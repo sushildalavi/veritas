@@ -24,8 +24,10 @@ def build_demo() -> gr.Blocks:
         verdict = gr.Textbox(label="Verdict")
         confidence = gr.Number(label="Confidence")
         backend_used = gr.Textbox(label="Backend used")
+        retrieval_backend = gr.Textbox(label="Retrieval backend")
         citation_valid = gr.Checkbox(label="Citation valid", interactive=False)
         fallback_used = gr.Checkbox(label="Fallback used", interactive=False)
+        retrieval_fallback_used = gr.Checkbox(label="Retrieval fallback", interactive=False)
         latency_ms = gr.Number(label="Latency (ms)")
         explanation = gr.Textbox(label="Explanation", lines=5)
         evidence_table = gr.Dataframe(
@@ -41,8 +43,10 @@ def build_demo() -> gr.Blocks:
                 response.verdict,
                 response.confidence,
                 response.backend_used,
+                response.retrieval_backend,
                 response.citation_valid,
                 response.fallback_used,
+                response.retrieval_fallback_used,
                 response.latency_ms,
                 response.explanation,
                 _format_evidence_table(response),
@@ -51,7 +55,18 @@ def build_demo() -> gr.Blocks:
         verify_button.click(
             submit,
             inputs=[claim, top_k],
-            outputs=[verdict, confidence, backend_used, citation_valid, fallback_used, latency_ms, explanation, evidence_table],
+            outputs=[
+                verdict,
+                confidence,
+                backend_used,
+                retrieval_backend,
+                citation_valid,
+                fallback_used,
+                retrieval_fallback_used,
+                latency_ms,
+                explanation,
+                evidence_table,
+            ],
         )
     return demo
 

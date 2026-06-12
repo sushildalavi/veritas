@@ -26,6 +26,9 @@ def health() -> dict[str, object]:
         "status": "ok",
         "verifier_backend": _pipeline.verifier_backend,
         "fallback_used": _pipeline.fallback_used,
+        "retrieval_backend": _pipeline.retrieval_backend,
+        "embedding_model": _pipeline.embedding_model,
+        "retrieval_fallback_used": _pipeline.retrieval_fallback_used,
         "checkpoint_path": _pipeline.checkpoint_path,
     }
 
@@ -69,6 +72,8 @@ def verify(request: VerifyRequest) -> VerifyResponse:
         explanation=outcome.explanation or (outcome.verification.explanation if outcome.verification else ""),
         citation_valid=outcome.citation_valid,
         backend_used=_pipeline.verifier_backend,
+        retrieval_backend=_pipeline.retrieval_backend,
+        retrieval_fallback_used=_pipeline.retrieval_fallback_used,
         evidence=evidence,
         fallback_used=_pipeline.fallback_used,
         latency_ms=elapsed_ms(start),
@@ -91,5 +96,8 @@ def metrics() -> dict[str, object]:
     payload["cache_entries"] = _cache.size()
     payload["fallback_used_for_default_demo"] = _pipeline.fallback_used
     payload["verifier_backend"] = _pipeline.verifier_backend
+    payload["retrieval_backend"] = _pipeline.retrieval_backend
+    payload["embedding_model"] = _pipeline.embedding_model
+    payload["retrieval_fallback_used"] = _pipeline.retrieval_fallback_used
     payload["checkpoint_path"] = _pipeline.checkpoint_path
     return payload

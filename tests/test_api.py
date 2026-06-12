@@ -14,6 +14,9 @@ def test_health_endpoint() -> None:
     assert payload["status"] == "ok"
     assert "verifier_backend" in payload
     assert "fallback_used" in payload
+    assert "retrieval_backend" in payload
+    assert "embedding_model" in payload
+    assert "retrieval_fallback_used" in payload
     assert "checkpoint_path" in payload
 
 
@@ -32,6 +35,8 @@ def test_verify_endpoint_returns_grounded_response() -> None:
     assert "explanation" in payload
     assert isinstance(payload["evidence"], list)
     assert "backend_used" in payload
+    assert "retrieval_backend" in payload
+    assert "retrieval_fallback_used" in payload
 
 
 def test_metrics_endpoint_reports_snapshot() -> None:
@@ -45,5 +50,8 @@ def test_metrics_endpoint_reports_snapshot() -> None:
     assert "average_latency_ms" in payload
     assert "p95_latency_ms" in payload
     assert "verifier_backend" in payload
+    assert "retrieval_backend" in payload
+    assert "embedding_model" in payload
+    assert "retrieval_fallback_used" in payload
     assert "checkpoint_path" in payload
     assert "backend_usage_counts" in payload

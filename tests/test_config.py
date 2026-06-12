@@ -23,6 +23,8 @@ demo:
     )
     monkeypatch.setenv("VERITAS_CONFIG", str(config_path))
     monkeypatch.setenv("VERITAS_VERIFIER_BACKEND", "sklearn")
+    monkeypatch.setenv("VERITAS_RETRIEVAL_BACKEND", "bm25_hashing_hybrid")
+    monkeypatch.setenv("VERITAS_USE_NEURAL_RETRIEVAL", "true")
     monkeypatch.setenv("VERITAS_CACHE_TTL_SECONDS", "45")
     monkeypatch.setenv("VERITAS_EVIDENCE_CORPUS", "custom.jsonl")
 
@@ -30,6 +32,8 @@ demo:
 
     assert isinstance(settings, ProjectSettings)
     assert settings.verifier_backend == "sklearn"
+    assert settings.retrieval_backend == "bm25_hashing_hybrid"
+    assert settings.use_neural_retrieval is True
     assert settings.cache_ttl_seconds == 45
     assert settings.api_host == "127.0.0.1"
     assert settings.api_port == 9000
@@ -39,9 +43,19 @@ demo:
 
 def test_load_project_settings_includes_transformer_checkpoint(tmp_path: Path, monkeypatch) -> None:
     config_path = tmp_path / "serving.yaml"
-    config_path.write_text("transformer_checkpoint: checkpoints/transformer_verifier\n", encoding="utf-8")
+    config_path.write_text(
+        """
+transformer_checkpoint: checkpoints/transformer_verifier
+retrieval:
+  backend: bm25_only
+  use_neural_retrieval: false
+""",
+        encoding="utf-8",
+    )
     monkeypatch.setenv("VERITAS_CONFIG", str(config_path))
 
     settings = load_project_settings()
 
     assert settings.transformer_checkpoint == "checkpoints/transformer_verifier"
+    assert settings.retrieval_backend == "bm25_only"
+    assert settings.use_neural_retrieval is False

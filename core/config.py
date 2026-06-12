@@ -16,6 +16,8 @@ class ProjectSettings:
     sklearn_checkpoint: str = "checkpoints/verifier"
     transformer_checkpoint: str = "checkpoints/transformer_verifier"
     legacy_verifier_checkpoint: str | None = None
+    retrieval_backend: str = "bm25_only"
+    use_neural_retrieval: bool = False
     embedding_backend: str = "hashing"
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
@@ -58,8 +60,16 @@ def load_project_settings(
         sklearn_checkpoint=str(env_or_yaml("VERITAS_SKLEARN_CHECKPOINT", ("checkpoint", "output_dir"), "checkpoints/verifier")),
         transformer_checkpoint=str(env_or_yaml("VERITAS_TRANSFORMER_CHECKPOINT", ("transformer_checkpoint",), "checkpoints/transformer_verifier")),
         legacy_verifier_checkpoint=_optional_str(env.get("VERITAS_VERIFIER_CHECKPOINT")),
+        retrieval_backend=str(env_or_yaml("VERITAS_RETRIEVAL_BACKEND", ("retrieval", "backend"), "bm25_only")),
+        use_neural_retrieval=_coerce_bool(env_or_yaml("VERITAS_USE_NEURAL_RETRIEVAL", ("retrieval", "use_neural_retrieval"), False)),
         embedding_backend=str(env_or_yaml("VERITAS_EMBEDDING_BACKEND", ("dense", "backend"), "hashing")),
-        embedding_model=str(env_or_yaml("VERITAS_EMBEDDING_MODEL", ("dense", "model_name"), "sentence-transformers/all-MiniLM-L6-v2")),
+        embedding_model=str(
+            env_or_yaml(
+                "VERITAS_EMBEDDING_MODEL",
+                ("retrieval", "embedding_model"),
+                env_or_yaml("VERITAS_EMBEDDING_MODEL", ("dense", "model_name"), "sentence-transformers/all-MiniLM-L6-v2"),
+            )
+        ),
         cross_encoder_model=str(env_or_yaml("VERITAS_CROSS_ENCODER_MODEL", ("ranking", "cross_encoder_model"), "cross-encoder/ms-marco-MiniLM-L-6-v2")),
         max_evidence=int(env_or_yaml("VERITAS_MAX_EVIDENCE", ("demo", "top_k"), 5)),
         cache_ttl_seconds=int(env_or_yaml("VERITAS_CACHE_TTL_SECONDS", ("cache", "ttl_seconds"), 120)),
@@ -84,3 +94,12 @@ def _optional_str(value: str | None) -> str | None:
     if value is None or value == "":
         return None
     return value
+
+
+def _coerce_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    text = str(value).strip().lower()
+    return text in {"1", "true", "yes", "on"}

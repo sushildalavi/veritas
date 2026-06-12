@@ -3,6 +3,10 @@ api:
   port: 8000
 demo:
   top_k: 5
+retrieval:
+  backend: bm25_only
+  use_neural_retrieval: false
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2
 cache:
   ttl_seconds: 120
 fallbacks:

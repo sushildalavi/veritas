@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import logging
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,19 +15,32 @@ from agent.reflection import ReflectionLoop
 from core.config import ProjectSettings, load_project_settings
 from data.schemas import EvidenceSpan
 from models.model_router import ModelRouter
-from retrieval import BM25Retriever, build_passage_corpus
+from retrieval import BM25Retriever, DenseRetriever, HashingEmbedder, HybridRetriever, build_passage_corpus
 
 from data.demo_corpus import DEFAULT_DEMO_PASSAGES
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
 class VerificationPipeline:
-    retriever: BM25Retriever
+    retriever: object
     verifier: ModelRouter
     reflection_loop: ReflectionLoop
+    retrieval_backend: str = "bm25_only"
+    embedding_model: str | None = None
+    retrieval_fallback_used: bool = False
     fallback_used: bool = True
     verifier_backend: str = "mock"
     checkpoint_path: str | None = None
+
+
+@dataclass
+class RetrievalRuntime:
+    retriever: object
+    retrieval_backend: str
+    embedding_model: str | None
+    fallback_used: bool = False
 
 
 def load_pipeline(
@@ -41,7 +55,8 @@ def load_pipeline(
     if verifier_checkpoint is None:
         verifier_checkpoint = _resolve_checkpoint_path(settings)
     passages = _load_passages(evidence_corpus_path)
-    retriever = BM25Retriever(passages)
+    retrieval_runtime = _load_retrieval_runtime(passages, settings)
+    retriever = retrieval_runtime.retriever
     prefer_deberta = settings.verifier_backend.lower() != "mock"
     verifier = ModelRouter(verifier_checkpoint=verifier_checkpoint, prefer_deberta=prefer_deberta)
     reflection_loop = ReflectionLoop(retriever=retriever, verifier=verifier)
@@ -51,6 +66,9 @@ def load_pipeline(
         retriever=retriever,
         verifier=verifier,
         reflection_loop=reflection_loop,
+        retrieval_backend=retrieval_runtime.retrieval_backend,
+        embedding_model=retrieval_runtime.embedding_model,
+        retrieval_fallback_used=retrieval_runtime.fallback_used,
         fallback_used=fallback_used,
         verifier_backend=backend,
         checkpoint_path=str(verifier_checkpoint) if verifier_checkpoint else None,
@@ -79,6 +97,63 @@ def _load_passages(evidence_corpus_path: str | Path | None) -> list[EvidenceSpan
             )
         )
     return passages or build_passage_corpus(DEFAULT_DEMO_PASSAGES)
+
+
+def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSettings) -> RetrievalRuntime:
+    backend = settings.retrieval_backend.strip().lower()
+    if backend == "bm25_only" or not passages:
+        return RetrievalRuntime(
+            retriever=BM25Retriever(passages),
+            retrieval_backend="bm25_only",
+            embedding_model=None,
+            fallback_used=False,
+        )
+
+    if backend == "bm25_hashing_hybrid":
+        dense_retriever = DenseRetriever(passages, embedder=HashingEmbedder())
+        return RetrievalRuntime(
+            retriever=HybridRetriever(BM25Retriever(passages), dense_retriever),
+            retrieval_backend="bm25_hashing_hybrid",
+            embedding_model="hashing",
+            fallback_used=False,
+        )
+
+    if backend == "bm25_sentence_transformer_hybrid":
+        if not settings.use_neural_retrieval:
+            return RetrievalRuntime(
+                retriever=BM25Retriever(passages),
+                retrieval_backend="bm25_only",
+                embedding_model=None,
+                fallback_used=False,
+            )
+        try:
+            dense_retriever = DenseRetriever(
+                passages,
+                backend="sentence-transformers",
+                model_name=settings.embedding_model,
+            )
+        except Exception as exc:  # pragma: no cover - defensive fallback
+            LOGGER.warning("Falling back to BM25 retrieval after neural loader failure: %s", exc)
+            return RetrievalRuntime(
+                retriever=BM25Retriever(passages),
+                retrieval_backend="bm25_only",
+                embedding_model=None,
+                fallback_used=True,
+            )
+        return RetrievalRuntime(
+            retriever=HybridRetriever(BM25Retriever(passages), dense_retriever),
+            retrieval_backend="bm25_sentence_transformer_hybrid",
+            embedding_model=settings.embedding_model,
+            fallback_used=False,
+        )
+
+    LOGGER.warning("Unknown retrieval backend %s; defaulting to BM25-only", backend)
+    return RetrievalRuntime(
+        retriever=BM25Retriever(passages),
+        retrieval_backend="bm25_only",
+        embedding_model=None,
+        fallback_used=True,
+    )
 
 
 def _resolve_checkpoint_path(settings: ProjectSettings) -> str | Path | None:

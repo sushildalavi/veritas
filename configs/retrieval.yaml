@@ -1,8 +1,10 @@
 bm25:
   k1: 1.5
   b: 0.75
+backend: bm25_only
 dense:
   model_name: sentence-transformers/all-MiniLM-L6-v2
+use_neural_retrieval: false
 vector_store:
   backend: faiss
   dimension: 64

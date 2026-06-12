@@ -9,6 +9,8 @@ from retrieval.hybrid import HybridRetriever, reciprocal_rank_fusion
 from retrieval.metrics import mean_reciprocal_rank, ndcg_at_k, recall_at_k
 from scripts.run_retrieval_eval import evaluate_retrieval, parse_top_k
 from retrieval.vector_store import LocalVectorStore
+from core.config import ProjectSettings
+from serving.model_loader import _load_retrieval_runtime
 
 
 def test_bm25_retriever_ranks_relevant_passage_first() -> None:
@@ -82,6 +84,83 @@ def test_dense_loader_supports_hashing_and_lazy_sentence_transformers(monkeypatc
     embedder = load_embedder("sentence-transformers", model_name="fake-model", allow_fallback=False)
     assert embedder.backend_name == "sentence-transformers"
     assert getattr(embedder, "model_name") == "fake-model"
+
+
+def test_live_retrieval_runtime_bm25_only_path() -> None:
+    passages = build_passage_corpus(["red apple", "blue sky"])
+    settings = ProjectSettings(retrieval_backend="bm25_only", use_neural_retrieval=False)
+
+    runtime = _load_retrieval_runtime(passages, settings)
+
+    assert runtime.retrieval_backend == "bm25_only"
+    assert runtime.embedding_model is None
+    assert runtime.fallback_used is False
+    assert isinstance(runtime.retriever, BM25Retriever)
+
+
+def test_live_retrieval_runtime_hashing_hybrid_path() -> None:
+    passages = build_passage_corpus(["red apple", "blue sky"])
+    settings = ProjectSettings(retrieval_backend="bm25_hashing_hybrid", use_neural_retrieval=False)
+
+    runtime = _load_retrieval_runtime(passages, settings)
+
+    assert runtime.retrieval_backend == "bm25_hashing_hybrid"
+    assert runtime.embedding_model == "hashing"
+    assert runtime.fallback_used is False
+    assert isinstance(runtime.retriever, HybridRetriever)
+
+
+def test_live_retrieval_runtime_sentence_transformer_hybrid_path(monkeypatch) -> None:
+    passages = build_passage_corpus(["red apple", "blue sky"])
+    settings = ProjectSettings(
+        retrieval_backend="bm25_sentence_transformer_hybrid",
+        use_neural_retrieval=True,
+        embedding_model="fake-model",
+    )
+
+    fake_module = types.ModuleType("sentence_transformers")
+
+    class FakeSentenceTransformer:
+        def __init__(self, model_name: str) -> None:
+            self.model_name = model_name
+
+        def encode(self, texts, normalize_embeddings=True):  # noqa: ANN001
+            return [[float(len(text))] for text in texts]
+
+    fake_module.SentenceTransformer = FakeSentenceTransformer
+    monkeypatch.setitem(sys.modules, "sentence_transformers", fake_module)
+
+    runtime = _load_retrieval_runtime(passages, settings)
+
+    assert runtime.retrieval_backend == "bm25_sentence_transformer_hybrid"
+    assert runtime.embedding_model == "fake-model"
+    assert runtime.fallback_used is False
+    assert isinstance(runtime.retriever, HybridRetriever)
+
+
+def test_live_retrieval_runtime_falls_back_when_sentence_transformer_loader_fails(monkeypatch) -> None:
+    passages = build_passage_corpus(["red apple", "blue sky"])
+    settings = ProjectSettings(
+        retrieval_backend="bm25_sentence_transformer_hybrid",
+        use_neural_retrieval=True,
+        embedding_model="broken-model",
+    )
+
+    fake_module = types.ModuleType("sentence_transformers")
+
+    class BrokenSentenceTransformer:
+        def __init__(self, model_name: str) -> None:
+            raise RuntimeError(f"failed to load {model_name}")
+
+    fake_module.SentenceTransformer = BrokenSentenceTransformer
+    monkeypatch.setitem(sys.modules, "sentence_transformers", fake_module)
+
+    runtime = _load_retrieval_runtime(passages, settings)
+
+    assert runtime.retrieval_backend == "bm25_only"
+    assert runtime.embedding_model is None
+    assert runtime.fallback_used is True
+    assert isinstance(runtime.retriever, BM25Retriever)
 
 
 def test_retrieval_eval_report_schema_uses_requested_backend(monkeypatch) -> None:
