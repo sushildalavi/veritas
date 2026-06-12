@@ -3,34 +3,34 @@
   "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
   "evidence_corpus_size": 9804,
   "limitations": [
-    "Evaluated on a sample of 20 queries, capped at --max-queries=20."
+    "Evaluated on a sample of 200 queries, capped at --max-queries=200."
   ],
-  "max_queries": 20,
+  "max_queries": 200,
   "metrics": {
     "bm25": {
-      "mrr": 0.5791666666666667,
-      "ndcg@10": 0.5892801411844708,
-      "recall@1": 0.3416666666666667,
-      "recall@10": 0.6527777777777778,
-      "recall@5": 0.6361111111111111
+      "mrr": 0.3975595238095238,
+      "ndcg@10": 0.3890548332971826,
+      "recall@1": 0.2461628787878788,
+      "recall@10": 0.44161936674436675,
+      "recall@5": 0.4001544427794428
     },
     "dense": {
-      "mrr": 0.6625,
-      "ndcg@10": 0.648016228628485,
-      "recall@1": 0.44722222222222224,
-      "recall@10": 0.6694444444444444,
-      "recall@5": 0.6277777777777778
+      "mrr": 0.53375,
+      "ndcg@10": 0.5056756338981253,
+      "recall@1": 0.3567756687756688,
+      "recall@10": 0.5244345376845377,
+      "recall@5": 0.5046561216561216
     },
     "hybrid": {
-      "mrr": 0.675,
-      "ndcg@10": 0.642840996450413,
-      "recall@1": 0.4222222222222222,
-      "recall@10": 0.6527777777777778,
-      "recall@5": 0.6527777777777778
+      "mrr": 0.4904642857142857,
+      "ndcg@10": 0.47811857991494316,
+      "recall@1": 0.28781733544233545,
+      "recall@10": 0.5349527000777001,
+      "recall@5": 0.5074140581640582
     }
   },
-  "num_queries": 20,
-  "runtime_seconds": 68.037,
+  "num_queries": 200,
+  "runtime_seconds": 154.531,
   "split": "val",
   "top_k": [
     1,
