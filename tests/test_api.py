@@ -27,3 +27,13 @@ def test_verify_endpoint_returns_grounded_response() -> None:
     assert payload["verdict"] in {"SUPPORTED", "REFUTED", "NOT ENOUGH INFO"}
     assert "explanation" in payload
     assert isinstance(payload["evidence"], list)
+
+
+def test_metrics_endpoint_reports_snapshot() -> None:
+    client.post("/verify", json={"claim": "Paris is in France", "top_k": 2})
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert "requests" in payload
+    assert "cache_entries" in payload

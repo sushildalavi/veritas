@@ -28,3 +28,13 @@ class ResponseCache:
 
     def set(self, key: str, value: object) -> None:
         self._store[key] = CacheEntry(value=value, expires_at=monotonic() + self.ttl_seconds)
+
+    def size(self) -> int:
+        self._purge_expired()
+        return len(self._store)
+
+    def _purge_expired(self) -> None:
+        now = monotonic()
+        for key, entry in list(self._store.items()):
+            if entry.expires_at < now:
+                self._store.pop(key, None)

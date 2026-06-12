@@ -33,6 +33,17 @@ class MetricsTracker:
             },
         )
 
+    def snapshot(self) -> dict[str, object]:
+        average_confidence = sum(self.confidences) / len(self.confidences) if self.confidences else 0.0
+        fallback_rate = self.fallbacks / self.requests if self.requests else 0.0
+        return {
+            "requests": self.requests,
+            "fallbacks": self.fallbacks,
+            "fallback_rate": fallback_rate,
+            "average_confidence": average_confidence,
+            "verdicts": dict(self.verdicts),
+        }
+
 
 def measure_latency() -> float:
     start = perf_counter()

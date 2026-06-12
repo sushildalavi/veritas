@@ -62,3 +62,11 @@ def verify(request: VerifyRequest) -> VerifyResponse:
     _metrics.record(response.verdict, response.confidence, response.fallback_used, response.latency_ms)
     _cache.set(cache_key, response)
     return response
+
+
+@app.get("/metrics")
+def metrics() -> dict[str, object]:
+    payload = _metrics.snapshot()
+    payload["cache_entries"] = _cache.size()
+    payload["fallback_used_for_default_demo"] = _pipeline.fallback_used
+    return payload
