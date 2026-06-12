@@ -1,13 +1,13 @@
 # Veritas — Final Elite Audit
 
-Veritas | LLM Fact Verification with Neural Retrieval, Cross-Encoder Ranking,
-Fine-Tuned Transformer Verification, QLoRA, DPO Alignment, and Citation
-Faithfulness
+Veritas | Neural Fact Verification with Hybrid Retrieval, Cross-Encoder
+Ranking, Fine-Tuned DistilRoBERTa & MLX LoRA
 
 GitHub: https://github.com/sushildalavi/veritas
 Live demo: https://sushildalavi-veritas.hf.space
 
-**PROJECT NOT FULLY COMPLETE: QLoRA/DPO require GPU execution.**
+**PROJECT NOT FULLY COMPLETE: CUDA QLoRA and DPO are ready but not run (no
+CUDA GPU on this machine).**
 
 ---
 
@@ -18,11 +18,16 @@ retrieval, hybrid RRF fusion, cross-encoder reranking, a class-weighted
 DistilRoBERTa verifier, template-based citation-grounded explanation
 generation, citation faithfulness checking, and FastAPI/Gradio serving with
 config-driven backend routing. All components through serving and
-evaluation are real, reproducible, and backed by checked-in reports. The two
-remaining phases — QLoRA fine-tuning and DPO alignment — require a CUDA GPU
-with `bitsandbytes`, which this development machine does not have. Ready-to-
-run scripts and configs are checked in for both, but no adapters or eval
-reports exist, so those phases are honestly marked incomplete.
+evaluation are real, reproducible, and backed by checked-in reports. An MLX
+LoRA adapter was also trained on Apple Silicon and evaluated on 200 held-out
+examples (verdict accuracy 0.695, macro F1 0.4632), with a 300-iteration
+adapter trained for comparison and rejected as overfit. A 1,382-pair DPO
+preference dataset has been built from the verifier training data. The two
+remaining phases — CUDA QLoRA fine-tuning and DPO alignment — require a CUDA
+GPU with `bitsandbytes`, which this development machine does not have.
+Ready-to-run scripts, configs, and Kaggle/Colab notebooks are checked in for
+both, but no adapters or eval reports exist, so those phases are honestly
+marked incomplete.
 
 ## 2. Project Goals
 
@@ -34,8 +39,10 @@ reports exist, so those phases are honestly marked incomplete.
   a sklearn TF-IDF/LogReg baseline, including on the minority REFUTED class.
 - Measure the oracle-vs-retrieved generalization gap honestly.
 - Generate citation-grounded explanations and measure faithfulness.
-- (Stretch, GPU-gated) Fine-tune an LLM explanation generator with QLoRA and
-  align it with DPO.
+- Fine-tune an LLM explanation generator with LoRA on Apple Silicon (MLX)
+  and build a DPO preference dataset for future alignment.
+- (Stretch, GPU-gated) Fine-tune an LLM explanation generator with CUDA
+  QLoRA and align it with DPO.
 - Serve everything through FastAPI + Gradio with health/metrics endpoints
   exposing the active model and backend configuration.
 
@@ -114,32 +121,85 @@ citation checker), `serving/` (FastAPI app, model loader, config routing),
 - Gradio UI (`ui/app.py`) surfaces `model_name` alongside verdict,
   confidence, backend, and citation status.
 
-## 9. QLoRA Fine-Tuning (Phase 6) — BLOCKED
+## 8a. MLX LoRA Alignment (Apple Silicon, local) — COMPLETE
 
-**Status: NOT COMPLETE.** `torch.cuda.is_available()` is `False` and
-`bitsandbytes` is not installed/supported on this machine (Apple Silicon,
-MPS only). Per project rules, no adapter files or `qlora_eval` reports were
-fabricated. Delivered instead:
+**Status: COMPLETE.** A real LoRA adapter was trained with `mlx_lm.lora
+--fine-tune-type lora` on `mlx-community/Qwen2.5-1.5B-Instruct-4bit` using
+600 chat-formatted training examples (`data/processed/mlx_lora/train.jsonl`).
 
-- `configs/qlora_tinyllama.yaml` — full training config for
+- `checkpoints/mlx_lora_verifier/` — 100-iteration adapter (best). Evaluated
+  on 200 held-out examples: verdict accuracy 0.695, macro F1 0.4632,
+  per-class F1 (SUPPORTED 0.7024, REFUTED 0.6872, NOT ENOUGH INFO 0.0),
+  citation valid rate 0.6, unsupported-sentence rate 0.2537, mean latency
+  1.2984s/example (`reports/mlx_lora_eval_200.{json,md}`).
+- `checkpoints/mlx_lora_verifier_300/` — 300-iteration adapter, trained and
+  evaluated for comparison on the same 200 examples: verdict accuracy
+  dropped to 0.52, macro F1 to 0.24 (REFUTED F1 collapsed to 0.04) —
+  overfitting, so the 100-iteration adapter remains the best
+  (`reports/mlx_lora_comparison.{json,md}`).
+- A 600-iteration run was not attempted: per the stop condition, once the
+  300-iteration adapter showed clear overfitting on this 600-example
+  training set, training longer would only extend the same trend.
+
+## 9. CUDA QLoRA Fine-Tuning (Phase 6) — READY, NOT RUN
+
+**Status: NOT COMPLETE (READY_NOT_RUN).** `torch.cuda.is_available()` is
+`False` and `bitsandbytes` is not installed/supported on this machine (Apple
+Silicon, MPS only). Per project rules, no adapter files or `cuda_qlora_eval`
+reports were fabricated. Delivered instead:
+
+- `configs/cuda_qlora_tinyllama.yaml` — full training config for
   `TinyLlama/TinyLlama-1.1B-Chat-v1.0` (4-bit NF4 quantization, LoRA r=16/
   alpha=32/dropout=0.05 on q/k/v/o projections).
-- `scripts/train_qlora_real.py` — complete, ready-to-run training script
-  (guards on CUDA/bitsandbytes, builds an explanation-generation dataset from
-  `verifier_train/val.jsonl` via `rag.build_context` +
-  `rag.prompt_templates.EXPLANATION_PROMPT`, trains via `transformers.Trainer`,
-  saves adapter to `checkpoints/qlora_tinyllama/`, evaluates faithfulness via
-  `rag.check_citations`, writes `reports/qlora_eval.{json,md}`).
-- `reports/qlora_BLOCKED_GPU_REQUIRED.md` — full blocker documentation and
-  run instructions for Colab/Kaggle.
+- `scripts/train_cuda_qlora.py` — complete, ready-to-run training script
+  (guards on CUDA/bitsandbytes, builds the SFT dataset from
+  `data/processed/mlx_lora/{train,valid}.jsonl` via
+  `evaluation.cuda_verifier_eval`, trains via `transformers.Trainer`, saves
+  the adapter to `checkpoints/cuda_qlora_verifier/`, evaluates verdict
+  accuracy/macro F1/citation validity via the shared
+  `evaluation.cuda_verifier_eval.evaluate_adapter`, writes
+  `reports/cuda_qlora_eval.{json,md}`). `--export-sft-only` was run locally
+  (no GPU) and produced real `data/processed/sft_{train,val}.jsonl` files
+  (600/100 examples).
+- `notebooks/12_cuda_qlora_kaggle_colab.ipynb` — installs dependencies,
+  checks for a CUDA GPU, clones the repo, runs training + evaluation, zips
+  and downloads the adapter + reports.
+- `reports/cuda_qlora_READY.md` — full readiness documentation and run
+  instructions for Colab/Kaggle.
 
-## 10. DPO Alignment (Phase 7) — BLOCKED
+## 10. CUDA DPO Alignment (Phase 7) — READY, NOT RUN
 
-**Status: NOT COMPLETE.** DPO depends on the QLoRA adapter from Phase 6,
-which does not exist. `reports/dpo_BLOCKED_QLORA_REQUIRED.md` documents the
-blocker and the unblock path (run QLoRA on a CUDA machine, build a preference
-dataset, write `scripts/train_dpo_real.py` analogous to
-`scripts/train_qlora_real.py`).
+**Status: NOT COMPLETE (READY_NOT_RUN).** DPO depends on the CUDA QLoRA
+adapter from Phase 6, which does not exist on this machine, and on
+`bitsandbytes`/`trl`, which are not installed. Per project rules, no adapter
+files or `cuda_dpo_eval` reports were fabricated. Delivered instead:
+
+- `data/processed/preference_pairs.jsonl` — 1,382 `{"prompt", "chosen",
+  "rejected"}` pairs built from `data/processed/verifier_train.jsonl` by
+  `scripts/build_preference_pairs_real.py`. `chosen` is a correct verdict
+  with a citation-valid grounded explanation (chosen-citation-valid rate
+  1.0); `rejected` is one of wrong verdict, invalid citation, or unsupported
+  explanation (461/461/460 split). See
+  `reports/preference_pair_stats.{json,md}`. **This is dataset construction
+  only — DPO training has not been run.**
+- `configs/cuda_dpo_tinyllama.yaml` — DPO hyperparameters (`beta=0.1`,
+  `max_length=512`, `max_prompt_length=384`) and paths.
+- `scripts/train_cuda_dpo.py` — complete, ready-to-run script that verifies
+  the CUDA QLoRA adapter + CUDA/`bitsandbytes`/`peft`/`trl` are available,
+  loads the QLoRA adapter as the starting policy, evaluates it on
+  `data/processed/mlx_lora/valid.jsonl` **before** DPO, runs
+  `trl.DPOTrainer` on `preference_pairs.jsonl` (`ref_model=None`), saves
+  `checkpoints/cuda_dpo_verifier/`, evaluates **after** DPO, and writes
+  `reports/cuda_dpo_eval.{json,md}` with a before/after/delta table
+  (verdict accuracy, macro F1, citation valid rate, unsupported-sentence
+  rate, verdict consistency rate).
+- `notebooks/13_cuda_dpo_kaggle_colab.ipynb` — installs dependencies, checks
+  for a CUDA GPU, clones the repo, loads the uploaded CUDA QLoRA adapter,
+  runs DPO training + before/after evaluation, zips and downloads the
+  adapter + reports.
+- `reports/cuda_dpo_READY.md` — full readiness documentation and run
+  instructions for Colab/Kaggle, superseding the older
+  `reports/dpo_BLOCKED_QLORA_REQUIRED.md`.
 
 ## 11. RAG / Explanation Generation
 
@@ -156,7 +216,7 @@ dataset, write `scripts/train_dpo_real.py` analogous to
   real validation examples: citation valid rate 0.560, mean citation
   precision 1.000, mean unsupported-sentence rate 0.306, verdict consistency
   rate 0.755.
-- QLoRA and DPO explanation generators are recorded as
+- CUDA QLoRA and CUDA DPO explanation generators are recorded as
   `"not trained - GPU required"` / `"not trained - QLoRA required"` rather
   than fabricated.
 
@@ -168,7 +228,7 @@ dataset, write `scripts/train_dpo_real.py` analogous to
   - `sklearn-tfidf-logreg`: macro F1 0.484, ~0.017ms/example, ~0.6MB.
   - Both are on the Pareto frontier — DistilRoBERTa for quality, sklearn for
     deployment cost.
-- `qlora-tinyllama` and `dpo-tinyllama` are listed as
+- `cuda-qlora-tinyllama` and `cuda-dpo-tinyllama` are listed as
   `"not trained - GPU required"` / `"not trained - QLoRA required"`.
 
 ## 14. Deployment (Hugging Face Space)
@@ -205,16 +265,24 @@ dataset, write `scripts/train_dpo_real.py` analogous to
   evidence.
 - Template explanations are citation-valid only 56% of the time on the
   measured sample.
-- QLoRA and DPO are not trained; no adapters or eval reports exist for
-  either.
+- The MLX LoRA adapter (100 iterations, 200-example eval) has macro F1
+  0.4632 with a NOT ENOUGH INFO F1 of 0.0; a 300-iteration adapter overfit
+  and was rejected (`reports/mlx_lora_comparison.md`).
+- A DPO preference-pair dataset (1,382 pairs) has been built, but DPO
+  training has not been run on either path.
+- CUDA QLoRA and CUDA DPO are not trained; no adapters or eval reports
+  exist for either, though configs/scripts/notebooks are ready.
 
 ## 18. Final Completion Status
 
-**PROJECT NOT FULLY COMPLETE: QLoRA/DPO require GPU execution.**
+**PROJECT NOT FULLY COMPLETE: CUDA QLoRA/DPO are ready but not run (require
+GPU execution).**
 
-Phases 1-5 and 8-11 (data, retrieval, ranking, verification, serving,
+Phases 1-5, 6c-6d, and 8-11 (data, retrieval, ranking, verification, serving,
+MLX LoRA alignment with 200-example evaluation, DPO preference-pair dataset,
 faithfulness, Pareto analysis, deployment docs, this audit) are complete with
-real, checked-in artifacts. Phases 6-7 (QLoRA, DPO) are blocked on GPU
-availability and are documented honestly as incomplete, with ready-to-run
-scripts/configs checked in for when GPU access is available. See
-`reports/final_completion_gate.md` for the itemized yes/no checklist.
+real, checked-in artifacts. Phases 6-7 (CUDA QLoRA, CUDA DPO) and 7b (MLX
+DPO) are blocked on GPU/trainer availability and are documented honestly as
+incomplete, with ready-to-run scripts/configs/notebooks checked in for when
+GPU access is available. See `reports/final_completion_gate.md` for the
+itemized yes/no checklist.

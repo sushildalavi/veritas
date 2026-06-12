@@ -39,8 +39,10 @@ These numbers come from the checked-in reports under `reports/`. The retrieval, 
 | Faithfulness (template, 200 val examples) | verdict consistency rate | 0.755 | `reports/faithfulness_comparison.md` |
 | Pareto (measured) | best frontier (quality) | `distilroberta-clean`, macro F1 0.711 | `reports/final_pareto_analysis.md` |
 | Pareto (measured) | best frontier (deployment cost) | `sklearn-tfidf-logreg`, macro F1 0.484, 0.6MB | `reports/final_pareto_analysis.md` |
-| MLX LoRA (Apple Silicon, `Qwen2.5-1.5B-Instruct-4bit`) | verdict accuracy / macro F1 / citation valid rate (20 examples) | 0.6 / 0.4 / 0.5 | `reports/mlx_lora_eval.md`, `reports/mlx_lora_READY.md` |
-| CUDA QLoRA / DPO | status | **not trained - optional cloud path / no DPO trainer** | `reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md`, `reports/mlx_dpo_READY.md` |
+| MLX LoRA (Apple Silicon, `Qwen2.5-1.5B-Instruct-4bit`, 100 iters, best adapter) | verdict accuracy / macro F1 / citation valid rate (200 examples) | 0.695 / 0.4632 / 0.6 | `reports/mlx_lora_eval_200.md`, `reports/mlx_lora_comparison.md` |
+| DPO preference pairs | pairs / chosen-citation-valid rate | 1382 / 1.0 | `reports/preference_pair_stats.md` |
+| CUDA QLoRA | status | **ready, not run** (Kaggle/Colab) | `reports/cuda_qlora_READY.md`, `notebooks/12_cuda_qlora_kaggle_colab.ipynb` |
+| CUDA DPO | status | **ready, not run** (Kaggle/Colab) | `reports/cuda_dpo_READY.md`, `notebooks/13_cuda_dpo_kaggle_colab.ipynb` |
 | Tests | pytest suite | 73 passed | - |
 
 ## Architecture
@@ -95,6 +97,26 @@ make build-mlx-lora-data
 make train-mlx-lora
 make eval-mlx-lora
 ```
+
+The checked-in adapter (`checkpoints/mlx_lora_verifier/`, 100 iterations) is
+evaluated on 200 held-out examples in `reports/mlx_lora_eval_200.md`. A
+300-iteration adapter was also trained and evaluated for comparison; it
+overfit (verdict accuracy dropped from 0.695 to 0.52), so the 100-iteration
+adapter remains the best one (`reports/mlx_lora_comparison.md`).
+
+A DPO preference-pair dataset (1,382 `{"prompt", "chosen", "rejected"}`
+triples) has been built from `data/processed/verifier_train.jsonl` for a
+future DPO run:
+
+```bash
+python3 scripts/build_preference_pairs_real.py
+```
+
+See `reports/preference_pair_stats.md`. CUDA QLoRA and CUDA DPO
+Kaggle/Colab notebooks (`notebooks/12_cuda_qlora_kaggle_colab.ipynb`,
+`notebooks/13_cuda_dpo_kaggle_colab.ipynb`) are ready to run but have not
+been executed — see `reports/cuda_qlora_READY.md` and
+`reports/cuda_dpo_READY.md`.
 
 To reproduce the neural benchmark runs that exist in this repo:
 
@@ -184,17 +206,19 @@ Deployment note:
 - The FEVER/SciFact splits used for training and evaluation (2809/650/650) are sample-scale, not the full FEVER dataset; retrieval/ranking evals use a 9,804-passage corpus and 200-query samples.
 - The clean DistilRoBERTa verifier (macro F1 0.711 on oracle/gold evidence) drops to macro F1 0.414 when fed real BM25 top-1 retrieved evidence (`reports/end_to_end_verifier_eval.md`) — the oracle/retrieved gap is real and should not be hidden.
 - Template-based explanations are citation-valid 56% of the time on a 200-example validation sample (`reports/faithfulness_comparison.md`); this is the only explanation generator with measured numbers.
-- **The MLX LoRA adapter (Apple Silicon, `checkpoints/mlx_lora_verifier/`) was trained on a small sample**: 600 training examples, 100 iterations, evaluated on 20 held-out examples (verdict accuracy 0.6, macro F1 0.4, citation valid rate 0.5; `reports/mlx_lora_eval.md`). This is a small-sample signal, not a benchmark result.
-- **CUDA QLoRA fine-tuning was not executed** (optional cloud path only): this machine has no CUDA GPU and no `bitsandbytes`, so no `qlora_eval` reports exist. Ready-to-run scripts/configs are checked in (`scripts/train_qlora_real.py`, `configs/qlora_tinyllama.yaml`) along with `reports/qlora_BLOCKED_GPU_REQUIRED.md`.
-- **DPO alignment (Phase 7) was not executed on either path.** The CUDA path depends on QLoRA (`reports/dpo_BLOCKED_QLORA_REQUIRED.md`); the installed `mlx-lm` (0.31.3) has no DPO trainer (`reports/mlx_dpo_READY.md`).
+- **The MLX LoRA adapter (Apple Silicon, `checkpoints/mlx_lora_verifier/`) was trained on a small sample**: 600 training examples, 100 iterations, evaluated on 200 held-out examples (verdict accuracy 0.695, macro F1 0.4632, citation valid rate 0.6; `reports/mlx_lora_eval_200.md`). A 300-iteration adapter overfit on the same data (`reports/mlx_lora_comparison.md`). This is a small-sample signal, not a benchmark result.
+- **A DPO preference-pair dataset has been built** (`data/processed/preference_pairs.jsonl`, 1,382 `{"prompt", "chosen", "rejected"}` triples; `reports/preference_pair_stats.md`), but **no DPO training has been run on either path** — this is dataset construction only, not alignment.
+- **CUDA QLoRA fine-tuning was not executed** (optional cloud path only): this machine has no CUDA GPU and no `bitsandbytes`, so no `cuda_qlora_eval` reports exist. Ready-to-run config/script/notebook are checked in (`configs/cuda_qlora_tinyllama.yaml`, `scripts/train_cuda_qlora.py`, `notebooks/12_cuda_qlora_kaggle_colab.ipynb`) along with `reports/cuda_qlora_READY.md`.
+- **CUDA DPO alignment was not executed**: it depends on the CUDA QLoRA adapter above, which does not exist on this machine. Ready-to-run config/script/notebook are checked in (`configs/cuda_dpo_tinyllama.yaml`, `scripts/train_cuda_dpo.py`, `notebooks/13_cuda_dpo_kaggle_colab.ipynb`) along with `reports/cuda_dpo_READY.md`. The MLX path is separately documented as blocked in `reports/mlx_dpo_READY.md` (`mlx-lm` 0.31.3 has no DPO trainer).
 - The public Spaces URL is [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space).
 
 ## What Not To Overclaim
 
 - Do not claim broad production accuracy from the sample reports; numbers are from 200-650 example evaluation sets.
 - Do not claim the public demo is deployed unless you are pointing to the live URL at `https://sushildalavi-veritas.hf.space`.
-- **Do not claim CUDA QLoRA or DPO were trained** — no adapter checkpoints or `qlora_eval`/`dpo_eval`/`mlx_dpo_eval` reports exist. See `reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md`, and `reports/mlx_dpo_READY.md`.
-- **Do not call the MLX LoRA run "QLoRA"** — the adapter (`checkpoints/mlx_lora_verifier/`) is a standard LoRA adapter trained with `mlx_lm.lora --fine-tune-type lora` on a pre-quantized `mlx-community` base model; no quantized-LoRA training was performed. Do not overstate the small-sample metrics in `reports/mlx_lora_eval.md` (20-example eval) as benchmark-grade.
+- **Do not claim CUDA QLoRA or DPO were trained** — no adapter checkpoints or `cuda_qlora_eval`/`cuda_dpo_eval`/`mlx_dpo_eval` reports exist. See `reports/cuda_qlora_READY.md`, `reports/cuda_dpo_READY.md`, and `reports/mlx_dpo_READY.md`.
+- **The preference-pair dataset (`data/processed/preference_pairs.jsonl`) is dataset construction only** — do not describe it as DPO alignment having been performed.
+- **Do not call the MLX LoRA run "QLoRA"** — the adapter (`checkpoints/mlx_lora_verifier/`) is a standard LoRA adapter trained with `mlx_lm.lora --fine-tune-type lora` on a pre-quantized `mlx-community` base model; no quantized-LoRA training was performed. Do not overstate the small-sample metrics in `reports/mlx_lora_eval_200.md` (200-example eval) as benchmark-grade.
 - Do not claim the verifier performs equally well end-to-end as it does on oracle/gold evidence; report both numbers (`reports/oracle_verifier_eval.md` vs. `reports/end_to_end_verifier_eval.md`).
 - Do not claim citation faithfulness above the measured template-generator rate (56% citation-valid on the 200-example sample in `reports/faithfulness_comparison.md`).
 - See `reports/final_completion_gate.md` for the authoritative completion status.
