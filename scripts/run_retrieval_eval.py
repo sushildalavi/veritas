@@ -140,13 +140,13 @@ def _summarize(
     top_k: list[int],
 ) -> dict[str, float]:
     doc_ids = [[getattr(span, "doc_id", "") for span in ranking] for ranking in rankings]
-    return {
-        "recall@1": mean(recall_at_k(ids, relevant, 1) for ids, relevant in zip(doc_ids, relevant_sets)),
-        "recall@5": mean(recall_at_k(ids, relevant, 5) for ids, relevant in zip(doc_ids, relevant_sets)),
-        "recall@10": mean(recall_at_k(ids, relevant, 10) for ids, relevant in zip(doc_ids, relevant_sets)),
-        "mrr": mean_reciprocal_rank(doc_ids, relevant_sets),
-        "ndcg@10": mean(ndcg_at_k(ids, relevant, 10) for ids, relevant in zip(doc_ids, relevant_sets)),
+    metrics: dict[str, float] = {
+        f"recall@{cutoff}": mean(recall_at_k(ids, relevant, cutoff) for ids, relevant in zip(doc_ids, relevant_sets))
+        for cutoff in top_k
     }
+    metrics["mrr"] = mean_reciprocal_rank(doc_ids, relevant_sets)
+    metrics[f"ndcg@{max(top_k)}"] = mean(ndcg_at_k(ids, relevant, max(top_k)) for ids, relevant in zip(doc_ids, relevant_sets))
+    return metrics
 
 
 def _limitations(requested_backend: str, actual_backend: str, num_queries: int, max_queries: int) -> list[str]:
@@ -194,6 +194,9 @@ def parse_top_k(value: str) -> list[int]:
 
 def _to_markdown(report: dict[str, object]) -> str:
     metrics = report["metrics"]
+    top_k = list(report["top_k"])
+    ndcg_key = f"ndcg@{max(top_k)}"
+    metric_headers = [f"recall@{cutoff}" for cutoff in top_k] + ["mrr", ndcg_key]
     lines = [
         "# Retrieval Evaluation",
         "",
@@ -205,8 +208,8 @@ def _to_markdown(report: dict[str, object]) -> str:
         f"- Embedding model: {report['embedding_model']}",
         f"- Runtime seconds: {report['runtime_seconds']}",
         "",
-        "| retriever | recall@1 | recall@5 | recall@10 | mrr | ndcg@10 |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| retriever | " + " | ".join(metric_headers) + " |",
+        "| --- | " + " | ".join(["---"] * len(metric_headers)) + " |",
     ]
     for retriever_name in ("bm25", "dense", "hybrid"):
         score = metrics[retriever_name]
@@ -215,11 +218,9 @@ def _to_markdown(report: dict[str, object]) -> str:
             + " | ".join(
                 [
                     retriever_name,
-                    f"{score['recall@1']:.3f}",
-                    f"{score['recall@5']:.3f}",
-                    f"{score['recall@10']:.3f}",
+                    *[f"{score[f'recall@{cutoff}']:.3f}" for cutoff in top_k],
                     f"{score['mrr']:.3f}",
-                    f"{score['ndcg@10']:.3f}",
+                    f"{score[ndcg_key]:.3f}",
                 ]
             )
             + " |"

@@ -110,7 +110,7 @@ def evaluate_ranking(
     corpus = _load_evidence_corpus(data_dir, file_suffix=file_suffix)
     bm25 = BM25Retriever(corpus)
     dense = DenseRetriever(corpus)
-    train_records = _select_records(records_by_split, "train")[:train_query_cap]
+    train_records = sorted(_select_records(records_by_split, "train"), key=lambda record: record.claim_id)[:train_query_cap]
     eval_records = _select_records(records_by_split, split)[:max_queries]
     if not eval_records:
         raise ValueError(f"No records found for split={split!r}")
