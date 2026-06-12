@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import argparse
 
 from training.config import load_yaml
 from training.losses import label_to_index
@@ -44,7 +45,11 @@ def prepare_examples(rows: list[dict]) -> list[dict[str, object]]:
 
 
 def main() -> None:  # pragma: no cover - script entrypoint
-    print("Training script placeholder for offline DeBERTa fine-tuning.")
+    parser = argparse.ArgumentParser(description="Run the offline DeBERTa training pipeline.")
+    parser.add_argument("--config", default="configs/deberta.yaml")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    print(f"Loaded DeBERTa config for {config.get('model', {}).get('name', 'unknown model')}")
 
 
 if __name__ == "__main__":  # pragma: no cover - script entrypoint

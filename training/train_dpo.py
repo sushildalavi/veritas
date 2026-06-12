@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import argparse
 from typing import Any
 
 from models.dpo_model import DPOModelConfig, load_dpo_model
@@ -35,7 +36,11 @@ def build_dpo_trainer(*args: Any, **kwargs: Any):  # pragma: no cover - optional
 
 
 def main() -> None:  # pragma: no cover - script entrypoint
-    print("DPO offline training script placeholder.")
+    parser = argparse.ArgumentParser(description="Run the offline DPO training pipeline.")
+    parser.add_argument("--config", default="configs/dpo.yaml")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    print(f"Loaded DPO config for base model {config.get('base_model', 'unknown')}")
 
 
 if __name__ == "__main__":  # pragma: no cover - script entrypoint

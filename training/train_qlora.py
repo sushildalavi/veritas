@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import argparse
 from typing import Any
 
 from models.qlora_llm import QLoRAConfig, build_peft_config
@@ -27,7 +28,11 @@ def build_training_artifacts(config: QLoRATrainingConfig) -> dict[str, object]:
 
 
 def main() -> None:  # pragma: no cover - script entrypoint
-    print("QLoRA offline training script placeholder.")
+    parser = argparse.ArgumentParser(description="Run the offline QLoRA training pipeline.")
+    parser.add_argument("--config", default="configs/qlora_phi.yaml")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    print(f"Loaded QLoRA config for base model {config.get('base_model', 'unknown')}")
 
 
 if __name__ == "__main__":  # pragma: no cover - script entrypoint
