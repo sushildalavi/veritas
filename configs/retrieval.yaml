@@ -1,0 +1,14 @@
+bm25:
+  k1: 1.5
+  b: 0.75
+dense:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+vector_store:
+  backend: faiss
+  dimension: 64
+hybrid:
+  rrf_k: 60
+evaluation:
+  recall_at_k: [1, 5, 10]
+  mrr: true
+  ndcg_at_k: [5, 10]

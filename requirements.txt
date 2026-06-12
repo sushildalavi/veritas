@@ -1,6 +1,7 @@
 fastapi
 gradio
 datasets
+rank_bm25
 pydantic
 pyyaml
 pytest
