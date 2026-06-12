@@ -14,6 +14,20 @@ veritas-verify = "cli:main"
 [tool.setuptools]
 py-modules = ["cli"]
 
+[tool.setuptools.packages.find]
+include = [
+  "agent*",
+  "data*",
+  "evaluation*",
+  "models*",
+  "rag*",
+  "ranking*",
+  "retrieval*",
+  "serving*",
+  "training*",
+  "ui*",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
