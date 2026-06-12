@@ -1,0 +1,50 @@
+{
+  "adapter_path": "checkpoints/mlx_lora_verifier_300",
+  "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "citation_valid_rate": 0.545,
+  "eval_file": "data/processed/verifier_val.jsonl",
+  "macro_f1": 0.24,
+  "mean_latency_seconds": 1.3534,
+  "parseable_rate": 1.0,
+  "parseable_verdicts": 200,
+  "per_class_f1": {
+    "NOT ENOUGH INFO": 0.0,
+    "REFUTED": 0.04,
+    "SUPPORTED": 0.68
+  },
+  "sample_size": 200,
+  "top_error_examples": [
+    {
+      "claim": "Catherine Hardwicke is exclusively Irish.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] Catherine Hardwicke therefore the claim is supported.\nCitation: [1]"
+    },
+    {
+      "claim": "Henri Kontinen's male sibling is a retired tennis player.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] Henri Kontinen (Finnish pronunciation: [\u02c8henri \u02c8kontinen]; born 19 June 1990) is a Finnish former professional tennis player who is a former world No. 1 in doubles in 2012 and 2013. Therefore, the claim is supported.\nCitation: [1]"
+    },
+    {
+      "claim": "The Winds of Winter is the sixth season in a series.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] The Winds of Winter is the planned sixth and penultimate novel of the epic fantasy series A Song of Ice and Fire by American writer George R therefore the claim is supported.\nCitation: [1]"
+    },
+    {
+      "claim": "Rachel Green appeared in every episode of Friends until the final episode in 2002.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] Portrayed by actress Jennifer Aniston, she was created for the show by its creators, David Crane and Marta Kauffman, and appears in all 236 episodes across 10 seasons. Her on-again, off-again relationship with Monica's brother, Ross, forms a central storyline of t"
+    },
+    {
+      "claim": "The Little Prince (2015 film) is directed by Michael Bay only.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] The Little Prince (French: Le Petit Prince; Italian: Il piccolo principe) is a 2015 English-language French-Italian animated fantasy adventure comedy-drama film directed by Mark Osborne and based on the 1943 novella of the same name by Antoine de Saint-Exup\u00e9ry the"
+    }
+  ],
+  "unsupported_sentence_rate": 0.3021,
+  "verdict_accuracy": 0.52
+}

@@ -1,0 +1,36 @@
+{
+  "adapters": [
+    {
+      "adapter_path": "checkpoints/mlx_lora_verifier",
+      "citation_valid_rate": 0.6,
+      "lora_iters": 100,
+      "macro_f1": 0.4632,
+      "per_class_f1": {
+        "NOT ENOUGH INFO": 0.0,
+        "REFUTED": 0.6872,
+        "SUPPORTED": 0.7024
+      },
+      "report": "reports/mlx_lora_eval_200.json",
+      "sample_size": 200,
+      "unsupported_sentence_rate": 0.2537,
+      "verdict_accuracy": 0.695
+    },
+    {
+      "adapter_path": "checkpoints/mlx_lora_verifier_300",
+      "citation_valid_rate": 0.545,
+      "lora_iters": 300,
+      "macro_f1": 0.24,
+      "per_class_f1": {
+        "NOT ENOUGH INFO": 0.0,
+        "REFUTED": 0.04,
+        "SUPPORTED": 0.68
+      },
+      "report": "reports/mlx_lora_eval_300.json",
+      "sample_size": 200,
+      "unsupported_sentence_rate": 0.3021,
+      "verdict_accuracy": 0.52
+    }
+  ],
+  "best_adapter": "checkpoints/mlx_lora_verifier",
+  "best_report": "reports/mlx_lora_eval_200.json"
+}
