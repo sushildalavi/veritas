@@ -1,4 +1,4 @@
-.PHONY: setup test lint data retrieve-eval train-deberta serve ui
+.PHONY: setup test lint data retrieve-eval train-deberta serve ui cli export-demo-corpus
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -23,3 +23,9 @@ serve:
 
 ui:
 	python3 -m ui.app
+
+cli:
+	python3 cli.py "Paris is in France"
+
+export-demo-corpus:
+	python3 -c "from data.export_demo_corpus import export_demo_corpus; export_demo_corpus('data/demo_corpus.jsonl')"
