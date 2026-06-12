@@ -3,98 +3,216 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
+from time import perf_counter
 
-from data.sample_pipeline import build_data_quality_markdown
 from evaluation.reporting import write_report
 from evaluation.sample_benchmarks import load_evidence_corpus, load_records, relevant_doc_ids
 from retrieval.bm25 import BM25Retriever
-from retrieval.dense import DenseRetriever
+from retrieval.dense import DenseRetriever, load_embedder
 from retrieval.hybrid import HybridRetriever
 from retrieval.metrics import mean_reciprocal_rank, ndcg_at_k, recall_at_k
+
+
+@dataclass(frozen=True)
+class RetrievalMetrics:
+    recall_at_1: float
+    recall_at_5: float
+    recall_at_10: float
+    mrr: float
+    ndcg_at_10: float
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run retrieval evaluation on sampled datasets.")
     parser.add_argument("--data-dir", default="data/processed")
-    parser.add_argument("--reports-dir", default="reports")
-    parser.add_argument("--top-k", type=int, default=5)
+    parser.add_argument("--split", choices=["train", "val", "test"], default="val")
+    parser.add_argument("--max-queries", type=int, default=20)
+    parser.add_argument("--dense-backend", choices=["hashing", "sentence-transformers"], default="hashing")
+    parser.add_argument("--embedding-model", default="sentence-transformers/all-MiniLM-L6-v2")
+    parser.add_argument("--top-k", default="1,5,10", help="Comma-separated retrieval cutoffs, e.g. 1,5,10")
+    parser.add_argument("--output-json", default="reports/retrieval_eval.json")
+    parser.add_argument("--output-md", default="reports/retrieval_eval.md")
     return parser
 
 
 def main() -> None:  # pragma: no cover - script entrypoint
     args = build_parser().parse_args()
     data_dir = Path(args.data_dir)
-    reports_dir = Path(args.reports_dir)
-    reports_dir.mkdir(parents=True, exist_ok=True)
+    output_json = Path(args.output_json)
+    output_md = Path(args.output_md)
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_md.parent.mkdir(parents=True, exist_ok=True)
 
+    try:
+        report = evaluate_retrieval(
+            data_dir=data_dir,
+            split=args.split,
+            max_queries=args.max_queries,
+            dense_backend=args.dense_backend,
+            embedding_model=args.embedding_model,
+            top_k=parse_top_k(args.top_k),
+        )
+    except Exception as exc:  # pragma: no cover - failure path is surfaced explicitly
+        failure_path = output_md.with_name(f"{output_md.stem}_FAILED.md")
+        failure_path.write_text(
+            "\n".join(
+                [
+                    "# Retrieval Evaluation Failed",
+                    "",
+                    f"- split: {args.split}",
+                    f"- dense_backend: {args.dense_backend}",
+                    f"- embedding_model: {args.embedding_model}",
+                    "",
+                    "The retrieval evaluation could not complete.",
+                    "",
+                    f"Reason: {type(exc).__name__}: {exc}",
+                    "",
+                    "No metrics were fabricated.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        raise SystemExit(f"Retrieval evaluation failed: {exc}") from exc
+
+    write_report(report, output_json)
+    output_md.write_text(_to_markdown(report), encoding="utf-8")
+    print(f"Wrote retrieval evaluation to {output_json}")
+
+
+def evaluate_retrieval(
+    *,
+    data_dir: Path,
+    split: str,
+    max_queries: int,
+    dense_backend: str,
+    embedding_model: str,
+    top_k: list[int],
+) -> dict[str, object]:
+    started = perf_counter()
     records_by_split = load_records(data_dir)
     corpus = load_evidence_corpus(data_dir)
+    records = _select_records(records_by_split, split)[:max_queries]
+    if not records:
+        raise ValueError(f"No records found for split={split!r}")
 
-    retrievers = {
-        "bm25": BM25Retriever(corpus),
-        "dense": DenseRetriever(corpus),
+    embedder = load_embedder(
+        "sentence-transformers" if dense_backend == "sentence-transformers" else "hashing",
+        embedding_model if dense_backend == "sentence-transformers" else None,
+        allow_fallback=False,
+    )
+    bm25 = BM25Retriever(corpus)
+    dense = DenseRetriever(corpus, embedder=embedder)
+    hybrid = HybridRetriever(bm25, dense)
+
+    max_cutoff = max(top_k)
+    rankings = {
+        "bm25": [bm25.retrieve(record.claim, top_k=max_cutoff) for record in records],
+        "dense": [dense.retrieve(record.claim, top_k=max_cutoff) for record in records],
+        "hybrid": [hybrid.retrieve(record.claim, top_k=max_cutoff) for record in records],
     }
-    retrievers["hybrid"] = HybridRetriever(retrievers["bm25"], retrievers["dense"])
+    relevant_sets = [relevant_doc_ids(record) for record in records]
+    metrics = {name: _summarize(rankings[name], relevant_sets, top_k) for name in rankings}
 
     report = {
-        "top_k": args.top_k,
-        "corpus_size": len(corpus),
-        "splits": {},
+        "split": split,
+        "max_queries": max_queries,
+        "num_queries": len(records),
+        "evidence_corpus_size": len(corpus),
+        "dense_backend": dense.backend_name,
+        "embedding_model": getattr(embedder, "model_name", embedding_model if dense_backend == "sentence-transformers" else "hashing"),
+        "top_k": top_k,
+        "runtime_seconds": round(perf_counter() - started, 3),
+        "metrics": metrics,
+        "limitations": _limitations(dense_backend, dense.backend_name, len(records), max_queries),
+    }
+    return report
+
+
+def _summarize(
+    rankings: list[list[object]],
+    relevant_sets: list[list[str]],
+    top_k: list[int],
+) -> dict[str, float]:
+    doc_ids = [[getattr(span, "doc_id", "") for span in ranking] for ranking in rankings]
+    return {
+        "recall@1": mean(recall_at_k(ids, relevant, 1) for ids, relevant in zip(doc_ids, relevant_sets)),
+        "recall@5": mean(recall_at_k(ids, relevant, 5) for ids, relevant in zip(doc_ids, relevant_sets)),
+        "recall@10": mean(recall_at_k(ids, relevant, 10) for ids, relevant in zip(doc_ids, relevant_sets)),
+        "mrr": mean_reciprocal_rank(doc_ids, relevant_sets),
+        "ndcg@10": mean(ndcg_at_k(ids, relevant, 10) for ids, relevant in zip(doc_ids, relevant_sets)),
     }
 
-    for split_name, records in records_by_split.items():
-        if not records:
-            continue
-        report["splits"][split_name] = {}
-        for retriever_name, retriever in retrievers.items():
-            rankings = [retriever.retrieve(record.claim, top_k=args.top_k) for record in records]
-            retrieved_ids = [[span.doc_id for span in ranking] for ranking in rankings]
-            relevant_sets = [relevant_doc_ids(record) for record in records]
-            report["splits"][split_name][retriever_name] = {
-                "mean_recall@1": mean(recall_at_k(ids, relevant, 1) for ids, relevant in zip(retrieved_ids, relevant_sets)),
-                "mean_recall@5": mean(recall_at_k(ids, relevant, min(5, args.top_k)) for ids, relevant in zip(retrieved_ids, relevant_sets)),
-                "mean_recall@10": mean(recall_at_k(ids, relevant, min(10, args.top_k)) for ids, relevant in zip(retrieved_ids, relevant_sets)),
-                "mean_mrr": mean_reciprocal_rank(retrieved_ids, relevant_sets),
-                "mean_ndcg@5": mean(ndcg_at_k(ids, relevant, min(5, args.top_k)) for ids, relevant in zip(retrieved_ids, relevant_sets)),
-            }
 
-    write_report(report, reports_dir / "retrieval_eval.json")
-    (reports_dir / "retrieval_eval.md").write_text(_to_markdown(report), encoding="utf-8")
-    print("Wrote retrieval evaluation to reports/retrieval_eval.json")
+def _limitations(requested_backend: str, actual_backend: str, num_queries: int, max_queries: int) -> list[str]:
+    limitations = [
+        f"Evaluated on a sample of {num_queries} queries, capped at --max-queries={max_queries}.",
+    ]
+    if requested_backend == "hashing":
+        limitations.append("Dense retrieval used the hashing backend, which is a lightweight baseline.")
+    if requested_backend == "sentence-transformers" and actual_backend != "sentence-transformers":
+        limitations.append("Requested neural backend was not available and fell back to hashing.")
+    return limitations
+
+
+def _select_records(records_by_split: dict[str, list[object]], split: str):
+    selected = []
+    for split_name, split_records in records_by_split.items():
+        if split_name.endswith(f"_{split}"):
+            selected.extend(split_records)
+    return selected
+
+
+def parse_top_k(value: str) -> list[int]:
+    cuts = []
+    for item in value.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        cuts.append(int(item))
+    if not cuts:
+        raise ValueError("At least one top-k cutoff is required")
+    return sorted(set(cuts))
 
 
 def _to_markdown(report: dict[str, object]) -> str:
+    metrics = report["metrics"]
     lines = [
         "# Retrieval Evaluation",
         "",
-        f"- Corpus size: {report['corpus_size']}",
-        f"- Top K: {report['top_k']}",
+        f"- Split: {report['split']}",
+        f"- Max queries: {report['max_queries']}",
+        f"- Queries evaluated: {report['num_queries']}",
+        f"- Evidence corpus size: {report['evidence_corpus_size']}",
+        f"- Dense backend: {report['dense_backend']}",
+        f"- Embedding model: {report['embedding_model']}",
+        f"- Runtime seconds: {report['runtime_seconds']}",
         "",
+        "| retriever | recall@1 | recall@5 | recall@10 | mrr | ndcg@10 |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
-    for split_name, split_report in report["splits"].items():
-        lines.extend([f"## {split_name}", ""])
-        headers = ["retriever", "mean_recall@1", "mean_recall@5", "mean_recall@10", "mean_mrr", "mean_ndcg@5"]
-        lines.append("| " + " | ".join(headers) + " |")
-        lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
-        for retriever_name, metrics in split_report.items():
-            lines.append(
-                "| "
-                + " | ".join(
-                    [
-                        retriever_name,
-                        f"{metrics['mean_recall@1']:.3f}",
-                        f"{metrics['mean_recall@5']:.3f}",
-                        f"{metrics['mean_recall@10']:.3f}",
-                        f"{metrics['mean_mrr']:.3f}",
-                        f"{metrics['mean_ndcg@5']:.3f}",
-                    ]
-                )
-                + " |"
+    for retriever_name in ("bm25", "dense", "hybrid"):
+        score = metrics[retriever_name]
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    retriever_name,
+                    f"{score['recall@1']:.3f}",
+                    f"{score['recall@5']:.3f}",
+                    f"{score['recall@10']:.3f}",
+                    f"{score['mrr']:.3f}",
+                    f"{score['ndcg@10']:.3f}",
+                ]
             )
-        lines.append("")
-    return "\n".join(lines)
+            + " |"
+        )
+    lines.extend(["", "## Limitations", ""])
+    for item in report["limitations"]:
+        lines.append(f"- {item}")
+    return "\n".join(lines) + "\n"
 
 
 if __name__ == "__main__":  # pragma: no cover - script entrypoint

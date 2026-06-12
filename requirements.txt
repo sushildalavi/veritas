@@ -8,3 +8,6 @@ pytest
 uvicorn
 joblib
 scikit-learn
+sentence-transformers
+transformers
+accelerate

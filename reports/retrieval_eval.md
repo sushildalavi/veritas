@@ -1,52 +1,20 @@
 # Retrieval Evaluation
 
-- Corpus size: 12
-- Top K: 5
+- Split: val
+- Max queries: 20
+- Queries evaluated: 2
+- Evidence corpus size: 12
+- Dense backend: hashing
+- Embedding model: hashing
+- Runtime seconds: 0.003
 
-## fever_train
-
-| retriever | mean_recall@1 | mean_recall@5 | mean_recall@10 | mean_mrr | mean_ndcg@5 |
+| retriever | recall@1 | recall@5 | recall@10 | mrr | ndcg@10 |
 | --- | --- | --- | --- | --- | --- |
-| bm25 | 0.000 | 0.500 | 0.500 | 0.250 | 0.315 |
-| dense | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
-| hybrid | 0.000 | 0.500 | 0.500 | 0.100 | 0.193 |
+| bm25 | 0.750 | 1.000 | 1.000 | 1.000 | 1.000 |
+| dense | 0.500 | 0.750 | 1.000 | 0.600 | 0.728 |
+| hybrid | 0.000 | 1.000 | 1.000 | 0.417 | 0.587 |
 
-## fever_val
+## Limitations
 
-| retriever | mean_recall@1 | mean_recall@5 | mean_recall@10 | mean_mrr | mean_ndcg@5 |
-| --- | --- | --- | --- | --- | --- |
-| bm25 | 0.500 | 1.000 | 1.000 | 1.000 | 1.000 |
-| dense | 0.000 | 0.500 | 0.500 | 0.200 | 0.237 |
-| hybrid | 0.000 | 1.000 | 1.000 | 0.500 | 0.624 |
-
-## fever_test
-
-| retriever | mean_recall@1 | mean_recall@5 | mean_recall@10 | mean_mrr | mean_ndcg@5 |
-| --- | --- | --- | --- | --- | --- |
-| bm25 | 0.250 | 1.000 | 1.000 | 1.000 | 1.000 |
-| dense | 0.250 | 1.000 | 1.000 | 1.000 | 1.000 |
-| hybrid | 0.250 | 1.000 | 1.000 | 1.000 | 1.000 |
-
-## scifact_train
-
-| retriever | mean_recall@1 | mean_recall@5 | mean_recall@10 | mean_mrr | mean_ndcg@5 |
-| --- | --- | --- | --- | --- | --- |
-| bm25 | 0.500 | 0.500 | 0.500 | 0.500 | 0.500 |
-| dense | 0.500 | 1.000 | 1.000 | 0.500 | 0.750 |
-| hybrid | 0.500 | 1.000 | 1.000 | 0.667 | 0.750 |
-
-## scifact_val
-
-| retriever | mean_recall@1 | mean_recall@5 | mean_recall@10 | mean_mrr | mean_ndcg@5 |
-| --- | --- | --- | --- | --- | --- |
-| bm25 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| dense | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| hybrid | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-
-## scifact_test
-
-| retriever | mean_recall@1 | mean_recall@5 | mean_recall@10 | mean_mrr | mean_ndcg@5 |
-| --- | --- | --- | --- | --- | --- |
-| bm25 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
-| dense | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
-| hybrid | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+- Evaluated on a sample of 2 queries, capped at --max-queries=20.
+- Dense retrieval used the hashing backend, which is a lightweight baseline.
