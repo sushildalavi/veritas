@@ -1,0 +1,64 @@
+{
+  "frontier": [
+    {
+      "deployment_feasibility": 0.33693837033536356,
+      "latency_ms": 29.700496089196978,
+      "macro_f1": 0.7112439293084454,
+      "memory_mb": 316.6805667877197,
+      "model": "distilroberta-clean"
+    },
+    {
+      "deployment_feasibility": 0.9987740598572418,
+      "latency_ms": 0.016652499325573444,
+      "macro_f1": 0.48387903907454266,
+      "memory_mb": 0.6046438217163086,
+      "model": "sklearn-tfidf-logreg"
+    }
+  ],
+  "not_trained": [
+    {
+      "model": "qlora-tinyllama",
+      "note": "see reports/qlora_BLOCKED_GPU_REQUIRED.md",
+      "status": "not trained - GPU required"
+    },
+    {
+      "model": "dpo-tinyllama",
+      "note": "see reports/dpo_BLOCKED_QLORA_REQUIRED.md",
+      "status": "not trained - QLoRA required"
+    }
+  ],
+  "points": [
+    {
+      "deployment_feasibility": 0.33693837033536356,
+      "latency_ms": 29.700496089196978,
+      "macro_f1": 0.7112439293084454,
+      "memory_mb": 316.6805667877197,
+      "model": "distilroberta-clean"
+    },
+    {
+      "deployment_feasibility": 0.9987740598572418,
+      "latency_ms": 0.016652499325573444,
+      "macro_f1": 0.48387903907454266,
+      "memory_mb": 0.6046438217163086,
+      "model": "sklearn-tfidf-logreg"
+    }
+  ],
+  "summaries": [
+    {
+      "deployment_feasibility": 0.9987740598572418,
+      "latency_ms": 0.016652499325573444,
+      "macro_f1": 0.48387903907454266,
+      "memory_mb": 0.6046438217163086,
+      "model": "sklearn-tfidf-logreg",
+      "status": "measured"
+    },
+    {
+      "deployment_feasibility": 0.33693837033536356,
+      "latency_ms": 29.700496089196978,
+      "macro_f1": 0.7112439293084454,
+      "memory_mb": 316.6805667877197,
+      "model": "distilroberta-clean",
+      "status": "measured"
+    }
+  ]
+}
