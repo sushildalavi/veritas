@@ -1,0 +1,175 @@
+{
+  "artifacts": [],
+  "checkpoints": [
+    {
+      "path": "checkpoints/transformer_verifier/config.json",
+      "size_bytes": 912
+    },
+    {
+      "path": "checkpoints/transformer_verifier/metadata.json",
+      "size_bytes": 2721
+    },
+    {
+      "path": "checkpoints/transformer_verifier/model.safetensors",
+      "size_bytes": 328495356
+    },
+    {
+      "path": "checkpoints/transformer_verifier/tokenizer.json",
+      "size_bytes": 3558740
+    },
+    {
+      "path": "checkpoints/transformer_verifier/tokenizer_config.json",
+      "size_bytes": 388
+    },
+    {
+      "path": "checkpoints/transformer_verifier/training_args.bin",
+      "size_bytes": 5265
+    },
+    {
+      "path": "checkpoints/verifier/metadata.json",
+      "size_bytes": 518
+    },
+    {
+      "path": "checkpoints/verifier/model.joblib",
+      "size_bytes": 14089
+    }
+  ],
+  "git_commit": "15cf8e2c9e126f390fb03def6ecf6bf8ff02d3de",
+  "model_backends": {
+    "cross_encoder_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "embedding_backend": "hashing",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "sklearn_checkpoint": "checkpoints/verifier",
+    "transformer_checkpoint": "checkpoints/transformer_verifier",
+    "verifier_backend": "auto"
+  },
+  "processed_datasets": [
+    {
+      "path": "data/processed/evidence_corpus.jsonl",
+      "size_bytes": 5281
+    },
+    {
+      "path": "data/processed/fever_test.jsonl",
+      "size_bytes": 1244
+    },
+    {
+      "path": "data/processed/fever_train.jsonl",
+      "size_bytes": 776
+    },
+    {
+      "path": "data/processed/fever_val.jsonl",
+      "size_bytes": 850
+    },
+    {
+      "path": "data/processed/scifact_test.jsonl",
+      "size_bytes": 190
+    },
+    {
+      "path": "data/processed/scifact_train.jsonl",
+      "size_bytes": 1550
+    },
+    {
+      "path": "data/processed/scifact_val.jsonl",
+      "size_bytes": 661
+    }
+  ],
+  "reports": [
+    {
+      "path": "reports/artifact_manifest.json",
+      "size_bytes": 4025
+    },
+    {
+      "path": "reports/data_quality.json",
+      "size_bytes": 790
+    },
+    {
+      "path": "reports/data_quality.md",
+      "size_bytes": 304
+    },
+    {
+      "path": "reports/error_analysis.json",
+      "size_bytes": 1193
+    },
+    {
+      "path": "reports/error_analysis.md",
+      "size_bytes": 857
+    },
+    {
+      "path": "reports/error_analysis_summary.json",
+      "size_bytes": 1304
+    },
+    {
+      "path": "reports/faithfulness_eval.json",
+      "size_bytes": 4339
+    },
+    {
+      "path": "reports/faithfulness_eval.md",
+      "size_bytes": 1773
+    },
+    {
+      "path": "reports/final_completion_summary.md",
+      "size_bytes": 3789
+    },
+    {
+      "path": "reports/final_project_audit.md",
+      "size_bytes": 3144
+    },
+    {
+      "path": "reports/pareto_analysis.json",
+      "size_bytes": 2026
+    },
+    {
+      "path": "reports/pareto_analysis.md",
+      "size_bytes": 482
+    },
+    {
+      "path": "reports/ranking_eval.json",
+      "size_bytes": 1323
+    },
+    {
+      "path": "reports/ranking_eval.md",
+      "size_bytes": 783
+    },
+    {
+      "path": "reports/ranking_eval_cross_encoder.json",
+      "size_bytes": 1622
+    },
+    {
+      "path": "reports/ranking_eval_cross_encoder.md",
+      "size_bytes": 886
+    },
+    {
+      "path": "reports/retrieval_eval.json",
+      "size_bytes": 856
+    },
+    {
+      "path": "reports/retrieval_eval.md",
+      "size_bytes": 595
+    },
+    {
+      "path": "reports/retrieval_eval_neural.json",
+      "size_bytes": 787
+    },
+    {
+      "path": "reports/retrieval_eval_neural.md",
+      "size_bytes": 562
+    },
+    {
+      "path": "reports/transformer_verifier_eval.json",
+      "size_bytes": 2721
+    },
+    {
+      "path": "reports/transformer_verifier_eval.md",
+      "size_bytes": 639
+    },
+    {
+      "path": "reports/verifier_training.json",
+      "size_bytes": 518
+    },
+    {
+      "path": "reports/verifier_training.md",
+      "size_bytes": 282
+    }
+  ],
+  "timestamp_utc": "2026-06-12T05:25:49.764407+00:00"
+}
