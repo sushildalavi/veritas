@@ -1,0 +1,305 @@
+{
+  "checkpoint_path": "checkpoints/verifier_clean/model.joblib",
+  "metadata": {
+    "checkpoint_path": "checkpoints/verifier_clean/model.joblib",
+    "data_dir": "data/processed",
+    "git_commit": "cb758630f1a1251291acf0f391784eb6f368dab9",
+    "python_version": "3.13.5",
+    "sample_sizes": {
+      "test_examples": 650,
+      "train_examples": 2809,
+      "validation_examples": 650
+    },
+    "seed": 42,
+    "sklearn_version": "1.9.0",
+    "timestamp_utc": "2026-06-12T10:51:42.552660+00:00",
+    "training_command": "python3 scripts/train_verifier_clean.py"
+  },
+  "test": {
+    "accuracy": 0.48615384615384616,
+    "confusion_matrix": [
+      [
+        127,
+        66,
+        33
+      ],
+      [
+        92,
+        75,
+        33
+      ],
+      [
+        74,
+        36,
+        114
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "SUPPORTED",
+      "REFUTED",
+      "NOT_ENOUGH_INFO"
+    ],
+    "example_count": 650,
+    "macro_f1": 0.48387903907454266,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.5643564356435643,
+        "precision": 0.6333333333333333,
+        "recall": 0.5089285714285714,
+        "support": 224
+      },
+      "REFUTED": {
+        "f1": 0.3978779840848806,
+        "precision": 0.423728813559322,
+        "recall": 0.375,
+        "support": 200
+      },
+      "SUPPORTED": {
+        "f1": 0.48940269749518306,
+        "precision": 0.4334470989761092,
+        "recall": 0.5619469026548672,
+        "support": 226
+      }
+    }
+  },
+  "thresholds": {
+    "accuracy_ok": false,
+    "macro_f1_ok": false
+  },
+  "top_test_errors": [
+    {
+      "claim": "Pearl (Steven Universe) exists as a magical dog.",
+      "claim_id": "35882",
+      "evidence": "Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Acetylcholine prevents neuromodulation.",
+      "claim_id": "12084",
+      "evidence": "Some of the effects of neuromodulators include altering intrinsic firing activity, increasing or decreasing voltage-dependent currents, altering synaptic efficacy, increasing bursting activity and rec",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Exotic Birds achieved mostly local failure.",
+      "claim_id": "127777",
+      "evidence": "Exotic Birds",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Temple Grandin features Claire Danes playing a cartoon penguin.",
+      "claim_id": "88346",
+      "evidence": "Temple Grandin -LRB-film-RRB-",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Ed Gagliardi died on October 13, 2005.",
+      "claim_id": "193837",
+      "evidence": "Edward John Gagliardi (February 13, 1952 \u2013 May 11, 2014) was an American bass guitarist, best known as the original bass player for the 1970s rock band Foreigner.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Google Search is not the product of an American multinational technology company.",
+      "claim_id": "148376",
+      "evidence": "Google Search (also known simply as Google or google.com) is a search engine operated by Google. Google LLC ( , GOO-g\u0259l) is an American multinational technology corporation focused on information tech",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Susan Collins was the second woman to become the nominee of a major party for Governor of Maine.",
+      "claim_id": "115807",
+      "evidence": "After her bid, she became the founding director of the Center for Family Business at Husson University in Bangor, Maine.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Matt Bomer was born in Spain.",
+      "claim_id": "81480",
+      "evidence": "Matt Bomer",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "SummerSlam had no pre-show, but contested ten matches.",
+      "claim_id": "148171",
+      "evidence": "Ten matches were contested at the event, with no match on the pre-show.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "The Burj Khalifa contains zero escalators.",
+      "claim_id": "97474",
+      "evidence": "Burj Khalifa",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "The American actor that plays Chumlee was born on December.",
+      "claim_id": "61922",
+      "evidence": "Austin Lee Russell (born September 8, 1982), better known by his stage name Chumlee, is an American businessman and reality television personality, best known for his appearances on the History Channe",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "The English Wikipedia is an edition of an expensive online encyclopedia.",
+      "claim_id": "106683",
+      "evidence": "English Wikipedia",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "The ability of individuals to connect to the internet is called Internet Access.",
+      "claim_id": "148966",
+      "evidence": "Internet access",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "The Big Country is a novel.",
+      "claim_id": "53319",
+      "evidence": "The Big Country is a 1958 American epic Western film directed by William Wyler, and starring Gregory Peck, Jean Simmons, Carroll Baker, Charlton Heston, and Charles Bickford. The supporting cast featu",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Daredevil follows Matt Murdock.",
+      "claim_id": "80625",
+      "evidence": "Marvel's Daredevil is an American television series created by Drew Goddard for the streaming service Netflix, based on the Marvel Comics character Daredevil. This puts him in conflict with many super",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Henry III of France was succeeded by Henry IV, founder of the House of Bourbon.",
+      "claim_id": "183456",
+      "evidence": "Henry III of France (French: Henri III, n\u00e9 Alexandre \u00c9douard; 19 September 1551 \u2013 2 August 1589) was King of France from 1574 until his assassination in 1589 and, as Henry of Valois (Polish: Henryk Wa",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Jean-Jacques Dessalines was partially in charge of the Haitian Revolution.",
+      "claim_id": "168075",
+      "evidence": "Jean-Jacques Dessalines",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Internet access avoids the use of computers.",
+      "claim_id": "129805",
+      "evidence": "Internet access",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Legendary Entertainment and Wanda Cinemas are owned by the same entity.",
+      "claim_id": "11269",
+      "evidence": "Legendary Entertainment Wanda Group",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Caleb McLaughlin was born on the day 14th.",
+      "claim_id": "228062",
+      "evidence": "Caleb Reginald McLaughlin (born October 13, 2001) is an American actor. Caleb Reginald McLaughlin (born October 13, 2001) is an American actor.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    }
+  ],
+  "train": {
+    "accuracy": 0.8273406906372375,
+    "confusion_matrix": [
+      [
+        1126,
+        172,
+        119
+      ],
+      [
+        20,
+        561,
+        23
+      ],
+      [
+        84,
+        67,
+        637
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "SUPPORTED",
+      "REFUTED",
+      "NOT_ENOUGH_INFO"
+    ],
+    "example_count": 2809,
+    "macro_f1": 0.8209794225002348,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.813018506700702,
+        "precision": 0.8177150192554558,
+        "recall": 0.8083756345177665,
+        "support": 788
+      },
+      "REFUTED": {
+        "f1": 0.7991452991452992,
+        "precision": 0.70125,
+        "recall": 0.9288079470198676,
+        "support": 604
+      },
+      "SUPPORTED": {
+        "f1": 0.8507744616547034,
+        "precision": 0.9154471544715447,
+        "recall": 0.7946365561044461,
+        "support": 1417
+      }
+    }
+  },
+  "validation": {
+    "accuracy": 0.45384615384615384,
+    "confusion_matrix": [
+      [
+        124,
+        56,
+        57
+      ],
+      [
+        90,
+        55,
+        31
+      ],
+      [
+        92,
+        29,
+        116
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "SUPPORTED",
+      "REFUTED",
+      "NOT_ENOUGH_INFO"
+    ],
+    "example_count": 650,
+    "macro_f1": 0.4436334262046349,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.5260770975056689,
+        "precision": 0.5686274509803921,
+        "recall": 0.48945147679324896,
+        "support": 237
+      },
+      "REFUTED": {
+        "f1": 0.34810126582278483,
+        "precision": 0.39285714285714285,
+        "recall": 0.3125,
+        "support": 176
+      },
+      "SUPPORTED": {
+        "f1": 0.4567219152854512,
+        "precision": 0.40522875816993464,
+        "recall": 0.5232067510548524,
+        "support": 237
+      }
+    }
+  }
+}

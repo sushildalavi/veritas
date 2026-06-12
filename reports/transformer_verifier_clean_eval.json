@@ -1,0 +1,144 @@
+{
+  "batch_size": 32,
+  "checkpoint_path": "checkpoints/transformer_verifier_clean",
+  "epochs": 2.0,
+  "label_order": [
+    "SUPPORTED",
+    "REFUTED",
+    "NOT_ENOUGH_INFO"
+  ],
+  "learning_rate": 2e-05,
+  "max_length": 256,
+  "metadata": {
+    "git_commit": "cb758630f1a1251291acf0f391784eb6f368dab9",
+    "python_version": "3.13.5",
+    "seed": 42,
+    "training_command": "python3 scripts/train_transformer_verifier_clean.py --batch-size 32 --epochs 2"
+  },
+  "model_name": "distilroberta-base",
+  "test": {
+    "accuracy": 0.7184615384615385,
+    "confusion_matrix": [
+      [
+        106,
+        115,
+        5
+      ],
+      [
+        42,
+        149,
+        9
+      ],
+      [
+        11,
+        1,
+        212
+      ]
+    ],
+    "example_count": 650,
+    "latency_ms_per_example": 29.700496089196978,
+    "macro_f1": 0.7112439293084454,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.9422222222222222,
+        "precision": 0.9380530973451328,
+        "recall": 0.9464285714285714
+      },
+      "REFUTED": {
+        "f1": 0.6408602150537634,
+        "precision": 0.5622641509433962,
+        "recall": 0.745
+      },
+      "SUPPORTED": {
+        "f1": 0.5506493506493506,
+        "precision": 0.6666666666666666,
+        "recall": 0.4690265486725664
+      }
+    }
+  },
+  "thresholds": {
+    "accuracy_ok": true,
+    "macro_f1_ok": true
+  },
+  "train": {
+    "accuracy": 0.713065147739409,
+    "confusion_matrix": [
+      [
+        775,
+        597,
+        45
+      ],
+      [
+        136,
+        457,
+        11
+      ],
+      [
+        13,
+        4,
+        771
+      ]
+    ],
+    "example_count": 2809,
+    "latency_ms_per_example": 32.59358877715552,
+    "macro_f1": 0.7222829341501488,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.9547987616099072,
+        "precision": 0.932285368802902,
+        "recall": 0.9784263959390863
+      },
+      "REFUTED": {
+        "f1": 0.5499398315282792,
+        "precision": 0.43194706994328924,
+        "recall": 0.7566225165562914
+      },
+      "SUPPORTED": {
+        "f1": 0.6621102093122597,
+        "precision": 0.8387445887445888,
+        "recall": 0.5469301340860974
+      }
+    }
+  },
+  "training_runtime_seconds": 538.888,
+  "validation": {
+    "accuracy": 0.7153846153846154,
+    "confusion_matrix": [
+      [
+        110,
+        118,
+        9
+      ],
+      [
+        43,
+        126,
+        7
+      ],
+      [
+        5,
+        3,
+        229
+      ]
+    ],
+    "example_count": 650,
+    "latency_ms_per_example": 29.652180576858182,
+    "macro_f1": 0.7009713916823959,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.950207468879668,
+        "precision": 0.9346938775510204,
+        "recall": 0.9662447257383966
+      },
+      "REFUTED": {
+        "f1": 0.5957446808510638,
+        "precision": 0.5101214574898786,
+        "recall": 0.7159090909090909
+      },
+      "SUPPORTED": {
+        "f1": 0.5569620253164557,
+        "precision": 0.6962025316455697,
+        "recall": 0.4641350210970464
+      }
+    }
+  }
+}

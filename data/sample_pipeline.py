@@ -9,15 +9,18 @@ import random
 import re
 import tarfile
 from collections.abc import Iterable
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
-from urllib.error import URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
+import threading
+import time
+
 from data.quality_audit import quality_audit
 from data.schemas import ClaimEvidenceRecord, EvidenceSpan
+
+WIKIPEDIA_CACHE_PATH = Path("data/raw/wikipedia_extract_cache.jsonl")
 
 FEVER_URLS = {
     "train": "https://fever.ai/download/fever/train.jsonl",
@@ -49,23 +52,82 @@ def _download_bytes(url: str) -> bytes:
         return response.read()
 
 
-@lru_cache(maxsize=256)
-def _fetch_wikipedia_extract(page_title: str) -> str:
+_WIKI_CACHE: dict[str, str] | None = None
+_WIKI_CACHE_LOCK = threading.Lock()
+
+
+def _load_wiki_cache() -> dict[str, str]:
+    global _WIKI_CACHE
+    if _WIKI_CACHE is not None:
+        return _WIKI_CACHE
+    cache: dict[str, str] = {}
+    if WIKIPEDIA_CACHE_PATH.exists():
+        with WIKIPEDIA_CACHE_PATH.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                entry = json.loads(line)
+                cache[entry["title"]] = entry["extract"]
+    _WIKI_CACHE = cache
+    return cache
+
+
+def _append_wiki_cache(page_title: str, extract: str) -> None:
+    with _WIKI_CACHE_LOCK:
+        cache = _load_wiki_cache()
+        cache[page_title] = extract
+        WIKIPEDIA_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with WIKIPEDIA_CACHE_PATH.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps({"title": page_title, "extract": extract}) + "\n")
+
+
+_RATE_LIMIT_LOCK = threading.Lock()
+_LAST_REQUEST_TIME = 0.0
+_MIN_REQUEST_INTERVAL = 0.6
+
+
+def _throttle() -> None:
+    global _LAST_REQUEST_TIME
+    with _RATE_LIMIT_LOCK:
+        wait = _LAST_REQUEST_TIME + _MIN_REQUEST_INTERVAL - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+        _LAST_REQUEST_TIME = time.monotonic()
+
+
+def _fetch_wikipedia_extract(page_title: str, *, max_retries: int = 4) -> str:
+    cache = _load_wiki_cache()
+    if page_title in cache:
+        return cache[page_title]
+
     url = (
-        "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1"
+        "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&exintro=1"
         f"&titles={quote(page_title)}&format=json&formatversion=2&redirects=1"
     )
     request = Request(url, headers={"User-Agent": "VeritasSampleBuilder/1.0 (local research pipeline)"})
-    try:
-        with urlopen(request, timeout=60) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except URLError:
-        return ""
-    pages = payload.get("query", {}).get("pages", [])
-    if not pages:
-        return ""
-    extract = pages[0].get("extract") or ""
-    return str(extract)
+
+    extract = ""
+    succeeded = False
+    for attempt in range(max_retries):
+        _throttle()
+        try:
+            with urlopen(request, timeout=30) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            pages = payload.get("query", {}).get("pages", [])
+            if pages:
+                extract = str(pages[0].get("extract") or "")
+            succeeded = True
+            break
+        except Exception:
+            if attempt < max_retries - 1:
+                time.sleep(2**attempt)
+
+    if not succeeded:
+        return extract
+
+    _append_wiki_cache(page_title, extract)
+    return extract
 
 
 def _split_sentences(text: str) -> list[str]:
@@ -73,8 +135,31 @@ def _split_sentences(text: str) -> list[str]:
     return parts
 
 
+_FEVER_TITLE_ESCAPES = {
+    "-LRB-": "(",
+    "-RRB-": ")",
+    "-LSB-": "[",
+    "-RSB-": "]",
+    "-COLON-": ":",
+}
+
+
+def _unescape_fever_title(page_title: str) -> str:
+    title = page_title.replace("_", " ")
+    for token, replacement in _FEVER_TITLE_ESCAPES.items():
+        title = title.replace(token, replacement)
+    return title
+
+
+def _prefetch_wikipedia_extracts(page_titles: Iterable[str]) -> None:
+    cache = _load_wiki_cache()
+    titles = {title for title in page_titles if title and title not in cache}
+    for title in titles:
+        _fetch_wikipedia_extract(title)
+
+
 def _extract_sentence_from_page(page_title: str, sentence_id: int) -> str:
-    extract = _fetch_wikipedia_extract(page_title.replace("_", " "))
+    extract = _fetch_wikipedia_extract(_unescape_fever_title(page_title))
     sentences = _split_sentences(extract)
     if 0 <= sentence_id < len(sentences):
         return sentences[sentence_id]
@@ -100,6 +185,17 @@ def build_fever_sample(
     train_rows = _sample_rows(_read_jsonl_from_url(FEVER_URLS["train"]), train_size, seed)
     val_rows = _sample_rows(_read_jsonl_from_url(FEVER_URLS["val"]), val_size, seed + 1)
     test_rows = _sample_rows(_read_jsonl_from_url(FEVER_URLS["test"]), test_size, seed + 2)
+
+    page_titles = {
+        _unescape_fever_title(item[2])
+        for rows in (train_rows, val_rows, test_rows)
+        for row in rows
+        for group in (row.get("evidence") or [])
+        for item in group
+        if item[2]
+    }
+    _prefetch_wikipedia_extracts(page_titles)
+
     return (
         [_normalize_fever_row(row) for row in train_rows],
         [_normalize_fever_row(row) for row in val_rows],

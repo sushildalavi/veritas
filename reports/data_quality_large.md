@@ -6,7 +6,7 @@
 | duplicate_count | 19 |
 | missing_evidence_count | 416 |
 | average_claim_length | 9.301289851545388 |
-| average_evidence_length | 8.629406160685932 |
+| average_evidence_length | 18.488409018736107 |
 | split_stats | {'unspecified': 4109} |
 
 ## Sample scale
@@ -14,7 +14,7 @@
 - Evidence corpus passages: 9804
 - FEVER sizes (train/val/test): {'train': 2000, 'val': 500, 'test': 500}
 - SciFact sizes (train/val/test): {'train': 809, 'val': 150, 'test': 150}
-- Build runtime seconds: 202.113
+- Build runtime seconds: 481.883
 
 FEVER evidence text is fetched from Wikipedia and is bounded for runtime;
 SciFact ships claims + abstract corpus self-contained and is used at full scale.

@@ -1,6 +1,6 @@
 {
   "average_claim_length": 9.301289851545388,
-  "average_evidence_length": 8.629406160685932,
+  "average_evidence_length": 18.488409018736107,
   "duplicate_count": 19,
   "evidence_corpus_size": 9804,
   "fever_sizes": {
@@ -14,7 +14,7 @@
     "SUPPORTED": 1880
   },
   "missing_evidence_count": 416,
-  "runtime_seconds": 202.113,
+  "runtime_seconds": 481.883,
   "sample_record": {
     "claim": "To The Bone includes a lighting designer.",
     "claim_id": "194158",
