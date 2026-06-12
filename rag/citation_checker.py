@@ -30,7 +30,7 @@ def check_citations(
     missing_citations = sorted(citation_ids - set(available))
     cited = citation_ids & set(available)
 
-    sentences = [sentence.strip() for sentence in re.split(r"(?<=[.!?])\s+", explanation) if sentence.strip()]
+    sentences = _split_sentences(explanation)
     unsupported_sentences: list[str] = []
     for sentence in sentences:
         cited_ids = _extract_citations(sentence)
@@ -60,6 +60,23 @@ def check_citations(
 
 def _extract_citations(text: str) -> set[int]:
     return {int(match) for match in re.findall(r"\[(\d+)\]", text)}
+
+
+def _split_sentences(text: str) -> list[str]:
+    sentences: list[str] = []
+    for fragment in re.split(r"(?<=[.!?])\s+|;\s+", text):
+        fragment = fragment.strip()
+        if not fragment:
+            continue
+        if fragment.lower().startswith("verdict:") and "based on" in fragment.lower():
+            fragment = fragment.split("based on", 1)[-1].strip()
+        if fragment and not _is_citation_only(fragment):
+            sentences.append(fragment)
+    return sentences
+
+
+def _is_citation_only(fragment: str) -> bool:
+    return bool(re.fullmatch(r"(?:\[\d+\]\s*)+", fragment))
 
 
 def _lexically_supported(sentence: str, evidence_text: str) -> bool:

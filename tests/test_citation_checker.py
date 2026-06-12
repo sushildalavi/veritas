@@ -27,3 +27,11 @@ def test_template_explanation_includes_citation_and_is_validated() -> None:
     assert output.citations == [1]
     assert result.citation_precision == 1.0
     assert result.valid is True
+
+
+def test_sentence_splitter_handles_verdict_prefix() -> None:
+    context = build_context("Paris is in France", [EvidenceSpan(doc_id="1", text="Paris is the capital of France.")])
+
+    result = check_citations("Verdict: SUPPORTED based on [1]; the claim is grounded in that evidence [1]", context)
+
+    assert result.valid is True
