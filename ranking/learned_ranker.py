@@ -40,25 +40,43 @@ class LearnedRanker:
 
 
 def _build_backend() -> tuple[object, str]:
-    try:  # pragma: no cover - optional dependency
+    candidates = [
+        ("lightgbm", _load_lightgbm_ranker),
+        ("sklearn-logistic", _load_logistic_ranker),
+        ("sklearn-gradient-boosting", _load_gradient_boosting_ranker),
+    ]
+    for backend_name, loader in candidates:
+        backend = loader()
+        if backend is not None:
+            return backend, backend_name
+    return _HeuristicRanker(), "heuristic"
+
+
+def _load_lightgbm_ranker() -> object | None:  # pragma: no cover - optional dependency
+    try:
         from lightgbm import LGBMRanker  # type: ignore
 
-        return LGBMRanker(n_estimators=32, learning_rate=0.1, random_state=42), "lightgbm"
+        return LGBMRanker(n_estimators=32, learning_rate=0.1, random_state=42)
     except Exception:
-        pass
-    try:  # pragma: no cover - optional dependency
+        return None
+
+
+def _load_logistic_ranker() -> object | None:  # pragma: no cover - optional dependency
+    try:
         from sklearn.linear_model import LogisticRegression  # type: ignore
 
-        return LogisticRegression(max_iter=200), "sklearn-logistic"
+        return LogisticRegression(max_iter=200)
     except Exception:
-        pass
-    try:  # pragma: no cover - optional dependency
+        return None
+
+
+def _load_gradient_boosting_ranker() -> object | None:  # pragma: no cover - optional dependency
+    try:
         from sklearn.ensemble import GradientBoostingClassifier  # type: ignore
 
-        return GradientBoostingClassifier(random_state=42), "sklearn-gradient-boosting"
+        return GradientBoostingClassifier(random_state=42)
     except Exception:
-        pass
-    return _HeuristicRanker(), "heuristic"
+        return None
 
 
 class _HeuristicRanker:
