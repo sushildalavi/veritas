@@ -1,0 +1,15 @@
+{
+  "checkpoint_path": "checkpoints/verifier/model.joblib",
+  "data_dir": "data/processed",
+  "git_commit": "b1b7e1923f99107a35ba66ae91a9d9e5550972bc",
+  "python_version": "3.13.5",
+  "sample_sizes": {
+    "test_examples": 6,
+    "train_examples": 8,
+    "validation_examples": 5
+  },
+  "seed": 42,
+  "sklearn_version": "1.9.0",
+  "timestamp_utc": "2026-06-12T05:59:55.566899+00:00",
+  "training_command": "python3 scripts/train_verifier.py"
+}

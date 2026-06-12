@@ -46,7 +46,7 @@ These numbers come from the checked-in reports under `reports/`. They are sample
 | Error analysis | error rate | 0.750 |
 | Pareto | best frontier point | `mock-top5` |
 | Pareto | frontier macro-F1 | 0.302 |
-| Tests | pytest suite | 58 passed |
+| Tests | pytest suite | 59 passed |
 
 ## Architecture
 
@@ -141,7 +141,7 @@ uvicorn serving.api:app --host 0.0.0.0 --port 8000
 
 ## Deploy To Hugging Face Spaces
 
-Public demo URL: not deployed yet.
+Public demo URL: https://sushildalavi-veritas.hf.space
 
 See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full step-by-step Space setup.
 
@@ -152,6 +152,10 @@ Short version:
 1. Set Python to `3.11`.
 1. Connect this repository or upload the files.
 1. Verify that `app.py` launches and the UI shows verdict, confidence, evidence, citation status, backend, fallback status, and latency.
+
+Deployment note:
+- The live Space currently uses the lightweight sklearn verifier checkpoint in `checkpoints/verifier/`.
+- The checkpoint is retrained from the checked-in sampled FEVER/SciFact data and stores sklearn/Python/git metadata for reproducibility.
 
 ## Production Features
 
@@ -169,7 +173,8 @@ Short version:
 - The dataset is deliberately tiny.
 - Retrieval and ranking metrics are sample-scale regression metrics, not benchmark claims.
 - The transformer verifier was trained on a tiny smoke run and does not show meaningful generalization.
-- The public Spaces URL is not published yet.
+- The public Spaces URL is [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space).
+- The deployed verifier is the lightweight sklearn checkpoint in `checkpoints/verifier/`, not the transformer smoke model.
 - Offline QLoRA and DPO remain optional extensions, not completed training runs.
 
 ## What Not To Overclaim

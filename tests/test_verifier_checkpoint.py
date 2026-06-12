@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
 from data.schemas import EvidenceSpan
-from models.deberta_verifier import DebertaVerifier
+from models.deberta_verifier import DebertaVerifier, _load_joblib_model
 from core.config import ProjectSettings
 from serving.model_loader import _resolve_checkpoint_path
 from scripts.train_transformer_verifier import _to_markdown
@@ -78,3 +78,25 @@ def test_transformer_verifier_report_markdown_schema() -> None:
     assert "Transformer Verifier Evaluation" in markdown
     assert "distilroberta-base" in markdown
     assert "SUPPORTED" in markdown
+
+
+def test_joblib_loader_warns_on_metadata_version_mismatch(tmp_path: Path, monkeypatch, caplog) -> None:
+    checkpoint_dir = tmp_path / "verifier"
+    checkpoint_dir.mkdir()
+    (checkpoint_dir / "metadata.json").write_text(
+        '{"sklearn_version": "0.0.0", "python_version": "3.13.5"}',
+        encoding="utf-8",
+    )
+    (checkpoint_dir / "model.joblib").write_text("placeholder", encoding="utf-8")
+
+    monkeypatch.setattr("models.deberta_verifier.sklearn.__version__", "9.9.9")
+    monkeypatch.setattr(
+        "models.deberta_verifier.joblib.load",
+        lambda path: {"pipeline": object(), "label_order": ["SUPPORTED"]},
+    )
+
+    with caplog.at_level("WARNING"):
+        payload = _load_joblib_model(checkpoint_dir)
+
+    assert payload is not None
+    assert any("version mismatch" in record.message for record in caplog.records)

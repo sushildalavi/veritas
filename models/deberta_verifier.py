@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
 import logging
 from pathlib import Path
+import warnings
 from typing import Any
 
 import joblib
+import sklearn
+from sklearn.exceptions import InconsistentVersionWarning
 
 from data.schemas import EvidenceSpan
 from models.labels import VALID_LABELS, normalize_label
@@ -155,11 +159,39 @@ def _load_joblib_model(checkpoint_path: Path) -> dict[str, Any] | None:
         candidate_path = checkpoint_path / "model.joblib"
     if not candidate_path.exists():
         return None
+    metadata = _read_checkpoint_metadata(checkpoint_path)
+    expected_sklearn_version = metadata.get("sklearn_version") if metadata else None
+    current_sklearn_version = sklearn.__version__
+    suppress_version_warning = expected_sklearn_version and expected_sklearn_version != current_sklearn_version
+    if suppress_version_warning:
+        LOGGER.warning(
+            "Verifier checkpoint sklearn version mismatch at %s: checkpoint=%s current=%s. "
+            "Attempting load with compatibility warnings suppressed; fallback remains available.",
+            candidate_path,
+            expected_sklearn_version,
+            current_sklearn_version,
+        )
     try:
-        payload = joblib.load(candidate_path)
+        if suppress_version_warning:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", InconsistentVersionWarning)
+                payload = joblib.load(candidate_path)
+        else:
+            payload = joblib.load(candidate_path)
     except Exception as exc:  # pragma: no cover - defensive fallback
         LOGGER.warning("Could not load joblib verifier checkpoint: %s", exc)
         return None
     if isinstance(payload, dict) and "pipeline" in payload:
         return payload
     return {"pipeline": payload, "label_order": list(getattr(payload, "classes_", VALID_LABELS))}
+
+
+def _read_checkpoint_metadata(checkpoint_path: Path) -> dict[str, Any]:
+    metadata_path = checkpoint_path / "metadata.json" if checkpoint_path.is_dir() else checkpoint_path.with_suffix(".metadata.json")
+    if not metadata_path.exists():
+        return {}
+    try:
+        payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}

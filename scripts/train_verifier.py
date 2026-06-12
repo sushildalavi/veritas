@@ -5,10 +5,16 @@ from __future__ import annotations
 import argparse
 import json
 import random
+from datetime import datetime, timezone
 from dataclasses import dataclass
 from pathlib import Path
+import platform
+import shlex
+import subprocess
+import sys
 
 import joblib
+import sklearn
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score
@@ -65,6 +71,14 @@ def main() -> None:  # pragma: no cover - script entrypoint
     checkpoint_path = checkpoint_dir / "model.joblib"
     joblib.dump({"pipeline": pipeline, "label_order": list(pipeline.classes_)}, checkpoint_path)
 
+    metadata = _build_metadata(
+        checkpoint_path=checkpoint_path,
+        args=args,
+        train_examples=train_examples,
+        val_examples=val_examples,
+        test_examples=test_examples,
+    )
+
     report = {
         "checkpoint_path": str(checkpoint_path),
         "train": _evaluate_split(pipeline, train_examples),
@@ -74,10 +88,11 @@ def main() -> None:  # pragma: no cover - script entrypoint
         "train_example_count": len(train_examples),
         "validation_example_count": len(val_examples),
         "test_example_count": len(test_examples),
+        "metadata": metadata,
     }
     write_report(report, reports_dir / "verifier_training.json")
     (reports_dir / "verifier_training.md").write_text(_to_markdown(report), encoding="utf-8")
-    (checkpoint_dir / "metadata.json").write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+    (checkpoint_dir / "metadata.json").write_text(json.dumps(metadata, indent=2, sort_keys=True), encoding="utf-8")
     print(f"Saved verifier checkpoint to {checkpoint_path}")
 
 
@@ -132,11 +147,16 @@ def _evaluate_split(pipeline: Pipeline, examples: list[TrainingExample]) -> dict
 
 
 def _to_markdown(report: dict[str, object]) -> str:
+    metadata = report.get("metadata", {})
     lines = [
         "# Verifier Training",
         "",
         f"- Checkpoint: `{report['checkpoint_path']}`",
         f"- Classes: {', '.join(report['class_labels'])}",
+        f"- Sklearn version: {metadata.get('sklearn_version', 'unknown')}",
+        f"- Python version: {metadata.get('python_version', 'unknown')}",
+        f"- Git commit: {metadata.get('git_commit', 'unknown')}",
+        f"- Training command: `{metadata.get('training_command', 'unknown')}`",
         "",
         "| split | examples | accuracy | macro_f1 |",
         "| --- | --- | --- | --- |",
@@ -147,6 +167,41 @@ def _to_markdown(report: dict[str, object]) -> str:
             f"| {split_name} | {int(metrics['example_count'])} | {metrics['accuracy']:.3f} | {metrics['macro_f1']:.3f} |"
         )
     return "\n".join(lines) + "\n"
+
+
+def _build_metadata(
+    *,
+    checkpoint_path: Path,
+    args: argparse.Namespace,
+    train_examples: list[TrainingExample],
+    val_examples: list[TrainingExample],
+    test_examples: list[TrainingExample],
+) -> dict[str, object]:
+    command = shlex.join([Path(sys.executable).name, "scripts/train_verifier.py", *sys.argv[1:]])
+    return {
+        "checkpoint_path": str(checkpoint_path),
+        "python_version": platform.python_version(),
+        "sklearn_version": sklearn.__version__,
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "git_commit": _git_commit_hash(),
+        "training_command": command,
+        "seed": args.seed,
+        "data_dir": str(Path(args.data_dir)),
+        "sample_sizes": {
+            "train_examples": len(train_examples),
+            "validation_examples": len(val_examples),
+            "test_examples": len(test_examples),
+        },
+    }
+
+
+def _git_commit_hash() -> str | None:
+    try:
+        result = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
+    except Exception:
+        return None
+    commit = result.stdout.strip()
+    return commit or None
 
 
 if __name__ == "__main__":  # pragma: no cover - script entrypoint

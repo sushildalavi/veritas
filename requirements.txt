@@ -7,7 +7,7 @@ pyyaml
 pytest
 uvicorn
 joblib
-scikit-learn
+scikit-learn==1.9.0
 sentence-transformers
 transformers
 accelerate

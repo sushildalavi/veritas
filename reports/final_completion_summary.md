@@ -1,9 +1,9 @@
 # FINAL_SUMMARY_FOR_CHATGPT
 
 - GitHub URL: https://github.com/sushildalavi/veritas
-- Public demo URL: not deployed yet
-- Current status: end-to-end local project complete with reproducible sample datasets, retrieval/ranking/verifier reports, a transformer smoke checkpoint, and a Gradio/FastAPI demo path.
-- Tests: `make test` passes, `make lint` passes, `python3 -m pytest` passes with 58 tests.
+- Public demo URL: https://sushildalavi-veritas.hf.space
+- Current status: end-to-end project complete with reproducible sample datasets, retrieval/ranking/verifier reports, a lightweight sklearn verifier checkpoint, and a Gradio/FastAPI demo path.
+- Tests: `make test` passes, `make lint` passes, `python3 -m pytest` passes with 59 tests.
 
 - Real metrics:
   - Data quality: 8 sampled records, 1 missing evidence span, 0 duplicates
@@ -57,7 +57,7 @@
 - Deployment:
   - `python3 app.py` launches the Gradio demo locally
   - `GET /health`, `POST /verify`, and `GET /metrics` are implemented
-  - Public deployment has not been published yet
+  - Public deployment is live at `https://sushildalavi-veritas.hf.space`
 
 - Completed:
   - Central config + artifact manifest
@@ -69,7 +69,6 @@
   - README and audit refresh
 
 - Missing:
-  - Public Hugging Face Spaces URL
   - Large-scale benchmark claims
   - QLoRA training
   - DPO training
@@ -80,11 +79,9 @@
   - Hardened the serving stack with config-driven routing, validation, caching, and observability.
 
 - Do not claim:
-  - That the public demo is deployed
   - That QLoRA or DPO were trained
   - That the transformer verifier is production-grade or benchmark-strong
   - That the neural retrieval and cross-encoder runs are large-scale experiments
 
 - Best project title: Veritas | Transformer-Based Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, and Citation Faithfulness Evaluation
-- Next best step: publish the Gradio app to Hugging Face Spaces and add the live URL to the README.
-
+- Next best step: keep the Space rebuilt from the retrained sklearn checkpoint and preserve the live URL in the README.

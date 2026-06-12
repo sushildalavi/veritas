@@ -65,6 +65,5 @@
 
 - All metrics are sample-scale and are useful for tracking regressions, not for broad benchmark claims.
 - No fabricated metrics are introduced in the README or this audit.
-- The public Hugging Face Spaces URL is not deployed yet.
+- The public Hugging Face Spaces URL is live at `https://sushildalavi-veritas.hf.space`.
 - QLoRA and DPO are documented as offline optional extensions only.
-
