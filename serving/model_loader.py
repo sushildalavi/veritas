@@ -10,14 +10,7 @@ from data.schemas import EvidenceSpan
 from models.model_router import ModelRouter
 from retrieval import BM25Retriever, build_passage_corpus
 
-
-DEFAULT_CORPUS = [
-    "Paris is the capital of France.",
-    "Berlin is the capital of Germany.",
-    "The Earth orbits the Sun.",
-    "Water freezes at 0 degrees Celsius.",
-    "The Pacific Ocean is the largest ocean.",
-]
+from data.demo_corpus import DEFAULT_DEMO_PASSAGES
 
 
 @dataclass
@@ -44,10 +37,10 @@ def load_pipeline(evidence_corpus_path: str | Path | None = None, verifier_check
 
 def _load_passages(evidence_corpus_path: str | Path | None) -> list[EvidenceSpan]:
     if evidence_corpus_path is None:
-        return build_passage_corpus(DEFAULT_CORPUS)
+        return build_passage_corpus(DEFAULT_DEMO_PASSAGES)
     path = Path(evidence_corpus_path)
     if not path.exists():
-        return build_passage_corpus(DEFAULT_CORPUS)
+        return build_passage_corpus(DEFAULT_DEMO_PASSAGES)
     passages: list[EvidenceSpan] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
@@ -63,4 +56,4 @@ def _load_passages(evidence_corpus_path: str | Path | None) -> list[EvidenceSpan
                 score=payload.get("score"),
             )
         )
-    return passages or build_passage_corpus(DEFAULT_CORPUS)
+    return passages or build_passage_corpus(DEFAULT_DEMO_PASSAGES)
