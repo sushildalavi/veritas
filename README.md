@@ -78,9 +78,17 @@ No fabricated results are reported here. Populate this table only after running 
 - Free public demo target: Hugging Face Spaces + Gradio.
 - Local API: `make serve`
 - Local UI: `make ui`
+- Local CLI: `make cli`
+- Export the demo corpus: `make export-demo-corpus`
 - Docker deployment: `docker build -t veritas . && docker run -p 8000:8000 veritas`
 - The demo uses a lightweight path by default: BM25 retrieval, fallback verifier, template explanation, and citation checking.
 - Environment variables are documented in [.env.example](/Users/sushildalavi/Desktop/Github/Veritas/.env.example).
+
+## Service Endpoints
+
+- `GET /health`
+- `POST /verify`
+- `GET /metrics`
 
 ## Makefile
 
