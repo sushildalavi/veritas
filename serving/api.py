@@ -24,8 +24,12 @@ _metrics = MetricsTracker()
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health() -> dict[str, object]:
+    return {
+        "status": "ok",
+        "verifier_backend": _pipeline.verifier_backend,
+        "fallback_used": _pipeline.fallback_used,
+    }
 
 
 @app.post("/verify", response_model=VerifyResponse)
@@ -69,4 +73,5 @@ def metrics() -> dict[str, object]:
     payload = _metrics.snapshot()
     payload["cache_entries"] = _cache.size()
     payload["fallback_used_for_default_demo"] = _pipeline.fallback_used
+    payload["verifier_backend"] = _pipeline.verifier_backend
     return payload

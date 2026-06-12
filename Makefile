@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data retrieve-eval train-deberta serve ui cli export-demo-corpus
+.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking train-verifier train-verifier-smoke serve serve-real ui cli export-demo-corpus
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -15,14 +15,27 @@ data:
 build-sample-data:
 	python3 scripts/build_sample_datasets.py
 
-retrieve-eval:
-	@echo "Phase 2 will add retrieval evaluation."
+eval-retrieval:
+	python3 scripts/run_retrieval_eval.py
 
-train-deberta:
-	@echo "Phase 4 will add DeBERTa training."
+eval-ranking:
+	python3 scripts/run_ranking_eval.py
+
+retrieve-eval: eval-retrieval
+
+train-verifier:
+	python3 scripts/train_verifier.py
+
+train-verifier-smoke:
+	python3 scripts/train_verifier.py --checkpoint-dir /tmp/veritas-verifier-checkpoint
+
+train-deberta: train-verifier
 
 serve:
 	python3 -m uvicorn serving.api:app --reload
+
+serve-real:
+	VERITAS_VERIFIER_CHECKPOINT=checkpoints/verifier python3 -m uvicorn serving.api:app --reload
 
 ui:
 	python3 -m ui.app

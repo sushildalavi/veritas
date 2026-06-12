@@ -1,0 +1,26 @@
+{
+  "checkpoint_path": "checkpoints/verifier/model.joblib",
+  "class_labels": [
+    "NOT ENOUGH INFO",
+    "REFUTED",
+    "SUPPORTED"
+  ],
+  "test": {
+    "accuracy": 0.3333333333333333,
+    "example_count": 6.0,
+    "macro_f1": 0.25
+  },
+  "test_example_count": 6,
+  "train": {
+    "accuracy": 0.75,
+    "example_count": 8.0,
+    "macro_f1": 0.6
+  },
+  "train_example_count": 8,
+  "validation": {
+    "accuracy": 0.4,
+    "example_count": 5.0,
+    "macro_f1": 0.2857142857142857
+  },
+  "validation_example_count": 5
+}

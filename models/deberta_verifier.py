@@ -7,6 +7,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import joblib
+
 from data.schemas import EvidenceSpan
 from models.labels import VALID_LABELS, normalize_label
 
@@ -67,22 +69,35 @@ class DebertaVerifier:
         self.model_name = model_name
         self._fallback = MockVerifier()
         self._pipeline = None
+        self._backend = "mock"
+        self._label_order = list(VALID_LABELS)
         self._load_pipeline()
 
     def _load_pipeline(self) -> None:
-        if self.checkpoint_path and self.checkpoint_path.exists():  # pragma: no cover - optional dependency
+        if self.checkpoint_path and self.checkpoint_path.exists():
+            loaded = _load_joblib_model(self.checkpoint_path)
+            if loaded is not None:
+                self._pipeline = loaded["pipeline"]
+                self._label_order = loaded.get("label_order", list(getattr(self._pipeline, "classes_", VALID_LABELS)))
+                self._backend = "sklearn"
+                return
             try:
                 from transformers import pipeline  # type: ignore
 
                 self._pipeline = pipeline("text-classification", model=str(self.checkpoint_path))
+                self._backend = "transformers"
                 return
             except Exception as exc:
                 LOGGER.warning("Falling back to mock verifier: %s", exc)
         self._pipeline = None
+        self._backend = "mock"
 
     def predict(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
         if self._pipeline is None:
             return self._fallback.predict(claim, evidence)
+
+        if self._backend == "sklearn":
+            return self._predict_with_sklearn(claim, evidence)
 
         text = _build_verification_input(claim, evidence)
         outputs = self._pipeline(text)
@@ -95,6 +110,21 @@ class DebertaVerifier:
             confidence=score,
             explanation=_template_explanation(claim, evidence, label),
             logits={label: score},
+            model_name=self.model_name,
+        )
+
+    def _predict_with_sklearn(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
+        text = _build_verification_input(claim, evidence)
+        probabilities = self._pipeline.predict_proba([text])[0]
+        classes = list(getattr(self._pipeline, "classes_", self._label_order))
+        label_scores = {normalize_label(label): float(score) for label, score in zip(classes, probabilities)}
+        verdict = max(label_scores, key=label_scores.get)
+        confidence = float(label_scores[verdict])
+        return VerificationResult(
+            verdict=verdict,
+            confidence=confidence,
+            explanation=_template_explanation(claim, evidence, verdict),
+            logits=label_scores,
             model_name=self.model_name,
         )
 
@@ -117,3 +147,19 @@ def _negates(evidence_text: str, claim: str) -> bool:
     claim_tokens = _tokens(claim)
     evidence_tokens = _tokens(evidence_text)
     return "not" in evidence_tokens and bool(claim_tokens & evidence_tokens)
+
+
+def _load_joblib_model(checkpoint_path: Path) -> dict[str, Any] | None:
+    candidate_path = checkpoint_path
+    if checkpoint_path.is_dir():
+        candidate_path = checkpoint_path / "model.joblib"
+    if not candidate_path.exists():
+        return None
+    try:
+        payload = joblib.load(candidate_path)
+    except Exception as exc:  # pragma: no cover - defensive fallback
+        LOGGER.warning("Could not load joblib verifier checkpoint: %s", exc)
+        return None
+    if isinstance(payload, dict) and "pipeline" in payload:
+        return payload
+    return {"pipeline": payload, "label_order": list(getattr(payload, "classes_", VALID_LABELS))}

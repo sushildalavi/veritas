@@ -19,19 +19,26 @@ class VerificationPipeline:
     verifier: ModelRouter
     reflection_loop: ReflectionLoop
     fallback_used: bool = True
+    verifier_backend: str = "mock"
 
 
 def load_pipeline(evidence_corpus_path: str | Path | None = None, verifier_checkpoint: str | Path | None = None) -> VerificationPipeline:
+    if verifier_checkpoint is None:
+        default_checkpoint = Path("checkpoints/verifier")
+        if default_checkpoint.exists():
+            verifier_checkpoint = default_checkpoint
     passages = _load_passages(evidence_corpus_path)
     retriever = BM25Retriever(passages)
     verifier = ModelRouter(verifier_checkpoint=verifier_checkpoint)
     reflection_loop = ReflectionLoop(retriever=retriever, verifier=verifier)
-    fallback_used = verifier_checkpoint is None or not Path(verifier_checkpoint).exists()
+    backend = getattr(getattr(verifier, "_deberta", None), "_backend", "mock")
+    fallback_used = backend == "mock"
     return VerificationPipeline(
         retriever=retriever,
         verifier=verifier,
         reflection_loop=reflection_loop,
         fallback_used=fallback_used,
+        verifier_backend=backend,
     )
 
 

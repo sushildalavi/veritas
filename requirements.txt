@@ -6,3 +6,5 @@ pydantic
 pyyaml
 pytest
 uvicorn
+joblib
+scikit-learn
