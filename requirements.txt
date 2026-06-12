@@ -1,0 +1,6 @@
+fastapi
+gradio
+pydantic
+pyyaml
+pytest
+uvicorn
