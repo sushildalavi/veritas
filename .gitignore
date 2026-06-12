@@ -22,7 +22,10 @@ data/*
 !data/*.py
 !data/__init__.py
 !data/**/*.py
-models/
+models/*
+!models/*.py
+!models/__init__.py
+!models/**/*.py
 checkpoints/
 reports/
 

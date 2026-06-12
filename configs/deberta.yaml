@@ -1,0 +1,14 @@
+model:
+  name: microsoft/deberta-v3-base
+training:
+  max_length: 384
+  num_epochs: 3
+  learning_rate: 2.0e-05
+  train_split: train
+  eval_split: validation
+metrics:
+  macro_f1: true
+  per_class_f1: true
+  confusion_matrix: true
+checkpoint:
+  output_dir: checkpoints/deberta
