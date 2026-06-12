@@ -38,6 +38,8 @@ class VerificationPipeline:
     fallback_used: bool = True
     verifier_backend: str = "mock"
     checkpoint_path: str | None = None
+    model_name: str = "mock"
+    verifier_macro_f1: float | None = None
 
 
 @dataclass
@@ -90,7 +92,33 @@ def load_pipeline(
         fallback_used=fallback_used,
         verifier_backend=backend,
         checkpoint_path=str(verifier_checkpoint) if verifier_checkpoint else None,
+        model_name=verifier.model_name,
+        verifier_macro_f1=_load_verifier_macro_f1(verifier_checkpoint),
     )
+
+
+_VERIFIER_EVAL_REPORTS = {
+    "checkpoints/transformer_verifier_clean": "reports/transformer_verifier_clean_eval.json",
+    "checkpoints/verifier_clean": "reports/verifier_clean_baseline.json",
+}
+
+
+def _load_verifier_macro_f1(checkpoint_path: str | Path | None) -> float | None:
+    if checkpoint_path is None:
+        return None
+    report_path = _VERIFIER_EVAL_REPORTS.get(str(checkpoint_path).rstrip("/"))
+    if report_path is None or not Path(report_path).exists():
+        return None
+    try:
+        import json
+
+        payload = json.loads(Path(report_path).read_text(encoding="utf-8"))
+    except Exception:  # pragma: no cover - defensive guard
+        return None
+    test_metrics = payload.get("test")
+    if isinstance(test_metrics, dict) and "macro_f1" in test_metrics:
+        return float(test_metrics["macro_f1"])
+    return None
 
 
 def _load_passages(evidence_corpus_path: str | Path | None) -> list[EvidenceSpan]:
@@ -230,29 +258,33 @@ def _resolve_checkpoint_path(settings: ProjectSettings) -> str | Path | None:
     sklearn_path = Path(settings.sklearn_checkpoint)
     transformer_path = Path(settings.transformer_checkpoint)
     legacy_path = Path(settings.legacy_verifier_checkpoint) if settings.legacy_verifier_checkpoint else None
+    # Priority for transformer-style checkpoints: DeBERTa clean > DistilRoBERTa
+    # clean > legacy/explicit override > old smoke-test transformer checkpoint.
+    transformer_candidates = [Path(settings.deberta_checkpoint), Path(settings.transformer_clean_checkpoint)]
+    if legacy_path is not None:
+        transformer_candidates.append(legacy_path)
+    transformer_candidates.append(transformer_path)
+
     if backend == "mock":
         return None
-    if _is_transformer_checkpoint(transformer_path):
-        return transformer_path
-    if legacy_path is not None and _is_transformer_checkpoint(legacy_path):
-        return legacy_path
+    for candidate in transformer_candidates:
+        if _is_transformer_checkpoint(candidate):
+            return candidate
     if _is_sklearn_checkpoint(sklearn_path):
         return sklearn_path
     if backend == "transformer":
-        if transformer_path.exists():
-            return transformer_path
-        if legacy_path is not None and legacy_path.exists():
-            return legacy_path
+        for candidate in transformer_candidates:
+            if candidate.exists():
+                return candidate
         if sklearn_path.exists():
             return sklearn_path
         return transformer_path
-    if legacy_path is not None and legacy_path.exists():
-        return legacy_path
     if sklearn_path.exists():
         return sklearn_path
-    if transformer_path.exists():
-        return transformer_path
-    return legacy_path if legacy_path is not None and legacy_path.exists() else None
+    for candidate in transformer_candidates:
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def _is_transformer_checkpoint(path: Path) -> bool:

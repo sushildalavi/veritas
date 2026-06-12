@@ -47,6 +47,8 @@ def test_transformer_checkpoint_takes_priority_over_sklearn(tmp_path: Path) -> N
     settings = ProjectSettings(
         sklearn_checkpoint=str(sklearn_dir),
         transformer_checkpoint=str(transformer_dir),
+        transformer_clean_checkpoint=str(tmp_path / "transformer_verifier_clean"),
+        deberta_checkpoint=str(tmp_path / "deberta_verifier_clean"),
     )
 
     resolved = _resolve_checkpoint_path(settings)

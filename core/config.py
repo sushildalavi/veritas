@@ -15,6 +15,8 @@ class ProjectSettings:
     verifier_backend: str = "auto"
     sklearn_checkpoint: str = "checkpoints/verifier"
     transformer_checkpoint: str = "checkpoints/transformer_verifier"
+    transformer_clean_checkpoint: str = "checkpoints/transformer_verifier_clean"
+    deberta_checkpoint: str = "checkpoints/deberta_verifier_clean"
     legacy_verifier_checkpoint: str | None = None
     retrieval_backend: str = "bm25_only"
     use_neural_retrieval: bool = False
@@ -61,6 +63,8 @@ def load_project_settings(
         verifier_backend=str(env_or_yaml("VERITAS_VERIFIER_BACKEND", ("verifier_backend",), "auto")),
         sklearn_checkpoint=str(env_or_yaml("VERITAS_SKLEARN_CHECKPOINT", ("checkpoint", "output_dir"), "checkpoints/verifier")),
         transformer_checkpoint=str(env_or_yaml("VERITAS_TRANSFORMER_CHECKPOINT", ("transformer_checkpoint",), "checkpoints/transformer_verifier")),
+        transformer_clean_checkpoint=str(env_or_yaml("VERITAS_TRANSFORMER_CLEAN_CHECKPOINT", ("transformer_clean_checkpoint",), "checkpoints/transformer_verifier_clean")),
+        deberta_checkpoint=str(env_or_yaml("VERITAS_DEBERTA_CHECKPOINT", ("deberta_checkpoint",), "checkpoints/deberta_verifier_clean")),
         legacy_verifier_checkpoint=_optional_str(env.get("VERITAS_VERIFIER_CHECKPOINT")),
         retrieval_backend=str(env_or_yaml("VERITAS_RETRIEVAL_BACKEND", ("retrieval", "backend"), "bm25_only")),
         use_neural_retrieval=_coerce_bool(env_or_yaml("VERITAS_USE_NEURAL_RETRIEVAL", ("retrieval", "use_neural_retrieval"), False)),

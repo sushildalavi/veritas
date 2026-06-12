@@ -84,17 +84,20 @@ class DebertaVerifier:
                 self._pipeline = loaded["pipeline"]
                 self._label_order = loaded.get("label_order", list(getattr(self._pipeline, "classes_", VALID_LABELS)))
                 self._backend = "sklearn"
+                self.model_name = "sklearn-tfidf-logreg"
                 return
             try:
                 from transformers import pipeline  # type: ignore
 
                 self._pipeline = pipeline("text-classification", model=str(self.checkpoint_path))
                 self._backend = "transformers"
+                self.model_name = _read_model_name(self.checkpoint_path) or self.model_name
                 return
             except Exception as exc:
                 LOGGER.warning("Falling back to mock verifier: %s", exc)
         self._pipeline = None
         self._backend = "mock"
+        self.model_name = "mock"
 
     def predict(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
         if self._pipeline is None:
@@ -184,6 +187,22 @@ def _load_joblib_model(checkpoint_path: Path) -> dict[str, Any] | None:
     if isinstance(payload, dict) and "pipeline" in payload:
         return payload
     return {"pipeline": payload, "label_order": list(getattr(payload, "classes_", VALID_LABELS))}
+
+
+def _read_model_name(checkpoint_path: Path) -> str | None:
+    metadata = _read_checkpoint_metadata(checkpoint_path)
+    model_name = metadata.get("model_name")
+    if isinstance(model_name, str) and model_name:
+        return model_name
+    config_path = checkpoint_path / "config.json" if checkpoint_path.is_dir() else None
+    if config_path and config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+        name = config.get("_name_or_path") or config.get("model_type")
+        return str(name) if name else None
+    return None
 
 
 def _read_checkpoint_metadata(checkpoint_path: Path) -> dict[str, Any]:

@@ -24,6 +24,7 @@ def build_demo() -> gr.Blocks:
         verdict = gr.Textbox(label="Verdict")
         confidence = gr.Number(label="Confidence")
         backend_used = gr.Textbox(label="Backend used")
+        model_name = gr.Textbox(label="Model")
         retrieval_backend = gr.Textbox(label="Retrieval backend")
         reranker_backend = gr.Textbox(label="Reranker backend")
         citation_valid = gr.Checkbox(label="Citation valid", interactive=False)
@@ -45,6 +46,7 @@ def build_demo() -> gr.Blocks:
                 response.verdict,
                 response.confidence,
                 response.backend_used,
+                response.model_name,
                 response.retrieval_backend,
                 response.reranker_backend,
                 response.citation_valid,
@@ -63,6 +65,7 @@ def build_demo() -> gr.Blocks:
                 verdict,
                 confidence,
                 backend_used,
+                model_name,
                 retrieval_backend,
                 reranker_backend,
                 citation_valid,

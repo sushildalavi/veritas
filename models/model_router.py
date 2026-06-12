@@ -23,3 +23,9 @@ class ModelRouter:
             return self._deberta.predict(claim, evidence)
         LOGGER.warning("Using mock verifier fallback")
         return self._mock.predict(claim, evidence)
+
+    @property
+    def model_name(self) -> str:
+        if self._deberta is not None and self._deberta._pipeline is not None:
+            return self._deberta.model_name
+        return self._mock.model_name

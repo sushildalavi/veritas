@@ -33,6 +33,8 @@ def health() -> dict[str, object]:
         "cross_encoder_model": _pipeline.cross_encoder_model,
         "reranker_fallback_used": _pipeline.reranker_fallback_used,
         "checkpoint_path": _pipeline.checkpoint_path,
+        "model_name": _pipeline.model_name,
+        "verifier_macro_f1": _pipeline.verifier_macro_f1,
     }
 
 
@@ -82,6 +84,8 @@ def verify(request: VerifyRequest) -> VerifyResponse:
         evidence=evidence,
         fallback_used=_pipeline.fallback_used,
         latency_ms=elapsed_ms(start),
+        model_name=_pipeline.model_name,
+        verifier_macro_f1=_pipeline.verifier_macro_f1,
     )
     _metrics.record(
         response.verdict,
@@ -108,4 +112,6 @@ def metrics() -> dict[str, object]:
     payload["cross_encoder_model"] = _pipeline.cross_encoder_model
     payload["reranker_fallback_used"] = _pipeline.reranker_fallback_used
     payload["checkpoint_path"] = _pipeline.checkpoint_path
+    payload["model_name"] = _pipeline.model_name
+    payload["verifier_macro_f1"] = _pipeline.verifier_macro_f1
     return payload

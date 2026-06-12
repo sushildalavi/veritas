@@ -39,3 +39,5 @@ class VerifyResponse(BaseModel):
     evidence: list[EvidenceItem]
     fallback_used: bool
     latency_ms: float
+    model_name: str
+    verifier_macro_f1: float | None = None
