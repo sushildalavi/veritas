@@ -8,6 +8,12 @@ version = "0.1.0"
 description = "Veritas fact verification project"
 requires-python = ">=3.11"
 
+[project.scripts]
+veritas-verify = "cli:main"
+
+[tool.setuptools]
+py-modules = ["cli"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
