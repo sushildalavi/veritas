@@ -1,0 +1,14 @@
+features:
+  include_cross_encoder_hook: true
+model:
+  backend: auto
+  lightgbm:
+    n_estimators: 32
+    learning_rate: 0.1
+metrics:
+  ndcg_at_k: [10]
+  map: true
+  mrr: true
+ablation:
+  bootstrap_iterations: 1000
+  confidence: 0.95
