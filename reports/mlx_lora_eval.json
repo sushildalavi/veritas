@@ -1,0 +1,16 @@
+{
+  "adapter_path": "checkpoints/mlx_lora_verifier",
+  "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "citation_valid_rate": 0.5,
+  "eval_file": "data/processed/verifier_val.jsonl",
+  "fine_tune_type": "lora",
+  "lora_iters": 100,
+  "macro_f1": 0.4,
+  "macro_f1_note": null,
+  "mean_latency_seconds": 1.5346,
+  "parseable_verdicts": 20,
+  "sample_size": 20,
+  "train_data": "data/processed/mlx_lora",
+  "unsupported_sentence_rate": 0.3017,
+  "verdict_accuracy": 0.6
+}

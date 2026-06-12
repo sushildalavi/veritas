@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data build-large-sample-data eval-retrieval eval-ranking eval-retrieval-large eval-ranking-large eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus audit manifest all-evals verify-local
+.PHONY: setup test lint data build-sample-data build-large-sample-data eval-retrieval eval-ranking eval-retrieval-large eval-ranking-large eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus audit manifest all-evals verify-local build-mlx-lora-data train-mlx-lora eval-mlx-lora
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -75,3 +75,12 @@ cli:
 
 export-demo-corpus:
 	python3 -c "from data.export_demo_corpus import export_demo_corpus; export_demo_corpus('data/demo_corpus.jsonl')"
+
+build-mlx-lora-data:
+	python3 scripts/build_mlx_lora_dataset.py
+
+train-mlx-lora:
+	python3 scripts/train_mlx_lora.py
+
+eval-mlx-lora:
+	python3 scripts/train_mlx_lora.py --skip-train

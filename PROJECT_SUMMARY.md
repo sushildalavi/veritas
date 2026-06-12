@@ -22,7 +22,8 @@ It includes retrieval, ranking, verification, citation faithfulness evaluation, 
 - Cross-encoder ranking (200 queries): MAP 0.540, MRR 0.562, nDCG@10 0.565 (`reports/ranking_eval_cross_encoder_large.md`)
 - Faithfulness (template explanations, 200 val examples): citation validity 0.560, verdict consistency 0.755 (`reports/faithfulness_comparison.md`)
 - Pareto (measured): `distilroberta-clean` macro F1 0.711 / 316.7MB vs. `sklearn-tfidf-logreg` macro F1 0.484 / 0.6MB (`reports/final_pareto_analysis.md`)
-- QLoRA / DPO: **not trained** — no CUDA GPU / `bitsandbytes` available (`reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md`)
+- MLX LoRA (Apple Silicon, `mlx-community/Qwen2.5-1.5B-Instruct-4bit`, 100 iters): verdict accuracy 0.6, macro F1 0.4, citation valid rate 0.5 on 20 held-out examples (`reports/mlx_lora_eval.md`)
+- CUDA QLoRA / DPO: **not trained** — optional cloud-only path, no CUDA GPU / `bitsandbytes` available (`reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md`); MLX DPO also not available (`reports/mlx_dpo_READY.md`)
 
 ## Deployment Status
 
@@ -33,8 +34,8 @@ It includes retrieval, ranking, verification, citation faithfulness evaluation, 
 
 ## Completion Status
 
-**PROJECT NOT COMPLETE: QLoRA and DPO require GPU execution.** All other phases (data, retrieval, ranking, verification, serving, faithfulness, Pareto analysis, docs) are complete with real, checked-in reports. See `reports/final_completion_gate.md` for the full checklist.
+**PROJECT NOT COMPLETE: DPO has no available trainer (CUDA or MLX).** All other phases (data, retrieval, ranking, verification, serving, faithfulness, Pareto analysis, docs, and now Apple Silicon MLX LoRA alignment) are complete with real, checked-in reports. CUDA QLoRA remains an optional, not-yet-run cloud path. See `reports/final_completion_gate.md` for the full checklist.
 
 ## Safe Resume Line
 
-Veritas is a production-oriented fact verification portfolio project with reproducible sample data, real large-scale evaluation reports, a class-weighted transformer verifier as the default serving backend, and ready-to-run (but not yet executed) QLoRA/DPO training scripts pending GPU access.
+Veritas is a production-oriented fact verification portfolio project with reproducible sample data, real large-scale evaluation reports, a class-weighted transformer verifier as the default serving backend, a trained Apple Silicon MLX LoRA adapter for citation-grounded verification, and ready-to-run (but not yet executed) CUDA QLoRA training scripts as an optional cloud path. DPO alignment is not run on either path.

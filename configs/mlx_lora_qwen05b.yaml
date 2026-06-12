@@ -1,0 +1,22 @@
+# MLX LoRA fine-tuning config for Apple Silicon (no CUDA, no bitsandbytes).
+#
+# Runs via `mlx_lm.lora -c configs/mlx_lora_qwen05b.yaml` (wrapped by
+# scripts/train_mlx_lora.py). Trains a LoRA adapter on top of an MLX
+# 4-bit-quantized Qwen2.5-Instruct checkpoint for citation-grounded
+# claim verification explanations.
+model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
+train: true
+data: data/processed/mlx_lora
+fine_tune_type: lora
+num_layers: 8
+batch_size: 1
+iters: 200
+val_batches: 10
+learning_rate: 1.0e-5
+steps_per_report: 20
+steps_per_eval: 50
+save_every: 100
+adapter_path: checkpoints/mlx_lora_verifier
+max_seq_length: 512
+grad_checkpoint: true
+seed: 42

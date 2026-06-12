@@ -12,7 +12,7 @@ license: apache-2.0
 
 # Veritas
 
-Veritas | Transformer-Based Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, and Citation Faithfulness Evaluation
+Veritas | Fact Verification with Neural Retrieval, Cross-Encoder Ranking, Fine-Tuned Transformer Verification, MLX LoRA & Citation Faithfulness
 
 Veritas is a reproducible factual claim verification project.
 It takes a claim through evidence retrieval, evidence ranking, claim verification, grounded explanation, citation validation, and faithfulness evaluation, then serves the system through FastAPI and Gradio.
@@ -39,7 +39,8 @@ These numbers come from the checked-in reports under `reports/`. The retrieval, 
 | Faithfulness (template, 200 val examples) | verdict consistency rate | 0.755 | `reports/faithfulness_comparison.md` |
 | Pareto (measured) | best frontier (quality) | `distilroberta-clean`, macro F1 0.711 | `reports/final_pareto_analysis.md` |
 | Pareto (measured) | best frontier (deployment cost) | `sklearn-tfidf-logreg`, macro F1 0.484, 0.6MB | `reports/final_pareto_analysis.md` |
-| QLoRA / DPO | status | **not trained - GPU required** | `reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md` |
+| MLX LoRA (Apple Silicon, `Qwen2.5-1.5B-Instruct-4bit`) | verdict accuracy / macro F1 / citation valid rate (20 examples) | 0.6 / 0.4 / 0.5 | `reports/mlx_lora_eval.md`, `reports/mlx_lora_READY.md` |
+| CUDA QLoRA / DPO | status | **not trained - optional cloud path / no DPO trainer** | `reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md`, `reports/mlx_dpo_READY.md` |
 | Tests | pytest suite | 73 passed | - |
 
 ## Architecture
@@ -84,6 +85,15 @@ make error-analysis
 make pareto-analysis
 make manifest
 make verify-local
+```
+
+To reproduce the Apple Silicon MLX LoRA alignment run (no CUDA, no
+bitsandbytes):
+
+```bash
+make build-mlx-lora-data
+make train-mlx-lora
+make eval-mlx-lora
 ```
 
 To reproduce the neural benchmark runs that exist in this repo:
@@ -174,14 +184,17 @@ Deployment note:
 - The FEVER/SciFact splits used for training and evaluation (2809/650/650) are sample-scale, not the full FEVER dataset; retrieval/ranking evals use a 9,804-passage corpus and 200-query samples.
 - The clean DistilRoBERTa verifier (macro F1 0.711 on oracle/gold evidence) drops to macro F1 0.414 when fed real BM25 top-1 retrieved evidence (`reports/end_to_end_verifier_eval.md`) — the oracle/retrieved gap is real and should not be hidden.
 - Template-based explanations are citation-valid 56% of the time on a 200-example validation sample (`reports/faithfulness_comparison.md`); this is the only explanation generator with measured numbers.
-- **QLoRA fine-tuning (Phase 6) and DPO alignment (Phase 7) were not executed.** This machine has no CUDA GPU and no `bitsandbytes`, so no QLoRA/DPO adapters or eval reports exist. Ready-to-run scripts/configs are checked in (`scripts/train_qlora_real.py`, `configs/qlora_tinyllama.yaml`) along with `reports/qlora_BLOCKED_GPU_REQUIRED.md` and `reports/dpo_BLOCKED_QLORA_REQUIRED.md`.
+- **The MLX LoRA adapter (Apple Silicon, `checkpoints/mlx_lora_verifier/`) was trained on a small sample**: 600 training examples, 100 iterations, evaluated on 20 held-out examples (verdict accuracy 0.6, macro F1 0.4, citation valid rate 0.5; `reports/mlx_lora_eval.md`). This is a small-sample signal, not a benchmark result.
+- **CUDA QLoRA fine-tuning was not executed** (optional cloud path only): this machine has no CUDA GPU and no `bitsandbytes`, so no `qlora_eval` reports exist. Ready-to-run scripts/configs are checked in (`scripts/train_qlora_real.py`, `configs/qlora_tinyllama.yaml`) along with `reports/qlora_BLOCKED_GPU_REQUIRED.md`.
+- **DPO alignment (Phase 7) was not executed on either path.** The CUDA path depends on QLoRA (`reports/dpo_BLOCKED_QLORA_REQUIRED.md`); the installed `mlx-lm` (0.31.3) has no DPO trainer (`reports/mlx_dpo_READY.md`).
 - The public Spaces URL is [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space).
 
 ## What Not To Overclaim
 
 - Do not claim broad production accuracy from the sample reports; numbers are from 200-650 example evaluation sets.
 - Do not claim the public demo is deployed unless you are pointing to the live URL at `https://sushildalavi-veritas.hf.space`.
-- **Do not claim QLoRA or DPO were trained** — no adapter checkpoints or `qlora_eval`/`dpo_eval` reports exist. See `reports/qlora_BLOCKED_GPU_REQUIRED.md` and `reports/dpo_BLOCKED_QLORA_REQUIRED.md`.
+- **Do not claim CUDA QLoRA or DPO were trained** — no adapter checkpoints or `qlora_eval`/`dpo_eval`/`mlx_dpo_eval` reports exist. See `reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md`, and `reports/mlx_dpo_READY.md`.
+- **Do not call the MLX LoRA run "QLoRA"** — the adapter (`checkpoints/mlx_lora_verifier/`) is a standard LoRA adapter trained with `mlx_lm.lora --fine-tune-type lora` on a pre-quantized `mlx-community` base model; no quantized-LoRA training was performed. Do not overstate the small-sample metrics in `reports/mlx_lora_eval.md` (20-example eval) as benchmark-grade.
 - Do not claim the verifier performs equally well end-to-end as it does on oracle/gold evidence; report both numbers (`reports/oracle_verifier_eval.md` vs. `reports/end_to_end_verifier_eval.md`).
 - Do not claim citation faithfulness above the measured template-generator rate (56% citation-valid on the 200-example sample in `reports/faithfulness_comparison.md`).
 - See `reports/final_completion_gate.md` for the authoritative completion status.

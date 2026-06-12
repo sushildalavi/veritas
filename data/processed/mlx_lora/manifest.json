@@ -1,0 +1,8 @@
+{
+  "counts": {
+    "test.jsonl": 100,
+    "train.jsonl": 600,
+    "valid.jsonl": 100
+  },
+  "output_dir": "data/processed/mlx_lora"
+}
