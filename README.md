@@ -1,34 +1,40 @@
 # Veritas
 
-Veritas | LLM Fact Verification with Hybrid Retrieval, Learned Ranking, QLoRA, and DPO Alignment
+Veritas | Transformer-Based Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, and Citation Faithfulness Evaluation
 
-Veritas is a reproducible factual claim verification project:
-claim -> evidence retrieval -> evidence ranking -> claim verification -> grounded explanation -> citation and faithfulness evaluation -> deployment.
+Veritas is a reproducible factual claim verification project.
+It takes a claim through evidence retrieval, evidence ranking, claim verification, grounded explanation, citation validation, and faithfulness evaluation, then serves the system through FastAPI and Gradio.
 
-## Sample Run
+## Results
 
-The repository now includes real sample artifacts generated from FEVER and SciFact subsets. The numbers below come from the checked-in reports under `reports/`.
+These numbers come from the checked-in reports under `reports/`. They are sample-scale and should be read as regression artifacts, not broad model claims.
 
 | Component | Metric | Value |
 | --- | --- | ---: |
 | Data quality | sampled records | 8 |
 | Data quality | missing evidence spans | 1 |
 | Data quality | average claim length | 8.0 |
-| Retrieval | evidence corpus size | 12 |
-| Retrieval | FEVER validation BM25 MRR | 1.000 |
-| Ranking | learned ranker backend | `sklearn-logistic` |
-| Ranking | FEVER train learned MAP | 0.750 |
-| Verification | checkpoint path | `checkpoints/verifier/model.joblib` |
-| Verification | train accuracy | 0.750 |
-| Verification | validation accuracy | 0.400 |
-| Verification | test accuracy | 0.333 |
+| Retrieval baseline | evidence corpus size | 12 |
+| Retrieval baseline | FEVER validation BM25 MRR | 1.000 |
+| Neural retrieval | dense backend | `sentence-transformers/all-MiniLM-L6-v2` |
+| Neural retrieval | dense Recall@1 | 0.750 |
+| Neural retrieval | dense MRR | 1.000 |
+| Ranking baseline | learned ranker backend | `sklearn-logistic` |
+| Ranking baseline | learned MAP | 0.271 |
+| Cross-encoder ranking | cross-encoder model | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
+| Cross-encoder ranking | cross-encoder MAP | 0.667 |
+| Cross-encoder ranking | cross-encoder MRR | 0.667 |
+| Verifier | sklearn checkpoint | `checkpoints/verifier/model.joblib` |
+| Verifier | train / val / test accuracy | 0.750 / 0.400 / 0.333 |
+| Transformer verifier | checkpoint path | `checkpoints/transformer_verifier` |
+| Transformer verifier | train / val / test accuracy | 0.500 / 0.000 / 0.000 |
 | Faithfulness | citation validity rate | 0.875 |
 | Faithfulness | verdict consistency rate | 0.875 |
 | Error analysis | mismatch count | 6 |
 | Error analysis | error rate | 0.750 |
 | Pareto | best frontier point | `mock-top5` |
 | Pareto | frontier macro-F1 | 0.302 |
-| Pareto | frontier latency | 0.20 ms |
+| Tests | pytest suite | 58 passed |
 
 ## Architecture
 
@@ -37,126 +43,133 @@ flowchart LR
     A[Claim] --> B[BM25 + Dense Retrieval]
     B --> C[Hybrid RRF]
     C --> D[Learned Ranker]
-    D --> E[Verifier]
-    E --> F[Grounded Explanation]
-    F --> G[Citation Checker]
-    G --> H[Faithfulness Evaluation]
-    H --> I[FastAPI + Gradio Demo]
+    C --> E[Cross-Encoder Reranker]
+    D --> F[Verifier]
+    E --> F
+    F --> G[Grounded Explanation]
+    G --> H[Citation Checker]
+    H --> I[Faithfulness Evaluation]
+    I --> J[FastAPI + Gradio Demo]
 ```
 
-## Run the Pipeline
+## What Is Implemented
 
-1. Build the sample datasets and quality reports:
+- Sampled FEVER and SciFact processing into reproducible JSONL artifacts.
+- Deterministic hashing dense retrieval for CI and a real `sentence-transformers` dense path for local neural evaluation.
+- BM25, hybrid RRF, heuristic ranking, learned ranking, and optional cross-encoder reranking.
+- Lightweight sklearn verifier checkpoint plus a real transformer fine-tuning path.
+- Citation checking and faithfulness evaluation.
+- FastAPI API and Gradio demo with caching, validation, monitoring, and fallback metadata.
+- Artifact manifest generation for reports and checkpoints.
+
+## Reproduce
 
 ```bash
 make build-sample-data
-```
-
-2. Run retrieval and ranking benchmarks:
-
-```bash
 make eval-retrieval
 make eval-ranking
-```
-
-3. Train the lightweight verifier checkpoint:
-
-```bash
 make train-verifier
-```
-
-4. Generate faithfulness, error, and Pareto analysis reports:
-
-```bash
 make eval-faithfulness
 make error-analysis
 make pareto-analysis
-```
-
-5. Generate the artifact manifest and run a local verification bundle:
-
-```bash
 make manifest
 make verify-local
 ```
 
-## Deployment
+To reproduce the neural benchmark runs that exist in this repo:
 
-- Free public demo target: Hugging Face Spaces + Gradio
-- Local Spaces-style entrypoint: `make demo`
-- Local API: `make serve-real`
-- Local UI: `make ui`
-- Local CLI: `make cli`
-- Export the demo corpus: `make export-demo-corpus`
-- Docker deployment: `docker build -t veritas . && docker run -p 8000:8000 veritas`
-- Environment variables:
-  - `VERITAS_EVIDENCE_CORPUS=data/processed/evidence_corpus.jsonl`
-  - `VERITAS_VERIFIER_CHECKPOINT=checkpoints/verifier`
+```bash
+python3 scripts/run_retrieval_eval.py \
+  --split val \
+  --max-queries 5 \
+  --dense-backend sentence-transformers \
+  --embedding-model sentence-transformers/all-MiniLM-L6-v2 \
+  --output-json reports/retrieval_eval_neural.json \
+  --output-md reports/retrieval_eval_neural.md
 
-## Service Endpoints
+python3 scripts/run_ranking_eval.py \
+  --split val \
+  --max-queries 2 \
+  --use-cross-encoder \
+  --cross-encoder-model cross-encoder/ms-marco-MiniLM-L-6-v2 \
+  --output-json reports/ranking_eval_cross_encoder.json \
+  --output-md reports/ranking_eval_cross_encoder.md
+
+python3 scripts/train_transformer_verifier.py \
+  --model-name distilroberta-base \
+  --max-train-examples 8 \
+  --max-val-examples 4 \
+  --max-test-examples 4 \
+  --epochs 1 \
+  --batch-size 2 \
+  --output-dir checkpoints/transformer_verifier \
+  --report-json reports/transformer_verifier_eval.json \
+  --report-md reports/transformer_verifier_eval.md
+```
+
+## Run The Demo
+
+Local Gradio demo:
+
+```bash
+python3 app.py
+```
+
+Optional service endpoints:
 
 - `GET /health`
 - `POST /verify`
 - `GET /metrics`
 
-## Makefile
+If you want the API directly:
 
-- `make setup`: install Python dependencies
-- `make test`: run the test suite
-- `make lint`: run a lightweight compile check
-- `make build-sample-data`: build the sampled FEVER and SciFact artifacts
-- `make eval-retrieval`: run retrieval evaluation
-- `make eval-ranking`: run ranking evaluation
-- `make train-verifier`: train the lightweight verifier checkpoint
-- `make train-verifier-smoke`: train into a temporary checkpoint path
-- `make eval-faithfulness`: run the citation and faithfulness report
-- `make error-analysis`: run verifier error analysis
-- `make pareto-analysis`: run the quality-versus-cost Pareto report
-- `make manifest`: write the artifact manifest
-- `make all-evals`: run the full local evaluation bundle
-- `make audit`: alias for `make manifest`
-- `make verify-local`: run tests, lint, and manifest generation
-- `make serve-real`: run the FastAPI app with the trained checkpoint when available
-- `make demo`: launch the Spaces entrypoint
+```bash
+uvicorn serving.api:app --host 0.0.0.0 --port 8000
+```
 
-## Data Quality
+## Deploy To Hugging Face Spaces
 
-- Exact deduplication is implemented for claims and evidence spans.
-- Near-duplicate detection is exposed with a dependency-light fallback.
-- Chunking is configurable by window size and overlap.
-- Quality audits report label distribution, duplicate count, missing evidence count, and length statistics.
+Public demo URL: not deployed yet.
 
-## Training
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full step-by-step Space setup.
 
-- `training/train_deberta.py` is the offline verifier fine-tuning entry point.
-- `training/train_qlora.py` is the offline QLoRA path.
-- `training/train_dpo.py` is the offline DPO alignment path.
-- `training/train_ranker.py` is the learned ranker training entry point.
-- These scripts stay lightweight in CI and do not download large models there.
+Short version:
 
-## Evaluation
+1. Create a new Space.
+1. Choose `Gradio` as the SDK.
+1. Set Python to `3.11`.
+1. Connect this repository or upload the files.
+1. Verify that `app.py` launches and the UI shows verdict, confidence, evidence, citation status, backend, fallback status, and latency.
 
-- Retrieval metrics live in `evaluation/retrieval_metrics.py`.
-- Ranking metrics live in `evaluation/ranking_metrics.py`.
-- Classification metrics live in `evaluation/classification_metrics.py`.
-- Calibration and error analysis live in `evaluation/confidence_analysis.py` and `evaluation/error_analysis.py`.
-- Faithfulness helpers live in `evaluation/faithfulness_metrics.py`.
-- Pareto analysis helpers live in `evaluation/pareto_analysis.py`.
+## Production Features
+
+- Central YAML + environment configuration in `core/config.py`.
+- Artifact manifest generation in `reports/artifact_manifest.json`.
+- Response caching with TTL.
+- Health and metrics endpoints.
+- Backend metadata in API responses.
+- Fallback verifier and retrieval paths for CPU-only demo use.
+- Validated request schema with claim stripping and length limits.
+- Model checkpoint routing that prefers transformer checkpoints, then sklearn, then mock fallback.
 
 ## Limitations
 
-- The sampled benchmark is intentionally small, so the metrics are useful for regression tracking but not for claiming broad model quality.
-- The free demo uses fallback components when checkpoints are unavailable.
-- Offline QLoRA and DPO flows are not required for the CPU demo or CI.
-- Retrieval corpora in the demo path are intentionally small and should be replaced with project data for any serious evaluation.
+- The dataset is deliberately tiny.
+- Retrieval and ranking metrics are sample-scale regression metrics, not benchmark claims.
+- The transformer verifier was trained on a tiny smoke run and does not show meaningful generalization.
+- The public Spaces URL is not published yet.
+- Offline QLoRA and DPO remain optional extensions, not completed training runs.
+
+## What Not To Overclaim
+
+- Do not claim broad production accuracy from the sample reports.
+- Do not claim the public demo is deployed unless you have an actual URL.
+- Do not claim QLoRA or DPO were trained unless the repo has matching checkpoints and reports.
+- Do not claim the transformer verifier is a strong benchmark model; it is a smoke-run artifact.
+- Do not claim the neural retrieval and cross-encoder runs were large-scale experiments.
 
 ## Resume Bullets
 
-- Built a reproducible FEVER/SciFact sampling pipeline with a 12-passage evidence corpus and generated quality reports from real JSONL artifacts.
-- Trained a lightweight verifier checkpoint with 0.75 train accuracy, 0.40 validation accuracy, and 0.333 test accuracy, then wired serving to prefer the checkpoint automatically.
-- Added retrieval, ranking, faithfulness, error-analysis, and Pareto reports backed by checked-in scripts and report artifacts.
-
-## Notes
-
-- No fake metrics are reported in this repository.
-- If a table or bullet is not backed by a script run, it stays out of the README.
+- Built a reproducible FEVER/SciFact verification pipeline with checked-in sample datasets, artifact manifests, and real evaluation reports.
+- Added optional sentence-transformer dense retrieval, cross-encoder reranking, and transformer verifier fine-tuning paths alongside lightweight CPU fallbacks.
+- Hardened the serving stack with config-driven checkpoint routing, caching, health/metrics endpoints, and Gradio/FastAPI deployment readiness.

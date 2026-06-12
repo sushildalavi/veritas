@@ -1,5 +1,5 @@
 {
-  "backend": "sklearn",
+  "backend": "transformers",
   "examples": [
     {
       "citation_precision": 1.0,
@@ -78,7 +78,7 @@
       "citation_valid": true,
       "claim_id": "100",
       "decision": "abstain",
-      "prediction": "REFUTED",
+      "prediction": "NOT ENOUGH INFO",
       "retries_used": 0,
       "split": "scifact_val",
       "truth": "SUPPORTED",

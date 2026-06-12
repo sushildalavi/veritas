@@ -1,6 +1,6 @@
 # Faithfulness Evaluation
 
-- Backend: sklearn
+- Backend: transformers
 - Top K: 3
 
 ## Overall

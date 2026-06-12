@@ -1,8 +1,8 @@
 {
   "frontier": [
     {
-      "deployment_feasibility": 0.9999191717579379,
-      "latency_ms": 0.08082824206212536,
+      "deployment_feasibility": 0.999932385617285,
+      "latency_ms": 0.06761438271496445,
       "macro_f1": 0.30158730158730157,
       "memory_mb": 0.0,
       "model": "mock-top5"
@@ -10,29 +10,29 @@
   ],
   "points": [
     {
-      "deployment_feasibility": 0.9999191717579379,
-      "latency_ms": 0.08082824206212536,
+      "deployment_feasibility": 0.999932385617285,
+      "latency_ms": 0.06761438271496445,
       "macro_f1": 0.30158730158730157,
       "memory_mb": 0.0,
       "model": "mock-top5"
     },
     {
-      "deployment_feasibility": 0.999881963522057,
-      "latency_ms": 0.11803647794295102,
+      "deployment_feasibility": 0.9998548957446474,
+      "latency_ms": 0.14510425535263494,
       "macro_f1": 0.20634920634920637,
       "memory_mb": 0.0,
       "model": "mock-top3"
     },
     {
-      "deployment_feasibility": 0.999675972726196,
-      "latency_ms": 0.29616663232445717,
-      "macro_f1": 0.14814814814814814,
+      "deployment_feasibility": 0.9549984727388946,
+      "latency_ms": 44.973666619625874,
+      "macro_f1": 0.13333333333333333,
       "memory_mb": 0.013930320739746094,
       "model": "trained-top3"
     },
     {
-      "deployment_feasibility": 0.9997287174744415,
-      "latency_ms": 0.24342188407899812,
+      "deployment_feasibility": 0.9353392747332109,
+      "latency_ms": 64.6328646253096,
       "macro_f1": 0.13333333333333333,
       "memory_mb": 0.013930320739746094,
       "model": "trained-top5"
@@ -40,34 +40,34 @@
   ],
   "summaries": [
     {
-      "deployment_feasibility": 0.999881963522057,
+      "deployment_feasibility": 0.9998548957446474,
       "example_count": 8.0,
       "macro_f1": 0.20634920634920637,
-      "mean_latency_ms": 0.11803647794295102,
+      "mean_latency_ms": 0.14510425535263494,
       "memory_mb": 0.0,
       "model": "mock-top3"
     },
     {
-      "deployment_feasibility": 0.9999191717579379,
+      "deployment_feasibility": 0.999932385617285,
       "example_count": 8.0,
       "macro_f1": 0.30158730158730157,
-      "mean_latency_ms": 0.08082824206212536,
+      "mean_latency_ms": 0.06761438271496445,
       "memory_mb": 0.0,
       "model": "mock-top5"
     },
     {
-      "deployment_feasibility": 0.999675972726196,
+      "deployment_feasibility": 0.9549984727388946,
       "example_count": 8.0,
-      "macro_f1": 0.14814814814814814,
-      "mean_latency_ms": 0.29616663232445717,
+      "macro_f1": 0.13333333333333333,
+      "mean_latency_ms": 44.973666619625874,
       "memory_mb": 0.013930320739746094,
       "model": "trained-top3"
     },
     {
-      "deployment_feasibility": 0.9997287174744415,
+      "deployment_feasibility": 0.9353392747332109,
       "example_count": 8.0,
       "macro_f1": 0.13333333333333333,
-      "mean_latency_ms": 0.24342188407899812,
+      "mean_latency_ms": 64.6328646253096,
       "memory_mb": 0.013930320739746094,
       "model": "trained-top5"
     }

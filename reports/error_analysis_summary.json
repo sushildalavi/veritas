@@ -1,5 +1,5 @@
 {
-  "backend": "sklearn",
+  "backend": "transformers",
   "category_counts": {
     "entity": 4,
     "negation": 1,
@@ -40,7 +40,7 @@
     {
       "category": "entity",
       "claim": "All hematopoietic stem cells segregate their chromosomes randomly.",
-      "prediction": "REFUTED",
+      "prediction": "NOT ENOUGH INFO",
       "truth": "SUPPORTED"
     }
   ],

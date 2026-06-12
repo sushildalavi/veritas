@@ -1,6 +1,6 @@
 # Error Analysis
 
-- Backend: sklearn
+- Backend: transformers
 - Top K: 3
 - Error rate: 0.750
 
@@ -21,4 +21,4 @@
 | The Book of Mormon won a Tony Award for Best Musical. | SUPPORTED | NOT ENOUGH INFO | entity |
 | TNFAIP3 is a glioblastoma tumor suppressor. | REFUTED | NOT ENOUGH INFO | numerical |
 | Broadly HIV-1 Neutralizing Antibodies (bnAb) 10EB have no affinity for phospholipids. | SUPPORTED | NOT ENOUGH INFO | negation |
-| All hematopoietic stem cells segregate their chromosomes randomly. | SUPPORTED | REFUTED | entity |
+| All hematopoietic stem cells segregate their chromosomes randomly. | SUPPORTED | NOT ENOUGH INFO | entity |
