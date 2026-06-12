@@ -19,34 +19,28 @@ It takes a claim through evidence retrieval, evidence ranking, claim verificatio
 
 ## Results
 
-These numbers come from the checked-in reports under `reports/`. They are sample-scale and should be read as regression artifacts, not broad model claims.
+These numbers come from the checked-in reports under `reports/`. The retrieval, ranking, and verifier numbers below are from larger (200-650 example) evaluation runs and are the current source of truth; the original tiny smoke-test numbers further down in this file are kept only for historical context.
 
-| Component | Metric | Value |
-| --- | --- | ---: |
-| Data quality | sampled records | 4109 |
-| Data quality | missing evidence spans | 416 |
-| Data quality | average claim length | 9.3 |
-| Retrieval baseline | evidence corpus size | 9804 |
-| Retrieval baseline | FEVER validation BM25 MRR | 0.579 |
-| Neural retrieval | dense backend | `sentence-transformers/all-MiniLM-L6-v2` |
-| Neural retrieval | dense Recall@1 | 0.447 |
-| Neural retrieval | dense MRR | 0.663 |
-| Ranking baseline | learned ranker backend | `sklearn-logistic` |
-| Ranking baseline | learned MAP | 0.500 |
-| Cross-encoder ranking | cross-encoder model | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
-| Cross-encoder ranking | cross-encoder MAP | 0.417 |
-| Cross-encoder ranking | cross-encoder MRR | 0.500 |
-| Verifier | sklearn checkpoint | `checkpoints/verifier/model.joblib` |
-| Verifier | train / val / test accuracy | 0.750 / 0.400 / 0.333 |
-| Transformer verifier | checkpoint path | `checkpoints/transformer_verifier` |
-| Transformer verifier | train / val / test accuracy | 0.500 / 0.000 / 0.000 |
-| Faithfulness | citation validity rate | 0.875 |
-| Faithfulness | verdict consistency rate | 0.875 |
-| Error analysis | mismatch count | 6 |
-| Error analysis | error rate | 0.750 |
-| Pareto | best frontier point | `mock-top5` |
-| Pareto | frontier macro-F1 | 0.302 |
-| Tests | pytest suite | 73 passed |
+| Component | Metric | Value | Report |
+| --- | --- | ---: | --- |
+| Data quality | sampled records (large pipeline) | 4109 | `reports/data_quality_large.md` |
+| Verifier dataset | train / val / test examples | 2809 / 650 / 650 | `reports/verifier_data_audit.md` |
+| Verifier (sklearn TF-IDF/LogReg) | test accuracy / macro F1 | 0.486 / 0.484 | `reports/verifier_clean_baseline.md` |
+| Verifier (DistilRoBERTa, class-weighted) | test accuracy / macro F1 | 0.718 / 0.711 | `reports/transformer_verifier_clean_eval.md` |
+| Verifier (DistilRoBERTa) | REFUTED recall | 0.745 | `reports/transformer_verifier_clean_eval.md` |
+| Oracle vs. retrieved | oracle accuracy / macro F1 | 0.717 / 0.710 | `reports/oracle_verifier_eval.md` |
+| Oracle vs. retrieved | end-to-end (BM25 top-1) accuracy / macro F1 | 0.440 / 0.414 | `reports/end_to_end_verifier_eval.md` |
+| Neural retrieval (200 queries) | dense backend | `sentence-transformers/all-MiniLM-L6-v2` | `reports/retrieval_eval_neural_large.md` |
+| Neural retrieval (200 queries) | dense recall@1 / recall@10 | 0.357 / 0.524 | `reports/retrieval_eval_neural_large.md` |
+| Neural retrieval (200 queries) | hybrid (RRF) recall@10 | 0.535 | `reports/retrieval_eval_neural_large.md` |
+| Cross-encoder ranking (200 queries) | cross-encoder model | `cross-encoder/ms-marco-MiniLM-L-6-v2` | `reports/ranking_eval_cross_encoder_large.md` |
+| Cross-encoder ranking (200 queries) | MAP / MRR / nDCG@10 | 0.540 / 0.562 / 0.565 | `reports/ranking_eval_cross_encoder_large.md` |
+| Faithfulness (template, 200 val examples) | citation validity rate | 0.560 | `reports/faithfulness_comparison.md` |
+| Faithfulness (template, 200 val examples) | verdict consistency rate | 0.755 | `reports/faithfulness_comparison.md` |
+| Pareto (measured) | best frontier (quality) | `distilroberta-clean`, macro F1 0.711 | `reports/final_pareto_analysis.md` |
+| Pareto (measured) | best frontier (deployment cost) | `sklearn-tfidf-logreg`, macro F1 0.484, 0.6MB | `reports/final_pareto_analysis.md` |
+| QLoRA / DPO | status | **not trained - GPU required** | `reports/qlora_BLOCKED_GPU_REQUIRED.md`, `reports/dpo_BLOCKED_QLORA_REQUIRED.md` |
+| Tests | pytest suite | 73 passed | - |
 
 ## Architecture
 
@@ -158,10 +152,10 @@ Short version:
 1. Verify that `app.py` launches and the UI shows verdict, confidence, evidence, citation status, backend, fallback status, and latency.
 
 Deployment note:
-- The live Space currently uses the lightweight sklearn verifier checkpoint in `checkpoints/verifier/`.
-- The checkpoint is retrained from the checked-in sampled FEVER/SciFact data and stores sklearn/Python/git metadata for reproducibility.
-- Cross-encoder reranking is optional and lazy-loaded. When `VERITAS_RERANKER_BACKEND=cross_encoder`, the serving stack reports whether the requested model loaded or fell back to a heuristic reranker.
-- The deployment metadata in `checkpoints/verifier/metadata.json` captures the sklearn version, Python version, timestamp, git commit hash, training command, and sample sizes used to build the checkpoint.
+- By default the serving stack resolves to the clean, class-weighted DistilRoBERTa verifier checkpoint in `checkpoints/transformer_verifier_clean/` (test accuracy 0.718, macro F1 0.711). If that checkpoint is absent it falls back to the sklearn TF-IDF/LogReg checkpoint in `checkpoints/verifier_clean/`, then to a mock verifier. See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the lightweight vs. advanced serving-mode configs.
+- `GET /health`, `POST /verify`, and `GET /metrics` report `model_name`, `checkpoint_path`, `verifier_macro_f1`, `retrieval_backend`, and `reranker_backend` so the active configuration can be confirmed at runtime.
+- Cross-encoder reranking and dense/hybrid retrieval are optional and config-driven (`configs/serving_advanced.yaml`); the serving stack reports whether the requested model loaded or fell back.
+- The deployment metadata in each checkpoint's `metadata.json` captures the library version, Python version, timestamp, git commit hash, training command, and sample sizes used to build the checkpoint.
 - The larger sample pipeline is also reproducible from `make build-large-sample-data`; SciFact is capped by the size of the shipped corpus, while FEVER uses the requested larger split sizes.
 
 ## Production Features
@@ -177,22 +171,20 @@ Deployment note:
 
 ## Limitations
 
-- The dataset is deliberately tiny.
-- The checked-in `_large` artifacts are still sample-scale and were built for CPU-friendly local evaluation, not for benchmark claims.
-- Retrieval and ranking metrics are sample-scale regression metrics, not benchmark claims.
-- The transformer verifier was trained on a tiny smoke run and does not show meaningful generalization.
+- The FEVER/SciFact splits used for training and evaluation (2809/650/650) are sample-scale, not the full FEVER dataset; retrieval/ranking evals use a 9,804-passage corpus and 200-query samples.
+- The clean DistilRoBERTa verifier (macro F1 0.711 on oracle/gold evidence) drops to macro F1 0.414 when fed real BM25 top-1 retrieved evidence (`reports/end_to_end_verifier_eval.md`) — the oracle/retrieved gap is real and should not be hidden.
+- Template-based explanations are citation-valid 56% of the time on a 200-example validation sample (`reports/faithfulness_comparison.md`); this is the only explanation generator with measured numbers.
+- **QLoRA fine-tuning (Phase 6) and DPO alignment (Phase 7) were not executed.** This machine has no CUDA GPU and no `bitsandbytes`, so no QLoRA/DPO adapters or eval reports exist. Ready-to-run scripts/configs are checked in (`scripts/train_qlora_real.py`, `configs/qlora_tinyllama.yaml`) along with `reports/qlora_BLOCKED_GPU_REQUIRED.md` and `reports/dpo_BLOCKED_QLORA_REQUIRED.md`.
 - The public Spaces URL is [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space).
-- The deployed verifier is the lightweight sklearn checkpoint in `checkpoints/verifier/`, not the transformer smoke model.
-- Offline QLoRA and DPO remain optional extensions, not completed training runs.
 
 ## What Not To Overclaim
 
-- Do not claim broad production accuracy from the sample reports.
+- Do not claim broad production accuracy from the sample reports; numbers are from 200-650 example evaluation sets.
 - Do not claim the public demo is deployed unless you are pointing to the live URL at `https://sushildalavi-veritas.hf.space`.
-- Do not claim QLoRA or DPO were trained unless the repo has matching checkpoints and reports.
-- Do not claim the transformer verifier is a strong benchmark model; it is a smoke-run artifact.
-- Do not claim the neural retrieval and cross-encoder runs were large-scale experiments.
-- Do not claim the Space deploys DeBERTa; the live demo uses the lightweight sklearn verifier checkpoint with optional reranking metadata.
+- **Do not claim QLoRA or DPO were trained** — no adapter checkpoints or `qlora_eval`/`dpo_eval` reports exist. See `reports/qlora_BLOCKED_GPU_REQUIRED.md` and `reports/dpo_BLOCKED_QLORA_REQUIRED.md`.
+- Do not claim the verifier performs equally well end-to-end as it does on oracle/gold evidence; report both numbers (`reports/oracle_verifier_eval.md` vs. `reports/end_to_end_verifier_eval.md`).
+- Do not claim citation faithfulness above the measured template-generator rate (56% citation-valid on the 200-example sample in `reports/faithfulness_comparison.md`).
+- See `reports/final_completion_gate.md` for the authoritative completion status.
 
 ## Resume Bullets
 
