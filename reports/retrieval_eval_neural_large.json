@@ -1,0 +1,40 @@
+{
+  "dense_backend": "sentence-transformers",
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "evidence_corpus_size": 9804,
+  "limitations": [
+    "Evaluated on a sample of 20 queries, capped at --max-queries=20."
+  ],
+  "max_queries": 20,
+  "metrics": {
+    "bm25": {
+      "mrr": 0.5791666666666667,
+      "ndcg@10": 0.5892801411844708,
+      "recall@1": 0.3416666666666667,
+      "recall@10": 0.6527777777777778,
+      "recall@5": 0.6361111111111111
+    },
+    "dense": {
+      "mrr": 0.6625,
+      "ndcg@10": 0.648016228628485,
+      "recall@1": 0.44722222222222224,
+      "recall@10": 0.6694444444444444,
+      "recall@5": 0.6277777777777778
+    },
+    "hybrid": {
+      "mrr": 0.675,
+      "ndcg@10": 0.642840996450413,
+      "recall@1": 0.4222222222222222,
+      "recall@10": 0.6527777777777778,
+      "recall@5": 0.6527777777777778
+    }
+  },
+  "num_queries": 20,
+  "runtime_seconds": 68.037,
+  "split": "val",
+  "top_k": [
+    1,
+    5,
+    10
+  ]
+}

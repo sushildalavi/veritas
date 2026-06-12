@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus audit manifest all-evals verify-local
+.PHONY: setup test lint data build-sample-data build-large-sample-data eval-retrieval eval-ranking eval-retrieval-large eval-ranking-large eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus audit manifest all-evals verify-local
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -14,6 +14,15 @@ data:
 
 build-sample-data:
 	python3 scripts/build_sample_datasets.py
+
+build-large-sample-data:
+	python3 scripts/build_large_sample_datasets.py --fever-train 2000 --fever-val 500 --fever-test 500
+
+eval-retrieval-large:
+	python3 scripts/run_retrieval_eval.py --split val --max-queries 20 --dense-backend sentence-transformers --embedding-model sentence-transformers/all-MiniLM-L6-v2 --file-suffix _large --output-json reports/retrieval_eval_neural_large.json --output-md reports/retrieval_eval_neural_large.md
+
+eval-ranking-large:
+	python3 scripts/run_ranking_eval.py --split val --max-queries 2 --candidate-k 5 --train-query-cap 40 --use-cross-encoder --cross-encoder-model cross-encoder/ms-marco-MiniLM-L-6-v2 --cross-encoder-batch-size 4 --file-suffix _large --output-json reports/ranking_eval_cross_encoder_large.json --output-md reports/ranking_eval_cross_encoder_large.md
 
 manifest:
 	python3 scripts/write_artifact_manifest.py

@@ -36,8 +36,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--split", choices=["train", "val", "test"], default="val")
     parser.add_argument("--max-queries", type=int, default=20)
     parser.add_argument("--candidate-k", type=int, default=10)
+    parser.add_argument("--train-query-cap", type=int, default=40)
     parser.add_argument("--use-cross-encoder", action="store_true")
     parser.add_argument("--cross-encoder-model", default="cross-encoder/ms-marco-MiniLM-L-6-v2")
+    parser.add_argument("--cross-encoder-batch-size", type=int, default=4)
+    parser.add_argument("--file-suffix", default="", help="Suffix for split/corpus files, e.g. _large")
     parser.add_argument("--output-json", default="reports/ranking_eval.json")
     parser.add_argument("--output-md", default="reports/ranking_eval.md")
     return parser
@@ -57,8 +60,11 @@ def main() -> None:  # pragma: no cover - script entrypoint
             split=args.split,
             max_queries=args.max_queries,
             candidate_k=args.candidate_k,
+            train_query_cap=args.train_query_cap,
             use_cross_encoder=args.use_cross_encoder,
             cross_encoder_model=args.cross_encoder_model,
+            cross_encoder_batch_size=args.cross_encoder_batch_size,
+            file_suffix=args.file_suffix,
         )
     except Exception as exc:  # pragma: no cover - failure path is surfaced explicitly
         failure_path = output_md.with_name(f"{output_md.stem}_FAILED.md")
@@ -93,20 +99,23 @@ def evaluate_ranking(
     split: str,
     max_queries: int,
     candidate_k: int,
+    train_query_cap: int = 40,
     use_cross_encoder: bool,
     cross_encoder_model: str,
+    cross_encoder_batch_size: int = 4,
+    file_suffix: str = "",
 ) -> dict[str, object]:
     started = perf_counter()
-    records_by_split = load_records(data_dir)
-    corpus = load_evidence_corpus(data_dir)
+    records_by_split = _load_records(data_dir, file_suffix=file_suffix)
+    corpus = _load_evidence_corpus(data_dir, file_suffix=file_suffix)
     bm25 = BM25Retriever(corpus)
     dense = DenseRetriever(corpus)
-    train_records = _select_records(records_by_split, "train")
+    train_records = _select_records(records_by_split, "train")[:train_query_cap]
     eval_records = _select_records(records_by_split, split)[:max_queries]
     if not eval_records:
         raise ValueError(f"No records found for split={split!r}")
 
-    cross_encoder = CrossEncoderReranker(cross_encoder_model) if use_cross_encoder else None
+    cross_encoder = _build_cross_encoder(cross_encoder_model, cross_encoder_batch_size) if use_cross_encoder else None
 
     learned_ranker = LearnedRanker()
     train_rows, train_labels = _build_training_data(train_records, bm25, dense, candidate_k, cross_encoder=None)
@@ -136,6 +145,7 @@ def evaluate_ranking(
     report = {
         "split": split,
         "max_queries": max_queries,
+        "train_query_cap": train_query_cap,
         "num_queries": len(eval_records),
         "evidence_corpus_size": len(corpus),
         "candidate_k": candidate_k,
@@ -332,12 +342,32 @@ def _select_records(records_by_split: dict[str, list[object]], split: str):
     return selected
 
 
+def _load_records(data_dir: Path, *, file_suffix: str) -> dict[str, list[object]]:
+    if file_suffix:
+        return load_records(data_dir, suffix=file_suffix)
+    return load_records(data_dir)
+
+
+def _load_evidence_corpus(data_dir: Path, *, file_suffix: str):
+    if file_suffix:
+        return load_evidence_corpus(data_dir, suffix=file_suffix)
+    return load_evidence_corpus(data_dir)
+
+
+def _build_cross_encoder(model_name: str, batch_size: int) -> CrossEncoderReranker:
+    try:
+        return CrossEncoderReranker(model_name, batch_size=batch_size)
+    except TypeError:
+        return CrossEncoderReranker(model_name)
+
+
 def _to_markdown(report: dict[str, object]) -> str:
     lines = [
         "# Ranking Evaluation",
         "",
         f"- Split: {report['split']}",
         f"- Max queries: {report['max_queries']}",
+        f"- Train query cap: {report['train_query_cap']}",
         f"- Queries evaluated: {report['num_queries']}",
         f"- Candidate K: {report['candidate_k']}",
         f"- Learned backend: {report['learned_ranker_backend']}",

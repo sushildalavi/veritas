@@ -23,11 +23,16 @@ def read_jsonl(path: str | Path) -> list[dict[str, Any]]:
     ]
 
 
-def load_records(data_dir: str | Path, split_names: Iterable[str] = SPLITS) -> dict[str, list[ClaimEvidenceRecord]]:
+def load_records(
+    data_dir: str | Path,
+    split_names: Iterable[str] = SPLITS,
+    *,
+    suffix: str = "",
+) -> dict[str, list[ClaimEvidenceRecord]]:
     base = Path(data_dir)
     records: dict[str, list[ClaimEvidenceRecord]] = {}
     for split_name in split_names:
-        split_path = base / f"{split_name}.jsonl"
+        split_path = base / f"{split_name}{suffix}.jsonl"
         records[split_name] = [
             ClaimEvidenceRecord(
                 claim_id=str(row.get("claim_id", "")),
@@ -51,8 +56,8 @@ def load_records(data_dir: str | Path, split_names: Iterable[str] = SPLITS) -> d
     return records
 
 
-def load_evidence_corpus(data_dir: str | Path) -> list[EvidenceSpan]:
-    corpus_path = Path(data_dir) / "evidence_corpus.jsonl"
+def load_evidence_corpus(data_dir: str | Path, *, suffix: str = "") -> list[EvidenceSpan]:
+    corpus_path = Path(data_dir) / f"evidence_corpus{suffix}.jsonl"
     return [
         EvidenceSpan(
             doc_id=str(row.get("doc_id", "")),

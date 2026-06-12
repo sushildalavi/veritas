@@ -65,7 +65,7 @@ def _load_logistic_ranker() -> object | None:  # pragma: no cover - optional dep
     try:
         from sklearn.linear_model import LogisticRegression  # type: ignore
 
-        return LogisticRegression(max_iter=200)
+        return LogisticRegression(max_iter=50, solver="liblinear")
     except Exception:
         return None
 

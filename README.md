@@ -23,19 +23,19 @@ These numbers come from the checked-in reports under `reports/`. They are sample
 
 | Component | Metric | Value |
 | --- | --- | ---: |
-| Data quality | sampled records | 8 |
-| Data quality | missing evidence spans | 1 |
-| Data quality | average claim length | 8.0 |
-| Retrieval baseline | evidence corpus size | 12 |
-| Retrieval baseline | FEVER validation BM25 MRR | 1.000 |
+| Data quality | sampled records | 4109 |
+| Data quality | missing evidence spans | 416 |
+| Data quality | average claim length | 9.3 |
+| Retrieval baseline | evidence corpus size | 9804 |
+| Retrieval baseline | FEVER validation BM25 MRR | 0.579 |
 | Neural retrieval | dense backend | `sentence-transformers/all-MiniLM-L6-v2` |
-| Neural retrieval | dense Recall@1 | 0.750 |
-| Neural retrieval | dense MRR | 1.000 |
+| Neural retrieval | dense Recall@1 | 0.447 |
+| Neural retrieval | dense MRR | 0.663 |
 | Ranking baseline | learned ranker backend | `sklearn-logistic` |
-| Ranking baseline | learned MAP | 0.271 |
+| Ranking baseline | learned MAP | 0.500 |
 | Cross-encoder ranking | cross-encoder model | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
-| Cross-encoder ranking | cross-encoder MAP | 0.667 |
-| Cross-encoder ranking | cross-encoder MRR | 0.667 |
+| Cross-encoder ranking | cross-encoder MAP | 0.417 |
+| Cross-encoder ranking | cross-encoder MRR | 0.500 |
 | Verifier | sklearn checkpoint | `checkpoints/verifier/model.joblib` |
 | Verifier | train / val / test accuracy | 0.750 / 0.400 / 0.333 |
 | Transformer verifier | checkpoint path | `checkpoints/transformer_verifier` |
@@ -46,7 +46,7 @@ These numbers come from the checked-in reports under `reports/`. They are sample
 | Error analysis | error rate | 0.750 |
 | Pareto | best frontier point | `mock-top5` |
 | Pareto | frontier macro-F1 | 0.302 |
-| Tests | pytest suite | 68 passed |
+| Tests | pytest suite | 73 passed |
 
 ## Architecture
 
@@ -67,6 +67,7 @@ flowchart LR
 ## What Is Implemented
 
 - Sampled FEVER and SciFact processing into reproducible JSONL artifacts.
+- A larger FEVER + SciFact sample pipeline under `data/processed/*_large.jsonl` for more realistic local evaluation.
 - Deterministic hashing dense retrieval for CI and a real `sentence-transformers` dense path for local neural evaluation.
 - BM25, hybrid RRF, heuristic ranking, learned ranking, and optional cross-encoder reranking.
 - Lightweight sklearn verifier checkpoint plus a real transformer fine-tuning path.
@@ -78,8 +79,11 @@ flowchart LR
 
 ```bash
 make build-sample-data
+make build-large-sample-data
 make eval-retrieval
 make eval-ranking
+make eval-retrieval-large
+make eval-ranking-large
 make train-verifier
 make eval-faithfulness
 make error-analysis
@@ -158,6 +162,7 @@ Deployment note:
 - The checkpoint is retrained from the checked-in sampled FEVER/SciFact data and stores sklearn/Python/git metadata for reproducibility.
 - Cross-encoder reranking is optional and lazy-loaded. When `VERITAS_RERANKER_BACKEND=cross_encoder`, the serving stack reports whether the requested model loaded or fell back to a heuristic reranker.
 - The deployment metadata in `checkpoints/verifier/metadata.json` captures the sklearn version, Python version, timestamp, git commit hash, training command, and sample sizes used to build the checkpoint.
+- The larger sample pipeline is also reproducible from `make build-large-sample-data`; SciFact is capped by the size of the shipped corpus, while FEVER uses the requested larger split sizes.
 
 ## Production Features
 
@@ -173,6 +178,7 @@ Deployment note:
 ## Limitations
 
 - The dataset is deliberately tiny.
+- The checked-in `_large` artifacts are still sample-scale and were built for CPU-friendly local evaluation, not for benchmark claims.
 - Retrieval and ranking metrics are sample-scale regression metrics, not benchmark claims.
 - The transformer verifier was trained on a tiny smoke run and does not show meaningful generalization.
 - The public Spaces URL is [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space).

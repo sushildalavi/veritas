@@ -2,15 +2,15 @@
 
 - GitHub URL: https://github.com/sushildalavi/veritas
 - Public demo URL: https://sushildalavi-veritas.hf.space
-- Current status: end-to-end project complete with reproducible sample datasets, retrieval/ranking/verifier reports, a lightweight sklearn verifier checkpoint, and a Gradio/FastAPI demo path.
-- Tests: `make test` passes, `make lint` passes, `python3 -m pytest` passes with 68 tests.
+- Current status: end-to-end project complete with reproducible sample datasets, larger local-eval artifacts, retrieval/ranking/verifier reports, a lightweight sklearn verifier checkpoint, and a Gradio/FastAPI demo path.
+- Tests: `make test` passes, `make lint` passes, `python3 -m pytest` passes with 73 tests.
 
 - Real metrics:
-  - Data quality: 8 sampled records, 1 missing evidence span, 0 duplicates
-  - Retrieval baseline: 12-passage evidence corpus, FEVER validation BM25 MRR 1.000
-  - Neural retrieval: sentence-transformers dense Recall@1 0.750, dense MRR 1.000
-  - Ranking baseline: learned MAP 0.271, RRF MAP 0.750
-  - Cross-encoder: MAP 0.667, MRR 0.667
+  - Data quality: FEVER 2,000 train / 500 val / 500 test; SciFact 809 train / 150 val / 150 test; evidence corpus 9,804 passages
+  - Retrieval baseline: BM25 MRR 0.5791666666666667, dense MRR 0.6625, hybrid MRR 0.675
+  - Neural retrieval: sentence-transformers dense Recall@1 0.44722222222222224, dense MRR 0.6625
+  - Ranking baseline: learned MAP 0.41666666666666663, RRF MAP 0.750
+  - Cross-encoder: MAP 0.41666666666666663, MRR 0.5
   - Verifier: sklearn train/val/test accuracy 0.750 / 0.400 / 0.333
   - Transformer verifier: train/val/test accuracy 0.500 / 0.000 / 0.000
   - Faithfulness: citation validity rate 0.875, verdict consistency rate 0.875
@@ -18,8 +18,9 @@
 
 - Data:
   - Sampled FEVER and SciFact JSONL artifacts are checked in under `data/processed/`
-  - Evidence corpus size: 12 passages
-  - Sample size is intentionally small for reproducibility and CPU-only execution
+  - Larger `_large` FEVER/SciFact JSONL artifacts are checked in under `data/processed/`
+  - Evidence corpus size: 9,804 passages
+  - The checked-in sample sets are bounded for reproducibility and CPU-only execution
 
 - Retrieval:
   - BM25 baseline and hybrid RRF are implemented and evaluated

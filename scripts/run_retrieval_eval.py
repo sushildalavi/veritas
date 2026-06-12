@@ -33,6 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dense-backend", choices=["hashing", "sentence-transformers"], default="hashing")
     parser.add_argument("--embedding-model", default="sentence-transformers/all-MiniLM-L6-v2")
     parser.add_argument("--top-k", default="1,5,10", help="Comma-separated retrieval cutoffs, e.g. 1,5,10")
+    parser.add_argument("--file-suffix", default="", help="Suffix for split/corpus files, e.g. _large")
     parser.add_argument("--output-json", default="reports/retrieval_eval.json")
     parser.add_argument("--output-md", default="reports/retrieval_eval.md")
     return parser
@@ -54,6 +55,7 @@ def main() -> None:  # pragma: no cover - script entrypoint
             dense_backend=args.dense_backend,
             embedding_model=args.embedding_model,
             top_k=parse_top_k(args.top_k),
+            file_suffix=args.file_suffix,
         )
     except Exception as exc:  # pragma: no cover - failure path is surfaced explicitly
         failure_path = output_md.with_name(f"{output_md.stem}_FAILED.md")
@@ -90,10 +92,11 @@ def evaluate_retrieval(
     dense_backend: str,
     embedding_model: str,
     top_k: list[int],
+    file_suffix: str = "",
 ) -> dict[str, object]:
     started = perf_counter()
-    records_by_split = load_records(data_dir)
-    corpus = load_evidence_corpus(data_dir)
+    records_by_split = _load_records(data_dir, file_suffix=file_suffix)
+    corpus = _load_evidence_corpus(data_dir, file_suffix=file_suffix)
     records = _select_records(records_by_split, split)[:max_queries]
     if not records:
         raise ValueError(f"No records found for split={split!r}")
@@ -163,6 +166,18 @@ def _select_records(records_by_split: dict[str, list[object]], split: str):
         if split_name.endswith(f"_{split}"):
             selected.extend(split_records)
     return selected
+
+
+def _load_records(data_dir: Path, *, file_suffix: str) -> dict[str, list[object]]:
+    if file_suffix:
+        return load_records(data_dir, suffix=file_suffix)
+    return load_records(data_dir)
+
+
+def _load_evidence_corpus(data_dir: Path, *, file_suffix: str):
+    if file_suffix:
+        return load_evidence_corpus(data_dir, suffix=file_suffix)
+    return load_evidence_corpus(data_dir)
 
 
 def parse_top_k(value: str) -> list[int]:
