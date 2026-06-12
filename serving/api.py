@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import os
 from fastapi import FastAPI, HTTPException
 
-from agent.reflection import ReflectionOutcome
-from models.deberta_verifier import VerificationResult
-from rag import ContextBundle, build_context
+from core.config import load_project_settings
 from serving.cache import ResponseCache
 from serving.model_loader import VerificationPipeline, load_pipeline
 from serving.monitoring import MetricsTracker, elapsed_ms, measure_latency
@@ -15,11 +12,11 @@ from serving.schemas import EvidenceItem, VerifyRequest, VerifyResponse
 
 app = FastAPI(title="Veritas", version="0.1.0")
 
+_settings = load_project_settings()
 _pipeline: VerificationPipeline = load_pipeline(
-    evidence_corpus_path=os.getenv("VERITAS_EVIDENCE_CORPUS"),
-    verifier_checkpoint=os.getenv("VERITAS_VERIFIER_CHECKPOINT"),
+    settings=_settings,
 )
-_cache = ResponseCache(ttl_seconds=120)
+_cache = ResponseCache(ttl_seconds=_settings.cache_ttl_seconds)
 _metrics = MetricsTracker()
 
 
@@ -29,6 +26,7 @@ def health() -> dict[str, object]:
         "status": "ok",
         "verifier_backend": _pipeline.verifier_backend,
         "fallback_used": _pipeline.fallback_used,
+        "checkpoint_path": _pipeline.checkpoint_path,
     }
 
 
@@ -74,4 +72,5 @@ def metrics() -> dict[str, object]:
     payload["cache_entries"] = _cache.size()
     payload["fallback_used_for_default_demo"] = _pipeline.fallback_used
     payload["verifier_backend"] = _pipeline.verifier_backend
+    payload["checkpoint_path"] = _pipeline.checkpoint_path
     return payload

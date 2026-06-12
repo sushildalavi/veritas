@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus
+.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus audit manifest all-evals verify-local
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -14,6 +14,15 @@ data:
 
 build-sample-data:
 	python3 scripts/build_sample_datasets.py
+
+manifest:
+	python3 scripts/write_artifact_manifest.py
+
+audit: manifest
+
+all-evals: eval-retrieval eval-ranking eval-faithfulness error-analysis pareto-analysis
+
+verify-local: test lint manifest
 
 eval-retrieval:
 	python3 scripts/run_retrieval_eval.py

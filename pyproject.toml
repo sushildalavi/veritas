@@ -17,6 +17,7 @@ py-modules = ["cli"]
 [tool.setuptools.packages.find]
 include = [
   "agent*",
+  "core*",
   "data*",
   "evaluation*",
   "models*",

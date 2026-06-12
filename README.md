@@ -73,6 +73,13 @@ make error-analysis
 make pareto-analysis
 ```
 
+5. Generate the artifact manifest and run a local verification bundle:
+
+```bash
+make manifest
+make verify-local
+```
+
 ## Deployment
 
 - Free public demo target: Hugging Face Spaces + Gradio
@@ -105,6 +112,10 @@ make pareto-analysis
 - `make eval-faithfulness`: run the citation and faithfulness report
 - `make error-analysis`: run verifier error analysis
 - `make pareto-analysis`: run the quality-versus-cost Pareto report
+- `make manifest`: write the artifact manifest
+- `make all-evals`: run the full local evaluation bundle
+- `make audit`: alias for `make manifest`
+- `make verify-local`: run tests, lint, and manifest generation
 - `make serve-real`: run the FastAPI app with the trained checkpoint when available
 - `make demo`: launch the Spaces entrypoint
 
