@@ -1,3 +1,4 @@
+# Offline optional extension only.
 base_model: microsoft/phi-2
 training:
   beta: 0.1

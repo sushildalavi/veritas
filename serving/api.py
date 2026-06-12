@@ -35,13 +35,24 @@ def verify(request: VerifyRequest) -> VerifyResponse:
     if len(request.claim) > 512:
         raise HTTPException(status_code=400, detail="claim too long")
 
+    start = measure_latency()
     cache_key = f"{request.claim}:{request.top_k}"
     cached = _cache.get(cache_key)
     if cached is not None:
+        _metrics.record(
+            cached.verdict,
+            cached.confidence,
+            cached.fallback_used,
+            elapsed_ms(start),
+            backend_used=cached.backend_used,
+            citation_valid=cached.citation_valid,
+        )
         return cached
 
-    start = measure_latency()
-    outcome = _pipeline.reflection_loop.run(request.claim, top_k=request.top_k)
+    try:
+        outcome = _pipeline.reflection_loop.run(request.claim, top_k=request.top_k)
+    except Exception as exc:  # pragma: no cover - defensive serving guard
+        raise HTTPException(status_code=503, detail="verification unavailable") from exc
     evidence = [
         EvidenceItem(
             doc_id=item.doc_id,
@@ -57,11 +68,19 @@ def verify(request: VerifyRequest) -> VerifyResponse:
         confidence=outcome.verification.confidence if outcome.verification else 0.0,
         explanation=outcome.explanation or (outcome.verification.explanation if outcome.verification else ""),
         citation_valid=outcome.citation_valid,
+        backend_used=_pipeline.verifier_backend,
         evidence=evidence,
         fallback_used=_pipeline.fallback_used,
         latency_ms=elapsed_ms(start),
     )
-    _metrics.record(response.verdict, response.confidence, response.fallback_used, response.latency_ms)
+    _metrics.record(
+        response.verdict,
+        response.confidence,
+        response.fallback_used,
+        response.latency_ms,
+        backend_used=response.backend_used,
+        citation_valid=response.citation_valid,
+    )
     _cache.set(cache_key, response)
     return response
 

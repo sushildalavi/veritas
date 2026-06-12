@@ -31,6 +31,7 @@ class VerifyResponse(BaseModel):
     confidence: float
     explanation: str
     citation_valid: bool
+    backend_used: str
     evidence: list[EvidenceItem]
     fallback_used: bool
     latency_ms: float
