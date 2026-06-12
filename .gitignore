@@ -18,16 +18,12 @@ dist/
 .ruff_cache/
 
 # Data and artifacts
-data/*
-!data/*.py
-!data/__init__.py
-!data/**/*.py
-models/*
-!models/*.py
-!models/__init__.py
-!models/**/*.py
-checkpoints/
-reports/
+data/raw/*
+!data/raw/.gitkeep
+checkpoints/*
+!checkpoints/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
 
 # Notebook state
 .ipynb_checkpoints/
