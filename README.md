@@ -80,6 +80,7 @@ No fabricated results are reported here. Populate this table only after running 
 - Local UI: `make ui`
 - Docker deployment: `docker build -t veritas . && docker run -p 8000:8000 veritas`
 - The demo uses a lightweight path by default: BM25 retrieval, fallback verifier, template explanation, and citation checking.
+- Environment variables are documented in [.env.example](/Users/sushildalavi/Desktop/Github/Veritas/.env.example).
 
 ## Makefile
 
