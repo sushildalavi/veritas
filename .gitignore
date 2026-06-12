@@ -18,7 +18,10 @@ dist/
 .ruff_cache/
 
 # Data and artifacts
-data/
+data/*
+!data/*.py
+!data/__init__.py
+!data/**/*.py
 models/
 checkpoints/
 reports/
