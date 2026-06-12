@@ -1,0 +1,119 @@
+{
+  "accuracy": 0.44,
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "confusion_matrix": [
+    [
+      95,
+      115,
+      16
+    ],
+    [
+      38,
+      150,
+      12
+    ],
+    [
+      93,
+      90,
+      41
+    ]
+  ],
+  "evidence_source": "top-1 BM25 retrieval over data/processed/evidence_corpus_large.jsonl (9804 passages)",
+  "example_count": 650,
+  "latency_ms_per_example": 26.264419101554758,
+  "macro_f1": 0.41358600135669815,
+  "oracle_vs_retrieved_gap": {
+    "accuracy_gap": 0.2769,
+    "macro_f1_gap": 0.2962
+  },
+  "per_class": {
+    "NOT_ENOUGH_INFO": {
+      "f1": 0.27986348122866894,
+      "precision": 0.5942028985507246,
+      "recall": 0.18303571428571427
+    },
+    "REFUTED": {
+      "f1": 0.5405405405405406,
+      "precision": 0.4225352112676056,
+      "recall": 0.75
+    },
+    "SUPPORTED": {
+      "f1": 0.42035398230088494,
+      "precision": 0.42035398230088494,
+      "recall": 0.42035398230088494
+    }
+  },
+  "retrieval_runtime_seconds": 38.43,
+  "top_errors": [
+    {
+      "claim": "Temple Grandin features Claire Danes playing a cartoon penguin.",
+      "claim_id": "88346",
+      "evidence": "Temple Grandin -LRB-film-RRB-",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "William Cohen is a politician.",
+      "claim_id": "188967",
+      "evidence": "William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Susan Collins was the second woman to become the nominee of a major party for Governor of Maine.",
+      "claim_id": "115807",
+      "evidence": "He became involved in the Labour Party and was elected to the House of Commons in 1983 for Sedgefield.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Matt Bomer was born in Spain.",
+      "claim_id": "81480",
+      "evidence": "Matt Bomer",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Scream 2 is a film that is categorized as a slasher.",
+      "claim_id": "172302",
+      "evidence": "Scream 2 is a 1997 American slasher film directed by Wes Craven and written by Kevin Williamson.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "SummerSlam had no pre-show, but contested ten matches.",
+      "claim_id": "148171",
+      "evidence": "Ten matches were contested at the event, with no match on the pre-show.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "There was an attempt to change Cyprus.",
+      "claim_id": "51435",
+      "evidence": "Glass Houses (1980) was an attempt to further establish him as a rock artist; it featured \"It's Still Rock and Roll to Me\" (Joel's first single to top the Billboard Hot 100), \"You May Be Right\", \"Don't Ask Me Why\", and \"Sometimes a Fantasy\".",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "The American actor that plays Chumlee was born on December.",
+      "claim_id": "61922",
+      "evidence": "Jacob Benjamin Gyllenhaal ( JIL-\u0259n-hawl, Swedish: [\u02c8j\u028f\u0302l\u02d0\u025bn\u02cch\u0251\u02d0l]; born December 19, 1980) is an American actor whose career on screen and stage has spanned more than three decades.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Yugoslavia was a country.",
+      "claim_id": "12118",
+      "evidence": "In 1963, the country was renamed for the final time, as the Socialist Federal Republic of Yugoslavia (SFRY).",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Medical school around the world vary in admission structure.",
+      "claim_id": "31728",
+      "evidence": "Assessment for selection in medicine and the health professions should follow the same quality assurance processes as in-course assessment. The literature on selection is limited and is not strongly theoretical or conceptual. For written testing, there is evidence of the predictive validity of Medic",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    }
+  ]
+}

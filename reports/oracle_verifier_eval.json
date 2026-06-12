@@ -1,0 +1,114 @@
+{
+  "accuracy": 0.7169230769230769,
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "confusion_matrix": [
+    [
+      106,
+      115,
+      5
+    ],
+    [
+      43,
+      148,
+      9
+    ],
+    [
+      11,
+      1,
+      212
+    ]
+  ],
+  "evidence_source": "gold/curated evidence from data/processed/verifier_test.jsonl",
+  "example_count": 650,
+  "latency_ms_per_example": 22.088901987657525,
+  "macro_f1": 0.709792018210814,
+  "per_class": {
+    "NOT_ENOUGH_INFO": {
+      "f1": 0.9422222222222222,
+      "precision": 0.9380530973451328,
+      "recall": 0.9464285714285714
+    },
+    "REFUTED": {
+      "f1": 0.6379310344827587,
+      "precision": 0.5606060606060606,
+      "recall": 0.74
+    },
+    "SUPPORTED": {
+      "f1": 0.5492227979274611,
+      "precision": 0.6625,
+      "recall": 0.4690265486725664
+    }
+  },
+  "top_errors": [
+    {
+      "claim": "Temple Grandin features Claire Danes playing a cartoon penguin.",
+      "claim_id": "88346",
+      "evidence": "Temple Grandin -LRB-film-RRB-",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "William Cohen is a politician.",
+      "claim_id": "188967",
+      "evidence": "William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Baadshah had at least three languages dubbed over it.",
+      "claim_id": "166925",
+      "evidence": "Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. T. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film.",
+      "predicted_label": "NOT_ENOUGH_INFO",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Susan Collins was the second woman to become the nominee of a major party for Governor of Maine.",
+      "claim_id": "115807",
+      "evidence": "After her bid, she became the founding director of the Center for Family Business at Husson University in Bangor, Maine.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Matt Bomer was born in Spain.",
+      "claim_id": "81480",
+      "evidence": "Matt Bomer",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Scream 2 is a film that is categorized as a slasher.",
+      "claim_id": "172302",
+      "evidence": "Scream 2 is a 1997 American slasher film directed by Wes Craven and written by Kevin Williamson.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "SummerSlam had no pre-show, but contested ten matches.",
+      "claim_id": "148171",
+      "evidence": "Ten matches were contested at the event, with no match on the pre-show.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "There was an attempt to change Cyprus.",
+      "claim_id": "51435",
+      "evidence": "This action precipitated the Turkish invasion of Cyprus on 20 July, which captured the present-day territory of Northern Cyprus and displaced over 150,000 Greek Cypriots and 50,000 Turkish Cypriots.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "The American actor that plays Chumlee was born on December.",
+      "claim_id": "61922",
+      "evidence": "Austin Lee Russell (born September 8, 1982), better known by his stage name Chumlee, is an American businessman and reality television personality, best known for his appearances on the History Channel television show Pawn Stars, which depicts day-to-day business at the Gold and Silver Pawn Shop in ",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Yugoslavia was a country.",
+      "claim_id": "12118",
+      "evidence": "Yugoslavia (; lit. Peter I was the country's first sovereign. The Constituent Assembly proclaimed Yugoslavia a federal republic on 29 November 1945, thus abolishing monarchical rule. This marked the onset of a four-decade long uncontested communist party rule of the country. In 1963, the country was",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    }
+  ]
+}
