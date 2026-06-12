@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real ui cli export-demo-corpus
+.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -45,6 +45,9 @@ serve:
 
 serve-real:
 	VERITAS_VERIFIER_CHECKPOINT=checkpoints/verifier python3 -m uvicorn serving.api:app --reload
+
+demo:
+	python3 app.py
 
 ui:
 	python3 -m ui.app
