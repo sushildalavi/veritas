@@ -25,9 +25,11 @@ def build_demo() -> gr.Blocks:
         confidence = gr.Number(label="Confidence")
         backend_used = gr.Textbox(label="Backend used")
         retrieval_backend = gr.Textbox(label="Retrieval backend")
+        reranker_backend = gr.Textbox(label="Reranker backend")
         citation_valid = gr.Checkbox(label="Citation valid", interactive=False)
         fallback_used = gr.Checkbox(label="Fallback used", interactive=False)
         retrieval_fallback_used = gr.Checkbox(label="Retrieval fallback", interactive=False)
+        reranker_fallback_used = gr.Checkbox(label="Reranker fallback", interactive=False)
         latency_ms = gr.Number(label="Latency (ms)")
         explanation = gr.Textbox(label="Explanation", lines=5)
         evidence_table = gr.Dataframe(
@@ -44,9 +46,11 @@ def build_demo() -> gr.Blocks:
                 response.confidence,
                 response.backend_used,
                 response.retrieval_backend,
+                response.reranker_backend,
                 response.citation_valid,
                 response.fallback_used,
                 response.retrieval_fallback_used,
+                response.reranker_fallback_used,
                 response.latency_ms,
                 response.explanation,
                 _format_evidence_table(response),
@@ -60,9 +64,11 @@ def build_demo() -> gr.Blocks:
                 confidence,
                 backend_used,
                 retrieval_backend,
+                reranker_backend,
                 citation_valid,
                 fallback_used,
                 retrieval_fallback_used,
+                reranker_fallback_used,
                 latency_ms,
                 explanation,
                 evidence_table,

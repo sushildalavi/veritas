@@ -1,12 +1,11 @@
-from data.schemas import EvidenceSpan
+from data.schemas import ClaimEvidenceRecord, EvidenceSpan
 from pathlib import Path
 
-from data.schemas import ClaimEvidenceRecord, EvidenceSpan
 from ranking.ab_simulation import bootstrap_ab_simulation
 from ranking.features import extract_features, feature_names, to_matrix
 from ranking.learned_ranker import LearnedRanker
 from ranking.metrics import mean_average_precision, mean_reciprocal_rank, ndcg_at_k
-from ranking.reranker import CrossEncoderReranker
+from ranking.reranker import CrossEncoderReranker, HeuristicReranker
 from scripts.run_ranking_eval import evaluate_ranking
 
 
@@ -78,6 +77,21 @@ def test_cross_encoder_reranker_uses_mock_model() -> None:
 
     scores = reranker.score_pairs("Paris is in France", passages)
     reranked = reranker.rerank("Paris is in France", passages)
+
+    assert scores[0] > scores[1]
+    assert reranked[0].doc_id == "1"
+    assert reranker.rank("Paris is in France", passages)[0].doc_id == "1"
+
+
+def test_heuristic_reranker_prefers_overlap() -> None:
+    reranker = HeuristicReranker()
+    passages = [
+        EvidenceSpan(doc_id="1", text="Paris is the capital of France."),
+        EvidenceSpan(doc_id="2", text="Ottawa is the capital of Canada."),
+    ]
+
+    scores = reranker.score_pairs("Paris is in France", passages)
+    reranked = reranker.rank("Paris is in France", passages)
 
     assert scores[0] > scores[1]
     assert reranked[0].doc_id == "1"

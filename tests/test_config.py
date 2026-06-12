@@ -25,6 +25,9 @@ demo:
     monkeypatch.setenv("VERITAS_VERIFIER_BACKEND", "sklearn")
     monkeypatch.setenv("VERITAS_RETRIEVAL_BACKEND", "bm25_hashing_hybrid")
     monkeypatch.setenv("VERITAS_USE_NEURAL_RETRIEVAL", "true")
+    monkeypatch.setenv("VERITAS_RERANKER_BACKEND", "cross_encoder")
+    monkeypatch.setenv("VERITAS_USE_CROSS_ENCODER", "true")
+    monkeypatch.setenv("VERITAS_CROSS_ENCODER_MODEL", "fake-reranker")
     monkeypatch.setenv("VERITAS_CACHE_TTL_SECONDS", "45")
     monkeypatch.setenv("VERITAS_EVIDENCE_CORPUS", "custom.jsonl")
 
@@ -34,6 +37,9 @@ demo:
     assert settings.verifier_backend == "sklearn"
     assert settings.retrieval_backend == "bm25_hashing_hybrid"
     assert settings.use_neural_retrieval is True
+    assert settings.reranker_backend == "cross_encoder"
+    assert settings.use_cross_encoder is True
+    assert settings.cross_encoder_model == "fake-reranker"
     assert settings.cache_ttl_seconds == 45
     assert settings.api_host == "127.0.0.1"
     assert settings.api_port == 9000
@@ -49,6 +55,10 @@ transformer_checkpoint: checkpoints/transformer_verifier
 retrieval:
   backend: bm25_only
   use_neural_retrieval: false
+ranking:
+  reranker_backend: heuristic
+  use_cross_encoder: false
+  cross_encoder_model: cross-encoder/ms-marco-MiniLM-L-6-v2
 """,
         encoding="utf-8",
     )
@@ -59,3 +69,5 @@ retrieval:
     assert settings.transformer_checkpoint == "checkpoints/transformer_verifier"
     assert settings.retrieval_backend == "bm25_only"
     assert settings.use_neural_retrieval is False
+    assert settings.reranker_backend == "heuristic"
+    assert settings.use_cross_encoder is False

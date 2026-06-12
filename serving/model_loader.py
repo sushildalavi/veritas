@@ -15,6 +15,7 @@ from agent.reflection import ReflectionLoop
 from core.config import ProjectSettings, load_project_settings
 from data.schemas import EvidenceSpan
 from models.model_router import ModelRouter
+from ranking.reranker import CrossEncoderReranker, HeuristicReranker
 from retrieval import BM25Retriever, DenseRetriever, HashingEmbedder, HybridRetriever, build_passage_corpus
 
 from data.demo_corpus import DEFAULT_DEMO_PASSAGES
@@ -27,9 +28,13 @@ class VerificationPipeline:
     retriever: object
     verifier: ModelRouter
     reflection_loop: ReflectionLoop
+    reranker: object | None = None
     retrieval_backend: str = "bm25_only"
     embedding_model: str | None = None
+    reranker_backend: str = "none"
+    cross_encoder_model: str | None = None
     retrieval_fallback_used: bool = False
+    reranker_fallback_used: bool = False
     fallback_used: bool = True
     verifier_backend: str = "mock"
     checkpoint_path: str | None = None
@@ -40,6 +45,14 @@ class RetrievalRuntime:
     retriever: object
     retrieval_backend: str
     embedding_model: str | None
+    fallback_used: bool = False
+
+
+@dataclass
+class RerankerRuntime:
+    reranker: object | None
+    reranker_backend: str
+    cross_encoder_model: str | None
     fallback_used: bool = False
 
 
@@ -56,19 +69,24 @@ def load_pipeline(
         verifier_checkpoint = _resolve_checkpoint_path(settings)
     passages = _load_passages(evidence_corpus_path)
     retrieval_runtime = _load_retrieval_runtime(passages, settings)
+    reranker_runtime = _load_reranker_runtime(settings)
     retriever = retrieval_runtime.retriever
     prefer_deberta = settings.verifier_backend.lower() != "mock"
     verifier = ModelRouter(verifier_checkpoint=verifier_checkpoint, prefer_deberta=prefer_deberta)
-    reflection_loop = ReflectionLoop(retriever=retriever, verifier=verifier)
+    reflection_loop = ReflectionLoop(retriever=retriever, verifier=verifier, ranker=reranker_runtime.reranker)
     backend = getattr(getattr(verifier, "_deberta", None), "_backend", "mock")
     fallback_used = backend == "mock"
     return VerificationPipeline(
         retriever=retriever,
         verifier=verifier,
         reflection_loop=reflection_loop,
+        reranker=reranker_runtime.reranker,
         retrieval_backend=retrieval_runtime.retrieval_backend,
         embedding_model=retrieval_runtime.embedding_model,
+        reranker_backend=reranker_runtime.reranker_backend,
+        cross_encoder_model=reranker_runtime.cross_encoder_model,
         retrieval_fallback_used=retrieval_runtime.fallback_used,
+        reranker_fallback_used=reranker_runtime.fallback_used,
         fallback_used=fallback_used,
         verifier_backend=backend,
         checkpoint_path=str(verifier_checkpoint) if verifier_checkpoint else None,
@@ -152,6 +170,57 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
         retriever=BM25Retriever(passages),
         retrieval_backend="bm25_only",
         embedding_model=None,
+        fallback_used=True,
+    )
+
+
+def _load_reranker_runtime(settings: ProjectSettings) -> RerankerRuntime:
+    backend = settings.reranker_backend.strip().lower()
+    cross_encoder_model = settings.cross_encoder_model
+    if backend in {"", "none", "off", "disabled"}:
+        return RerankerRuntime(
+            reranker=None,
+            reranker_backend="none",
+            cross_encoder_model=cross_encoder_model,
+            fallback_used=False,
+        )
+    if backend == "heuristic":
+        return RerankerRuntime(
+            reranker=HeuristicReranker(),
+            reranker_backend="heuristic",
+            cross_encoder_model=cross_encoder_model,
+            fallback_used=False,
+        )
+    if backend == "cross_encoder":
+        if not settings.use_cross_encoder:
+            LOGGER.warning("Cross-encoder reranking is disabled; using heuristic fallback")
+            return RerankerRuntime(
+                reranker=HeuristicReranker(),
+                reranker_backend="heuristic",
+                cross_encoder_model=cross_encoder_model,
+                fallback_used=True,
+            )
+        try:
+            reranker = CrossEncoderReranker(model_name=cross_encoder_model)
+        except Exception as exc:  # pragma: no cover - defensive fallback
+            LOGGER.warning("Falling back to heuristic reranking after cross-encoder loader failure: %s", exc)
+            return RerankerRuntime(
+                reranker=HeuristicReranker(),
+                reranker_backend="heuristic",
+                cross_encoder_model=cross_encoder_model,
+                fallback_used=True,
+            )
+        return RerankerRuntime(
+            reranker=reranker,
+            reranker_backend="cross_encoder",
+            cross_encoder_model=cross_encoder_model,
+            fallback_used=False,
+        )
+    LOGGER.warning("Unknown reranker backend %s; defaulting to no reranker", backend)
+    return RerankerRuntime(
+        reranker=None,
+        reranker_backend="none",
+        cross_encoder_model=cross_encoder_model,
         fallback_used=True,
     )
 

@@ -46,7 +46,7 @@ These numbers come from the checked-in reports under `reports/`. They are sample
 | Error analysis | error rate | 0.750 |
 | Pareto | best frontier point | `mock-top5` |
 | Pareto | frontier macro-F1 | 0.302 |
-| Tests | pytest suite | 59 passed |
+| Tests | pytest suite | 68 passed |
 
 ## Architecture
 
@@ -156,6 +156,8 @@ Short version:
 Deployment note:
 - The live Space currently uses the lightweight sklearn verifier checkpoint in `checkpoints/verifier/`.
 - The checkpoint is retrained from the checked-in sampled FEVER/SciFact data and stores sklearn/Python/git metadata for reproducibility.
+- Cross-encoder reranking is optional and lazy-loaded. When `VERITAS_RERANKER_BACKEND=cross_encoder`, the serving stack reports whether the requested model loaded or fell back to a heuristic reranker.
+- The deployment metadata in `checkpoints/verifier/metadata.json` captures the sklearn version, Python version, timestamp, git commit hash, training command, and sample sizes used to build the checkpoint.
 
 ## Production Features
 
@@ -184,6 +186,7 @@ Deployment note:
 - Do not claim QLoRA or DPO were trained unless the repo has matching checkpoints and reports.
 - Do not claim the transformer verifier is a strong benchmark model; it is a smoke-run artifact.
 - Do not claim the neural retrieval and cross-encoder runs were large-scale experiments.
+- Do not claim the Space deploys DeBERTa; the live demo uses the lightweight sklearn verifier checkpoint with optional reranking metadata.
 
 ## Resume Bullets
 

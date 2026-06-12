@@ -29,6 +29,9 @@ def health() -> dict[str, object]:
         "retrieval_backend": _pipeline.retrieval_backend,
         "embedding_model": _pipeline.embedding_model,
         "retrieval_fallback_used": _pipeline.retrieval_fallback_used,
+        "reranker_backend": _pipeline.reranker_backend,
+        "cross_encoder_model": _pipeline.cross_encoder_model,
+        "reranker_fallback_used": _pipeline.reranker_fallback_used,
         "checkpoint_path": _pipeline.checkpoint_path,
     }
 
@@ -74,6 +77,8 @@ def verify(request: VerifyRequest) -> VerifyResponse:
         backend_used=_pipeline.verifier_backend,
         retrieval_backend=_pipeline.retrieval_backend,
         retrieval_fallback_used=_pipeline.retrieval_fallback_used,
+        reranker_backend=_pipeline.reranker_backend,
+        reranker_fallback_used=_pipeline.reranker_fallback_used,
         evidence=evidence,
         fallback_used=_pipeline.fallback_used,
         latency_ms=elapsed_ms(start),
@@ -99,5 +104,8 @@ def metrics() -> dict[str, object]:
     payload["retrieval_backend"] = _pipeline.retrieval_backend
     payload["embedding_model"] = _pipeline.embedding_model
     payload["retrieval_fallback_used"] = _pipeline.retrieval_fallback_used
+    payload["reranker_backend"] = _pipeline.reranker_backend
+    payload["cross_encoder_model"] = _pipeline.cross_encoder_model
+    payload["reranker_fallback_used"] = _pipeline.reranker_fallback_used
     payload["checkpoint_path"] = _pipeline.checkpoint_path
     return payload

@@ -3,7 +3,7 @@
 - GitHub URL: https://github.com/sushildalavi/veritas
 - Public demo URL: https://sushildalavi-veritas.hf.space
 - Current status: end-to-end project complete with reproducible sample datasets, retrieval/ranking/verifier reports, a lightweight sklearn verifier checkpoint, and a Gradio/FastAPI demo path.
-- Tests: `make test` passes, `make lint` passes, `python3 -m pytest` passes with 59 tests.
+- Tests: `make test` passes, `make lint` passes, `python3 -m pytest` passes with 68 tests.
 
 - Real metrics:
   - Data quality: 8 sampled records, 1 missing evidence span, 0 duplicates
@@ -36,7 +36,7 @@
   - Report: `reports/ranking_eval.json`
 
 - Cross-encoder:
-  - Optional cross-encoder reranking is implemented
+  - Optional cross-encoder reranking is implemented and can be surfaced in serving with fallback metadata
   - Report: `reports/ranking_eval_cross_encoder.json`
   - Model: `cross-encoder/ms-marco-MiniLM-L-6-v2`
 
@@ -58,6 +58,7 @@
   - `python3 app.py` launches the Gradio demo locally
   - `GET /health`, `POST /verify`, and `GET /metrics` are implemented
   - Public deployment is live at `https://sushildalavi-veritas.hf.space`
+  - The live Space uses the lightweight sklearn verifier checkpoint in `checkpoints/verifier/`
 
 - Completed:
   - Central config + artifact manifest
@@ -82,6 +83,7 @@
   - That QLoRA or DPO were trained
   - That the transformer verifier is production-grade or benchmark-strong
   - That the neural retrieval and cross-encoder runs are large-scale experiments
+  - That the live Space deploys DeBERTa instead of the lightweight sklearn verifier
 
 - Best project title: Veritas | Transformer-Based Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, and Citation Faithfulness Evaluation
 - Next best step: keep the Space rebuilt from the retrained sklearn checkpoint and preserve the live URL in the README.

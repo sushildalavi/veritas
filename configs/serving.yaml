@@ -7,6 +7,10 @@ retrieval:
   backend: bm25_only
   use_neural_retrieval: false
   embedding_model: sentence-transformers/all-MiniLM-L6-v2
+ranking:
+  reranker_backend: none
+  use_cross_encoder: false
+  cross_encoder_model: cross-encoder/ms-marco-MiniLM-L-6-v2
 cache:
   ttl_seconds: 120
 fallbacks:

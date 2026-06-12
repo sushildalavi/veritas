@@ -18,6 +18,8 @@ class ProjectSettings:
     legacy_verifier_checkpoint: str | None = None
     retrieval_backend: str = "bm25_only"
     use_neural_retrieval: bool = False
+    reranker_backend: str = "none"
+    use_cross_encoder: bool = False
     embedding_backend: str = "hashing"
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
@@ -62,6 +64,8 @@ def load_project_settings(
         legacy_verifier_checkpoint=_optional_str(env.get("VERITAS_VERIFIER_CHECKPOINT")),
         retrieval_backend=str(env_or_yaml("VERITAS_RETRIEVAL_BACKEND", ("retrieval", "backend"), "bm25_only")),
         use_neural_retrieval=_coerce_bool(env_or_yaml("VERITAS_USE_NEURAL_RETRIEVAL", ("retrieval", "use_neural_retrieval"), False)),
+        reranker_backend=str(env_or_yaml("VERITAS_RERANKER_BACKEND", ("ranking", "reranker_backend"), "none")),
+        use_cross_encoder=_coerce_bool(env_or_yaml("VERITAS_USE_CROSS_ENCODER", ("ranking", "use_cross_encoder"), False)),
         embedding_backend=str(env_or_yaml("VERITAS_EMBEDDING_BACKEND", ("dense", "backend"), "hashing")),
         embedding_model=str(
             env_or_yaml(

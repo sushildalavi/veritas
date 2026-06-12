@@ -17,6 +17,9 @@ def test_health_endpoint() -> None:
     assert "retrieval_backend" in payload
     assert "embedding_model" in payload
     assert "retrieval_fallback_used" in payload
+    assert "reranker_backend" in payload
+    assert "cross_encoder_model" in payload
+    assert "reranker_fallback_used" in payload
     assert "checkpoint_path" in payload
 
 
@@ -37,6 +40,8 @@ def test_verify_endpoint_returns_grounded_response() -> None:
     assert "backend_used" in payload
     assert "retrieval_backend" in payload
     assert "retrieval_fallback_used" in payload
+    assert "reranker_backend" in payload
+    assert "reranker_fallback_used" in payload
 
 
 def test_metrics_endpoint_reports_snapshot() -> None:
@@ -53,5 +58,8 @@ def test_metrics_endpoint_reports_snapshot() -> None:
     assert "retrieval_backend" in payload
     assert "embedding_model" in payload
     assert "retrieval_fallback_used" in payload
+    assert "reranker_backend" in payload
+    assert "cross_encoder_model" in payload
+    assert "reranker_fallback_used" in payload
     assert "checkpoint_path" in payload
     assert "backend_usage_counts" in payload

@@ -34,6 +34,8 @@ class VerifyResponse(BaseModel):
     backend_used: str
     retrieval_backend: str
     retrieval_fallback_used: bool
+    reranker_backend: str
+    reranker_fallback_used: bool
     evidence: list[EvidenceItem]
     fallback_used: bool
     latency_ms: float
