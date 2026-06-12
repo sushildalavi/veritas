@@ -1,0 +1,50 @@
+{
+  "adapter_path": "checkpoints/mlx_lora_verifier",
+  "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "citation_valid_rate": 0.6,
+  "eval_file": "data/processed/verifier_val.jsonl",
+  "macro_f1": 0.4632,
+  "mean_latency_seconds": 1.2984,
+  "parseable_rate": 1.0,
+  "parseable_verdicts": 200,
+  "per_class_f1": {
+    "NOT ENOUGH INFO": 0.0,
+    "REFUTED": 0.6872,
+    "SUPPORTED": 0.7024
+  },
+  "sample_size": 200,
+  "top_error_examples": [
+    {
+      "claim": "Henri Kontinen's male sibling is a retired tennis player.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] Henri Kontinen is a Finnish former professional tennis player, which the claim is supported.\nCitation: [1]"
+    },
+    {
+      "claim": "The Winds of Winter is the sixth season in a series.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] The Winds of Winter is the planned sixth and penultimate novel of the epic fantasy series A Song of Ice and Fire by American writer George R.\nCitation: [1] The Winds of Winter is the planned sixth and penultimate novel of the epic fantasy series A Song of Ice and "
+    },
+    {
+      "claim": "Rachel Green appeared in every episode of Friends until the final episode in 2002.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] Portrayed by actress Jennifer Aniston, she was created for the show by its creators, David Crane and Marta Kauffman, and appears in all 236 episodes across 10 seasons. Her on-again, off-again relationship with Monica's brother, Ross, forms a central storyline of t"
+    },
+    {
+      "claim": "One of the major features of Zoroastrianism is messianism.",
+      "gold_label": "SUPPORTED",
+      "predicted_label": "REFUTED",
+      "response": "Verdict: REFUTED\nExplanation: [1] Opposed to Ahura Mazda is Angra Mainyu (\ud802\udf00\ud802\udf22\ud802\udf2d\ud802\udf00\u2e31 \ud802\udf28\ud802\udf00\ud802\udf0c\ud802\udf25\ud802\udf0c\ud802\udf0c\ud802\udf0e), who is personified as a destructive spirit and the adversary of all things that are good. Opposed to Ahura Mazda is Angra Mainyu (\ud802\udf00\ud802\udf22\ud802\udf2d\ud802\udf00\u2e31 \ud802\udf28\ud802\udf00\ud802\udf0c\ud802\udf25\ud802\udf0c\ud802\udf0c\ud802\udf0e), who is personified as a destructive spirit and the adversary of "
+    },
+    {
+      "claim": "Stanley Williams died in 2007.",
+      "gold_label": "REFUTED",
+      "predicted_label": "SUPPORTED",
+      "response": "Verdict: SUPPORTED\nExplanation: [1] Stanley Tookie Williams III (December 29, 1953 \u2013 December 13, 2005) was an American gangster who co-founded and led the Crips gang in Los Angeles. The highly publicized trial of Williams and extensive appeals for clemency sparked debate on the status of the death "
+    }
+  ],
+  "unsupported_sentence_rate": 0.2537,
+  "verdict_accuracy": 0.695
+}
