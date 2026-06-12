@@ -1,3 +1,15 @@
+---
+title: Veritas
+emoji: 🔍
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 6.18.0
+app_file: app.py
+pinned: false
+license: apache-2.0
+---
+
 # Veritas
 
 Veritas | Transformer-Based Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, and Citation Faithfulness Evaluation
