@@ -25,25 +25,12 @@ Outputs (on success):
 from __future__ import annotations
 
 import argparse
-import json
-import re
 from pathlib import Path
 from time import perf_counter
 
-from data.schemas import EvidenceSpan
-from evaluation.mlx_lora_eval import (
-    EXPLANATION_RE,
-    LABEL_ORDER,
-    UNPARSEABLE,
-    VERDICT_RE,
-    to_markdown,
-)
+from evaluation.cuda_verifier_eval import Example, check_cuda_environment, evaluate_adapter, load_examples, write_sft_jsonl
+from evaluation.mlx_lora_eval import to_markdown
 from evaluation.reporting import write_report
-from evaluation.sample_benchmarks import read_jsonl
-from rag import build_context, check_citations
-
-CLAIM_RE = re.compile(r"Claim: (.*?)\nEvidence:", re.DOTALL)
-EVIDENCE_RE = re.compile(r"Evidence: \[1\] (.*?)\nClassify", re.DOTALL)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -81,13 +68,13 @@ def main() -> None:
     args = build_parser().parse_args()
     data_dir = Path(args.data_dir)
 
-    train_examples = _load_examples(data_dir / args.train_file, limit=args.max_train_examples)
-    val_examples = _load_examples(data_dir / args.val_file, limit=args.max_val_examples)
+    train_examples = load_examples(data_dir / args.train_file, limit=args.max_train_examples)
+    val_examples = load_examples(data_dir / args.val_file, limit=args.max_val_examples)
     if not train_examples:
         raise SystemExit(f"No training examples found at {data_dir / args.train_file}")
 
-    _write_sft_jsonl(Path(args.sft_train_file), train_examples)
-    _write_sft_jsonl(Path(args.sft_val_file), val_examples)
+    write_sft_jsonl(Path(args.sft_train_file), train_examples)
+    write_sft_jsonl(Path(args.sft_val_file), val_examples)
     print(f"wrote {len(train_examples)} train / {len(val_examples)} val examples to {args.sft_train_file} / {args.sft_val_file}")
 
     if args.export_sft_only:
@@ -99,7 +86,7 @@ def main() -> None:
     report_json.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        _check_gpu_environment()
+        check_cuda_environment(("bitsandbytes",))
     except RuntimeError as exc:
         failure_path = report_md.with_name(f"{report_md.stem}_FAILED.md")
         failure_path.write_text(
@@ -177,7 +164,7 @@ def main() -> None:
     model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
 
-    report = _evaluate_adapter(model, tokenizer, val_examples, max_new_tokens=args.max_new_tokens)
+    report = evaluate_adapter(model, tokenizer, val_examples, max_new_tokens=args.max_new_tokens)
     report["base_model"] = args.base_model
     report["adapter_path"] = str(output_dir)
     report["fine_tune_type"] = "qlora"
@@ -193,53 +180,7 @@ def main() -> None:
     print(f"cuda qlora eval: verdict_accuracy={report['verdict_accuracy']} macro_f1={report['macro_f1']}")
 
 
-def _check_gpu_environment() -> None:
-    import torch  # noqa: PLC0415
-
-    if not torch.cuda.is_available():
-        raise RuntimeError("torch.cuda.is_available() is False; CUDA QLoRA requires a CUDA GPU.")
-    try:
-        import bitsandbytes  # noqa: F401, PLC0415
-    except ImportError as exc:
-        raise RuntimeError("bitsandbytes is not installed; required for 4-bit QLoRA quantization.") from exc
-
-
-class _Example:
-    __slots__ = ("claim", "evidence_text", "gold_label", "prompt", "completion")
-
-    def __init__(self, system_content: str, user_content: str, assistant_content: str) -> None:
-        self.prompt = f"{system_content}\n\n{user_content}"
-        self.completion = assistant_content
-
-        claim_match = CLAIM_RE.search(user_content)
-        self.claim = claim_match.group(1).strip() if claim_match else ""
-
-        evidence_match = EVIDENCE_RE.search(user_content)
-        self.evidence_text = evidence_match.group(1).strip() if evidence_match else ""
-
-        verdict_match = VERDICT_RE.search(assistant_content)
-        self.gold_label = verdict_match.group(1).upper() if verdict_match else UNPARSEABLE
-
-
-def _load_examples(path: Path, *, limit: int) -> list[_Example]:
-    rows = read_jsonl(path)
-    if limit > 0:
-        rows = rows[:limit]
-    examples = []
-    for row in rows:
-        messages = {message["role"]: message["content"] for message in row["messages"]}
-        examples.append(_Example(messages["system"], messages["user"], messages["assistant"]))
-    return examples
-
-
-def _write_sft_jsonl(path: Path, examples: list[_Example]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        for example in examples:
-            handle.write(json.dumps({"prompt": example.prompt, "completion": example.completion}) + "\n")
-
-
-def _build_dataset(examples: list[_Example], tokenizer, max_seq_length: int):  # noqa: ANN001
+def _build_dataset(examples: list[Example], tokenizer, max_seq_length: int):  # noqa: ANN001
     from datasets import Dataset  # type: ignore
 
     texts = [f"{example.prompt}\n{example.completion}{tokenizer.eos_token}" for example in examples]
@@ -253,72 +194,6 @@ def _build_dataset(examples: list[_Example], tokenizer, max_seq_length: int):  #
     tokenized = dataset.map(_tokenize, batched=True, remove_columns=["text"])
     tokenized.set_format(type="torch")
     return tokenized
-
-
-def _evaluate_adapter(model, tokenizer, examples: list[_Example], *, max_new_tokens: int) -> dict:  # noqa: ANN001
-    import torch  # noqa: PLC0415
-
-    gold_labels: list[str] = []
-    pred_labels: list[str] = []
-    citation_valid: list[bool] = []
-    unsupported_rates: list[float] = []
-    latencies: list[float] = []
-    error_examples: list[dict] = []
-
-    model.eval()
-    for example in examples:
-        inputs = tokenizer(example.prompt, return_tensors="pt", truncation=True, max_length=512).to(model.device)
-        started = perf_counter()
-        with torch.no_grad():
-            generated = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
-        latencies.append(perf_counter() - started)
-        response = tokenizer.decode(generated[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
-
-        verdict_match = VERDICT_RE.search(response)
-        pred_label = verdict_match.group(1).upper() if verdict_match else UNPARSEABLE
-
-        explanation_match = EXPLANATION_RE.search(response)
-        explanation = explanation_match.group(1).strip() if explanation_match else response.strip()
-        context = build_context(example.claim, [EvidenceSpan(doc_id="1", text=example.evidence_text)] if example.evidence_text else [])
-        citation_result = check_citations(explanation, context)
-
-        gold_labels.append(example.gold_label)
-        pred_labels.append(pred_label)
-        citation_valid.append(citation_result.valid)
-        unsupported_rates.append(citation_result.unsupported_sentence_rate)
-
-        if pred_label != example.gold_label and len(error_examples) < 5:
-            error_examples.append(
-                {
-                    "claim": example.claim,
-                    "gold_label": example.gold_label,
-                    "predicted_label": pred_label,
-                    "response": response.strip()[:300],
-                }
-            )
-
-    from sklearn.metrics import f1_score  # noqa: PLC0415
-
-    sample_size = len(examples)
-    parseable_count = sum(1 for pred in pred_labels if pred != UNPARSEABLE)
-    verdict_accuracy = sum(1 for gold, pred in zip(gold_labels, pred_labels) if gold == pred) / sample_size
-
-    macro_f1 = f1_score(gold_labels, pred_labels, labels=LABEL_ORDER, average="macro", zero_division=0)
-    per_class_f1_scores = f1_score(gold_labels, pred_labels, labels=LABEL_ORDER, average=None, zero_division=0)
-    per_class_f1 = dict(zip(LABEL_ORDER, (round(score, 4) for score in per_class_f1_scores)))
-
-    return {
-        "sample_size": sample_size,
-        "verdict_accuracy": round(verdict_accuracy, 4),
-        "macro_f1": round(macro_f1, 4),
-        "per_class_f1": per_class_f1,
-        "parseable_verdicts": parseable_count,
-        "parseable_rate": round(parseable_count / sample_size, 4),
-        "citation_valid_rate": round(sum(citation_valid) / sample_size, 4),
-        "unsupported_sentence_rate": round(sum(unsupported_rates) / sample_size, 4),
-        "mean_latency_seconds": round(sum(latencies) / sample_size, 4),
-        "top_error_examples": error_examples,
-    }
 
 
 if __name__ == "__main__":  # pragma: no cover - script entrypoint
