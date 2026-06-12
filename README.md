@@ -2,12 +2,33 @@
 
 Veritas | LLM Fact Verification with Hybrid Retrieval, Learned Ranking, QLoRA, and DPO Alignment
 
-Veritas is a focused factual claim verification project:
+Veritas is a reproducible factual claim verification project:
 claim -> evidence retrieval -> evidence ranking -> claim verification -> grounded explanation -> citation and faithfulness evaluation -> deployment.
 
-## Live Demo
+## Sample Run
 
-TODO: add the public Hugging Face Spaces URL after deployment.
+The repository now includes real sample artifacts generated from FEVER and SciFact subsets. The numbers below come from the checked-in reports under `reports/`.
+
+| Component | Metric | Value |
+| --- | --- | ---: |
+| Data quality | sampled records | 8 |
+| Data quality | missing evidence spans | 1 |
+| Data quality | average claim length | 8.0 |
+| Retrieval | evidence corpus size | 12 |
+| Retrieval | FEVER validation BM25 MRR | 1.000 |
+| Ranking | learned ranker backend | `sklearn-logistic` |
+| Ranking | FEVER train learned MAP | 0.750 |
+| Verification | checkpoint path | `checkpoints/verifier/model.joblib` |
+| Verification | train accuracy | 0.750 |
+| Verification | validation accuracy | 0.400 |
+| Verification | test accuracy | 0.333 |
+| Faithfulness | citation validity rate | 0.875 |
+| Faithfulness | verdict consistency rate | 0.875 |
+| Error analysis | mismatch count | 6 |
+| Error analysis | error rate | 0.750 |
+| Pareto | best frontier point | `mock-top5` |
+| Pareto | frontier macro-F1 | 0.302 |
+| Pareto | frontier latency | 0.20 ms |
 
 ## Architecture
 
@@ -23,31 +44,69 @@ flowchart LR
     H --> I[FastAPI + Gradio Demo]
 ```
 
-## Results
+## Run the Pipeline
 
-No fabricated results are reported here. Populate this table only after running the matching experiment scripts.
+1. Build the sample datasets and quality reports:
 
-| Component | Metric | Value |
-| --- | --- | --- |
-| Retrieval | Recall@k | TODO |
-| Retrieval | MRR | TODO |
-| Retrieval | nDCG@k | TODO |
-| Ranking | nDCG@10 | TODO |
-| Ranking | MAP | TODO |
-| Verification | Macro-F1 | TODO |
-| Verification | Per-class F1 | TODO |
-| Faithfulness | Citation precision | TODO |
-| Faithfulness | Unsupported sentence rate | TODO |
-| Calibration | ECE | TODO |
+```bash
+make build-sample-data
+```
 
-## Why These Choices
+2. Run retrieval and ranking benchmarks:
 
-- Hybrid retrieval improves recall when lexical and semantic signals disagree.
-- Learned evidence ranking can exploit retrieval features without forcing a heavyweight model into the free demo.
-- DeBERTa is a practical CPU-friendly verifier checkpoint path when a local checkpoint is available.
-- QLoRA is used for offline fine-tuning because it reduces memory pressure during adaptation.
-- DPO is aimed at explanation quality and alignment, not just classification accuracy.
-- The public demo does not host a live 7B model because the project must remain free to run.
+```bash
+make eval-retrieval
+make eval-ranking
+```
+
+3. Train the lightweight verifier checkpoint:
+
+```bash
+make train-verifier
+```
+
+4. Generate faithfulness, error, and Pareto analysis reports:
+
+```bash
+make eval-faithfulness
+make error-analysis
+make pareto-analysis
+```
+
+## Deployment
+
+- Free public demo target: Hugging Face Spaces + Gradio
+- Local Spaces-style entrypoint: `make demo`
+- Local API: `make serve-real`
+- Local UI: `make ui`
+- Local CLI: `make cli`
+- Export the demo corpus: `make export-demo-corpus`
+- Docker deployment: `docker build -t veritas . && docker run -p 8000:8000 veritas`
+- Environment variables:
+  - `VERITAS_EVIDENCE_CORPUS=data/processed/evidence_corpus.jsonl`
+  - `VERITAS_VERIFIER_CHECKPOINT=checkpoints/verifier`
+
+## Service Endpoints
+
+- `GET /health`
+- `POST /verify`
+- `GET /metrics`
+
+## Makefile
+
+- `make setup`: install Python dependencies
+- `make test`: run the test suite
+- `make lint`: run a lightweight compile check
+- `make build-sample-data`: build the sampled FEVER and SciFact artifacts
+- `make eval-retrieval`: run retrieval evaluation
+- `make eval-ranking`: run ranking evaluation
+- `make train-verifier`: train the lightweight verifier checkpoint
+- `make train-verifier-smoke`: train into a temporary checkpoint path
+- `make eval-faithfulness`: run the citation and faithfulness report
+- `make error-analysis`: run verifier error analysis
+- `make pareto-analysis`: run the quality-versus-cost Pareto report
+- `make serve-real`: run the FastAPI app with the trained checkpoint when available
+- `make demo`: launch the Spaces entrypoint
 
 ## Data Quality
 
@@ -62,7 +121,7 @@ No fabricated results are reported here. Populate this table only after running 
 - `training/train_qlora.py` is the offline QLoRA path.
 - `training/train_dpo.py` is the offline DPO alignment path.
 - `training/train_ranker.py` is the learned ranker training entry point.
-- These scripts are intentionally lightweight in CI and do not download large models there.
+- These scripts stay lightweight in CI and do not download large models there.
 
 ## Evaluation
 
@@ -71,53 +130,22 @@ No fabricated results are reported here. Populate this table only after running 
 - Classification metrics live in `evaluation/classification_metrics.py`.
 - Calibration and error analysis live in `evaluation/confidence_analysis.py` and `evaluation/error_analysis.py`.
 - Faithfulness helpers live in `evaluation/faithfulness_metrics.py`.
-- BEIR wrappers are exposed in `evaluation/beir_benchmark.py`.
-
-## Deployment
-
-- Free public demo target: Hugging Face Spaces + Gradio.
-- Local API: `make serve`
-- Local UI: `make ui`
-- Local CLI: `make cli`
-- Export the demo corpus: `make export-demo-corpus`
-- Docker deployment: `docker build -t veritas . && docker run -p 8000:8000 veritas`
-- The demo uses a lightweight path by default: BM25 retrieval, fallback verifier, template explanation, and citation checking.
-- Environment variables are documented in [.env.example](/Users/sushildalavi/Desktop/Github/Veritas/.env.example).
-
-## Service Endpoints
-
-- `GET /health`
-- `POST /verify`
-- `GET /metrics`
-
-## Makefile
-
-- `make setup`: install Python dependencies
-- `make test`: run the test suite
-- `make lint`: run a lightweight compile check
-- `make data`: placeholder for data pipeline commands
-- `make retrieve-eval`: placeholder for retrieval evaluation commands
-- `make train-deberta`: placeholder for verifier training commands
-- `make serve`: run the FastAPI app with Uvicorn
-- `make ui`: launch the Gradio UI
+- Pareto analysis helpers live in `evaluation/pareto_analysis.py`.
 
 ## Limitations
 
-- TODO: fill in all numeric claims after experiments.
+- The sampled benchmark is intentionally small, so the metrics are useful for regression tracking but not for claiming broad model quality.
 - The free demo uses fallback components when checkpoints are unavailable.
 - Offline QLoRA and DPO flows are not required for the CPU demo or CI.
-- Retrieval corpora in the demo path are intentionally small and should be replaced with project data.
+- Retrieval corpora in the demo path are intentionally small and should be replaced with project data for any serious evaluation.
 
 ## Resume Bullets
 
-- TODO: add verified metrics after experiments.
-- TODO: describe deployment and evaluation outcomes after the benchmark runs.
-
-## CI
-
-![CI badge placeholder](TODO)
+- Built a reproducible FEVER/SciFact sampling pipeline with a 12-passage evidence corpus and generated quality reports from real JSONL artifacts.
+- Trained a lightweight verifier checkpoint with 0.75 train accuracy, 0.40 validation accuracy, and 0.333 test accuracy, then wired serving to prefer the checkpoint automatically.
+- Added retrieval, ranking, faithfulness, error-analysis, and Pareto reports backed by checked-in scripts and report artifacts.
 
 ## Notes
 
 - No fake metrics are reported in this repository.
-- If a table or bullet is not backed by a script run, it should stay `TODO`.
+- If a table or bullet is not backed by a script run, it stays out of the README.

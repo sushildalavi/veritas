@@ -24,7 +24,8 @@ def generate_template_explanation(context: ContextBundle, verification: Verifica
         )
 
     lead = context.evidence_items[0]
-    explanation = f"[{lead.citation_id}] {lead.evidence.text} Therefore the claim is {verification.verdict.lower()}."
+    evidence_text = lead.evidence.text.rstrip(".!?")
+    explanation = f"[{lead.citation_id}] {evidence_text} therefore the claim is {verification.verdict.lower()}."
     return ExplanationOutput(
         explanation=explanation,
         citations=[item.citation_id for item in context.evidence_items[:2]],
