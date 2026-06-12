@@ -1,0 +1,10 @@
+api:
+  host: 0.0.0.0
+  port: 8000
+demo:
+  top_k: 5
+cache:
+  ttl_seconds: 120
+fallbacks:
+  use_bm25: true
+  use_mock_verifier: true

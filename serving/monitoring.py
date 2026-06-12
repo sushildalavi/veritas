@@ -1,0 +1,43 @@
+"""Structured logging and lightweight monitoring."""
+
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import dataclass, field
+import logging
+from time import perf_counter
+
+LOGGER = logging.getLogger("veritas")
+
+
+@dataclass
+class MetricsTracker:
+    requests: int = 0
+    fallbacks: int = 0
+    verdicts: Counter[str] = field(default_factory=Counter)
+    confidences: list[float] = field(default_factory=list)
+
+    def record(self, verdict: str, confidence: float, fallback_used: bool, latency_ms: float) -> None:
+        self.requests += 1
+        self.verdicts[verdict] += 1
+        self.confidences.append(confidence)
+        if fallback_used:
+            self.fallbacks += 1
+        LOGGER.info(
+            "verification",
+            extra={
+                "verdict": verdict,
+                "confidence": confidence,
+                "fallback_used": fallback_used,
+                "latency_ms": latency_ms,
+            },
+        )
+
+
+def measure_latency() -> float:
+    start = perf_counter()
+    return start
+
+
+def elapsed_ms(start: float) -> float:
+    return (perf_counter() - start) * 1000.0
