@@ -6,9 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from models.dpo_model import DPOModelConfig, load_dpo_model
+from training.config import load_yaml
 
 
 @dataclass(frozen=True)
@@ -19,7 +18,7 @@ class DPOTrainingConfig:
 
 
 def load_config(path: str | Path) -> dict[str, Any]:
-    return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    return load_yaml(path)
 
 
 def build_training_artifacts(config: DPOTrainingConfig) -> dict[str, object]:

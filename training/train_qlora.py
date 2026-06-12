@@ -6,9 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from models.qlora_llm import QLoRAConfig, build_peft_config
+from training.config import load_yaml
 
 
 @dataclass(frozen=True)
@@ -19,7 +18,7 @@ class QLoRATrainingConfig:
 
 
 def load_config(path: str | Path) -> dict[str, Any]:
-    return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    return load_yaml(path)
 
 
 def build_training_artifacts(config: QLoRATrainingConfig) -> dict[str, object]:

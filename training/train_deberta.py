@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from training.config import load_yaml
 from training.losses import label_to_index
 
 
@@ -24,6 +25,10 @@ def load_dataset_rows(path: str | Path) -> list[dict]:
         if line.strip():
             rows.append(__import__("json").loads(line))
     return rows
+
+
+def load_config(path: str | Path) -> dict[str, object]:
+    return load_yaml(path)
 
 
 def prepare_examples(rows: list[dict]) -> list[dict[str, object]]:
