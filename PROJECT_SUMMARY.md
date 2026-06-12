@@ -28,9 +28,8 @@ It includes retrieval, ranking, verification, citation faithfulness evaluation, 
 
 - `python3 app.py` launches the Gradio UI locally.
 - `GET /health`, `POST /verify`, and `GET /metrics` are implemented.
-- Public Hugging Face Spaces URL: not deployed yet.
+- Public Hugging Face Spaces URL: https://sushildalavi-veritas.hf.space.
 
 ## Safe Resume Line
 
 Veritas is a production-oriented fact verification portfolio project with reproducible sample data, real evaluation reports, and both lightweight and transformer-based model paths.
-

@@ -180,7 +180,7 @@ Deployment note:
 ## What Not To Overclaim
 
 - Do not claim broad production accuracy from the sample reports.
-- Do not claim the public demo is deployed unless you have an actual URL.
+- Do not claim the public demo is deployed unless you are pointing to the live URL at `https://sushildalavi-veritas.hf.space`.
 - Do not claim QLoRA or DPO were trained unless the repo has matching checkpoints and reports.
 - Do not claim the transformer verifier is a strong benchmark model; it is a smoke-run artifact.
 - Do not claim the neural retrieval and cross-encoder runs were large-scale experiments.

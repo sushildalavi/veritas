@@ -8,7 +8,7 @@
 - Phase 4: transformer verifier fine-tuning path and checkpoint
 - Phase 5: serving hardening, validation, monitoring, and backend metadata
 - Phase 6: Hugging Face Spaces deployment readiness and Gradio launch path
-- Phase 7: QLoRA and DPO documented as offline optional extensions
+- Phase 7: QLoRA and DPO left as offline optional extensions
 - Phase 8: README and project summary rewritten with real metrics only
 - Phase 9: final completion summary prepared for review
 
