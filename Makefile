@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking train-verifier train-verifier-smoke serve serve-real ui cli export-demo-corpus
+.PHONY: setup test lint data build-sample-data eval-retrieval eval-ranking eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real ui cli export-demo-corpus
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -20,6 +20,15 @@ eval-retrieval:
 
 eval-ranking:
 	python3 scripts/run_ranking_eval.py
+
+eval-faithfulness:
+	python3 scripts/eval_faithfulness.py
+
+error-analysis:
+	python3 scripts/error_analysis.py
+
+pareto-analysis:
+	python3 scripts/pareto_analysis.py
 
 retrieve-eval: eval-retrieval
 

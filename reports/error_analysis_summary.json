@@ -1,0 +1,50 @@
+{
+  "backend": "sklearn",
+  "category_counts": {
+    "entity": 4,
+    "negation": 1,
+    "numerical": 1
+  },
+  "error_rate": 0.75,
+  "examples": [
+    {
+      "category": "entity",
+      "claim": "There is a guest house in the Taj Mahal.",
+      "prediction": "NOT ENOUGH INFO",
+      "truth": "SUPPORTED"
+    },
+    {
+      "category": "entity",
+      "claim": "The Saw franchise is a collection of bugs.",
+      "prediction": "NOT ENOUGH INFO",
+      "truth": "SUPPORTED"
+    },
+    {
+      "category": "entity",
+      "claim": "The Book of Mormon won a Tony Award for Best Musical.",
+      "prediction": "NOT ENOUGH INFO",
+      "truth": "SUPPORTED"
+    },
+    {
+      "category": "numerical",
+      "claim": "TNFAIP3 is a glioblastoma tumor suppressor.",
+      "prediction": "NOT ENOUGH INFO",
+      "truth": "REFUTED"
+    },
+    {
+      "category": "negation",
+      "claim": "Broadly HIV-1 Neutralizing Antibodies (bnAb) 10EB have no affinity for phospholipids.",
+      "prediction": "NOT ENOUGH INFO",
+      "truth": "SUPPORTED"
+    },
+    {
+      "category": "entity",
+      "claim": "All hematopoietic stem cells segregate their chromosomes randomly.",
+      "prediction": "REFUTED",
+      "truth": "SUPPORTED"
+    }
+  ],
+  "mismatch_count": 6,
+  "top_k": 3,
+  "total_examples": 8
+}

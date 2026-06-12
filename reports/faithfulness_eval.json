@@ -1,0 +1,160 @@
+{
+  "backend": "sklearn",
+  "examples": [
+    {
+      "citation_precision": 1.0,
+      "citation_valid": false,
+      "claim_id": "194158",
+      "decision": "abstain",
+      "prediction": "NOT ENOUGH INFO",
+      "retries_used": 0,
+      "split": "fever_train",
+      "truth": "NOT ENOUGH INFO",
+      "unsupported_sentence_rate": 0.5,
+      "verdict_consistency": true
+    },
+    {
+      "citation_precision": 1.0,
+      "citation_valid": false,
+      "claim_id": "43158",
+      "decision": "abstain",
+      "prediction": "NOT ENOUGH INFO",
+      "retries_used": 0,
+      "split": "fever_train",
+      "truth": "SUPPORTED",
+      "unsupported_sentence_rate": 0.5,
+      "verdict_consistency": true
+    },
+    {
+      "citation_precision": 1.0,
+      "citation_valid": false,
+      "claim_id": "66075",
+      "decision": "abstain",
+      "prediction": "NOT ENOUGH INFO",
+      "retries_used": 0,
+      "split": "fever_val",
+      "truth": "SUPPORTED",
+      "unsupported_sentence_rate": 0.5,
+      "verdict_consistency": true
+    },
+    {
+      "citation_precision": 1.0,
+      "citation_valid": true,
+      "claim_id": "59001",
+      "decision": "abstain",
+      "prediction": "NOT ENOUGH INFO",
+      "retries_used": 0,
+      "split": "fever_test",
+      "truth": "SUPPORTED",
+      "unsupported_sentence_rate": 0.0,
+      "verdict_consistency": true
+    },
+    {
+      "citation_precision": 1.0,
+      "citation_valid": false,
+      "claim_id": "1135",
+      "decision": "abstain",
+      "prediction": "NOT ENOUGH INFO",
+      "retries_used": 0,
+      "split": "scifact_train",
+      "truth": "REFUTED",
+      "unsupported_sentence_rate": 0.5,
+      "verdict_consistency": true
+    },
+    {
+      "citation_precision": 1.0,
+      "citation_valid": false,
+      "claim_id": "189",
+      "decision": "abstain",
+      "prediction": "NOT ENOUGH INFO",
+      "retries_used": 0,
+      "split": "scifact_train",
+      "truth": "SUPPORTED",
+      "unsupported_sentence_rate": 0.5,
+      "verdict_consistency": true
+    },
+    {
+      "citation_precision": 1.0,
+      "citation_valid": false,
+      "claim_id": "100",
+      "decision": "abstain",
+      "prediction": "REFUTED",
+      "retries_used": 0,
+      "split": "scifact_val",
+      "truth": "SUPPORTED",
+      "unsupported_sentence_rate": 0.5,
+      "verdict_consistency": true
+    },
+    {
+      "citation_precision": 1.0,
+      "citation_valid": false,
+      "claim_id": "991",
+      "decision": "abstain",
+      "prediction": "NOT ENOUGH INFO",
+      "retries_used": 0,
+      "split": "scifact_test",
+      "truth": "NOT ENOUGH INFO",
+      "unsupported_sentence_rate": 1.0,
+      "verdict_consistency": false
+    }
+  ],
+  "overall": {
+    "citation_valid_rate": 0.125,
+    "mean_citation_precision": 1.0,
+    "mean_retries_used": 0.0,
+    "mean_unsupported_sentence_rate": 0.5,
+    "rows": 8.0,
+    "verdict_consistency_rate": 0.875
+  },
+  "splits": {
+    "fever_test": {
+      "citation_valid_rate": 1.0,
+      "mean_citation_precision": 1.0,
+      "mean_retries_used": 0.0,
+      "mean_unsupported_sentence_rate": 0.0,
+      "rows": 1.0,
+      "verdict_consistency_rate": 1.0
+    },
+    "fever_train": {
+      "citation_valid_rate": 0.0,
+      "mean_citation_precision": 1.0,
+      "mean_retries_used": 0.0,
+      "mean_unsupported_sentence_rate": 0.5,
+      "rows": 2.0,
+      "verdict_consistency_rate": 1.0
+    },
+    "fever_val": {
+      "citation_valid_rate": 0.0,
+      "mean_citation_precision": 1.0,
+      "mean_retries_used": 0.0,
+      "mean_unsupported_sentence_rate": 0.5,
+      "rows": 1.0,
+      "verdict_consistency_rate": 1.0
+    },
+    "scifact_test": {
+      "citation_valid_rate": 0.0,
+      "mean_citation_precision": 1.0,
+      "mean_retries_used": 0.0,
+      "mean_unsupported_sentence_rate": 1.0,
+      "rows": 1.0,
+      "verdict_consistency_rate": 0.0
+    },
+    "scifact_train": {
+      "citation_valid_rate": 0.0,
+      "mean_citation_precision": 1.0,
+      "mean_retries_used": 0.0,
+      "mean_unsupported_sentence_rate": 0.5,
+      "rows": 2.0,
+      "verdict_consistency_rate": 1.0
+    },
+    "scifact_val": {
+      "citation_valid_rate": 0.0,
+      "mean_citation_precision": 1.0,
+      "mean_retries_used": 0.0,
+      "mean_unsupported_sentence_rate": 0.5,
+      "rows": 1.0,
+      "verdict_consistency_rate": 1.0
+    }
+  },
+  "top_k": 3
+}

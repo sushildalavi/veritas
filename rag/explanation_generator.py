@@ -24,13 +24,7 @@ def generate_template_explanation(context: ContextBundle, verification: Verifica
         )
 
     lead = context.evidence_items[0]
-    explanation = (
-        f"Verdict: {verification.verdict} based on [{lead.citation_id}]; "
-        f"the claim '{context.claim}' is grounded in that evidence [{lead.citation_id}] because {lead.evidence.text}"
-    )
-    if len(context.evidence_items) > 1:
-        tail = context.evidence_items[1]
-        explanation += f"; additional context [{tail.citation_id}] reinforces the same verdict [{tail.citation_id}]"
+    explanation = f"[{lead.citation_id}] {lead.evidence.text} Therefore the claim is {verification.verdict.lower()}."
     return ExplanationOutput(
         explanation=explanation,
         citations=[item.citation_id for item in context.evidence_items[:2]],
