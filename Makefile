@@ -1,4 +1,4 @@
-.PHONY: setup test lint data retrieve-eval train-deberta serve ui cli export-demo-corpus
+.PHONY: setup test lint data build-sample-data retrieve-eval train-deberta serve ui cli export-demo-corpus
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -11,6 +11,9 @@ lint:
 
 data:
 	@echo "Phase 1 will add the data pipeline."
+
+build-sample-data:
+	python3 scripts/build_sample_datasets.py
 
 retrieve-eval:
 	@echo "Phase 2 will add retrieval evaluation."

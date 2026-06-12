@@ -1,0 +1,37 @@
+{
+  "average_claim_length": 8,
+  "average_evidence_length": 15.545454545454545,
+  "duplicate_count": 0,
+  "label_distribution": {
+    "NOT_ENOUGH_INFO": 2,
+    "REFUTED": 1,
+    "SUPPORTED": 5
+  },
+  "missing_evidence_count": 1,
+  "sample_record": {
+    "claim": "To The Bone includes a lighting designer.",
+    "claim_id": "194158",
+    "evidence": [
+      {
+        "doc_id": ":-1:0:0",
+        "metadata": {
+          "evidence_annotation_id": 227381,
+          "evidence_id": null,
+          "source": "fever"
+        },
+        "score": null,
+        "text": "",
+        "title": ""
+      }
+    ],
+    "label": "NOT_ENOUGH_INFO",
+    "metadata": {
+      "source": "fever",
+      "verifiable": "NOT VERIFIABLE"
+    },
+    "split": null
+  },
+  "split_stats": {
+    "unspecified": 8
+  }
+}
