@@ -37,3 +37,4 @@ def test_metrics_endpoint_reports_snapshot() -> None:
     payload = response.json()
     assert "requests" in payload
     assert "cache_entries" in payload
+    assert "average_latency_ms" in payload
