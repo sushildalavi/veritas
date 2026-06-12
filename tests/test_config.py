@@ -35,3 +35,13 @@ demo:
     assert settings.api_port == 9000
     assert settings.demo_top_k == 3
     assert settings.evidence_corpus_path == "custom.jsonl"
+
+
+def test_load_project_settings_includes_transformer_checkpoint(tmp_path: Path, monkeypatch) -> None:
+    config_path = tmp_path / "serving.yaml"
+    config_path.write_text("transformer_checkpoint: checkpoints/transformer_verifier\n", encoding="utf-8")
+    monkeypatch.setenv("VERITAS_CONFIG", str(config_path))
+
+    settings = load_project_settings()
+
+    assert settings.transformer_checkpoint == "checkpoints/transformer_verifier"

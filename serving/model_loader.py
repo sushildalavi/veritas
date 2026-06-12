@@ -82,21 +82,47 @@ def _load_passages(evidence_corpus_path: str | Path | None) -> list[EvidenceSpan
 
 
 def _resolve_checkpoint_path(settings: ProjectSettings) -> str | Path | None:
-    if settings.legacy_verifier_checkpoint:
-        return settings.legacy_verifier_checkpoint
     backend = settings.verifier_backend.lower()
     sklearn_path = Path(settings.sklearn_checkpoint)
     transformer_path = Path(settings.transformer_checkpoint)
+    legacy_path = Path(settings.legacy_verifier_checkpoint) if settings.legacy_verifier_checkpoint else None
     if backend == "mock":
         return None
+    if _is_transformer_checkpoint(transformer_path):
+        return transformer_path
+    if legacy_path is not None and _is_transformer_checkpoint(legacy_path):
+        return legacy_path
+    if _is_sklearn_checkpoint(sklearn_path):
+        return sklearn_path
     if backend == "transformer":
         if transformer_path.exists():
             return transformer_path
+        if legacy_path is not None and legacy_path.exists():
+            return legacy_path
         if sklearn_path.exists():
             return sklearn_path
         return transformer_path
+    if legacy_path is not None and legacy_path.exists():
+        return legacy_path
     if sklearn_path.exists():
         return sklearn_path
     if transformer_path.exists():
         return transformer_path
-    return sklearn_path
+    return legacy_path if legacy_path is not None and legacy_path.exists() else None
+
+
+def _is_transformer_checkpoint(path: Path) -> bool:
+    if not path.exists():
+        return False
+    if path.is_file():
+        return path.suffix in {".bin", ".safetensors"}
+    candidate_files = {"config.json", "model.safetensors", "pytorch_model.bin"}
+    return any((path / name).exists() for name in candidate_files)
+
+
+def _is_sklearn_checkpoint(path: Path) -> bool:
+    if not path.exists():
+        return False
+    if path.is_file():
+        return path.suffix == ".joblib"
+    return (path / "model.joblib").exists()
