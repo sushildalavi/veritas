@@ -1,65 +1,144 @@
 {
-  "baseline_checkpoint": "checkpoints/transformer_verifier_clean",
-  "checkpoint": "checkpoints/deberta_verifier_clean",
-  "eval": {
-    "baseline": {
-      "accuracy": 0.545,
-      "backend": "transformers",
-      "macro_f1": 0.368,
-      "mean_latency_seconds": 0.0307,
-      "model_name": "distilroberta-base",
-      "per_class_f1": {
-        "NOT_ENOUGH_INFO": 0.0,
-        "REFUTED": 0.5114,
-        "SUPPORTED": 0.5926
+  "batch_size": 1,
+  "checkpoint_path": "checkpoints/deberta_verifier_clean",
+  "epochs": 0.3,
+  "label_order": [
+    "SUPPORTED",
+    "REFUTED",
+    "NOT_ENOUGH_INFO"
+  ],
+  "learning_rate": 2e-05,
+  "max_length": 128,
+  "metadata": {
+    "git_commit": "474d6901e78119acd20e4538e2c44c9f3e9cad66",
+    "python_version": "3.13.5",
+    "seed": 42,
+    "training_command": "python3 scripts/train_transformer_verifier_clean.py --model-name microsoft/deberta-v3-xsmall --output-dir checkpoints/deberta_verifier_clean --report-json reports/deberta_verifier_clean_eval.json --report-md reports/deberta_verifier_clean_eval.md --epochs 0.3 --batch-size 1 --learning-rate 2e-5 --max-length 128"
+  },
+  "model_name": "microsoft/deberta-v3-xsmall",
+  "test": {
+    "accuracy": 0.3476923076923077,
+    "confusion_matrix": [
+      [
+        226,
+        0,
+        0
+      ],
+      [
+        200,
+        0,
+        0
+      ],
+      [
+        224,
+        0,
+        0
+      ]
+    ],
+    "example_count": 650,
+    "latency_ms_per_example": 24.624887755355584,
+    "macro_f1": 0.17199391171993914,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
       },
-      "refuted_recall": 0.4592,
-      "sample_size": 200
-    },
-    "challenger": {
-      "accuracy": 0.51,
-      "backend": "transformers",
-      "macro_f1": 0.2252,
-      "mean_latency_seconds": 0.0347,
-      "model_name": "microsoft/deberta-v3-xsmall",
-      "per_class_f1": {
-        "NOT_ENOUGH_INFO": 0.0,
-        "REFUTED": 0.0,
-        "SUPPORTED": 0.6755
+      "REFUTED": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
       },
-      "refuted_recall": 0.0,
-      "sample_size": 200
+      "SUPPORTED": {
+        "f1": 0.5159817351598174,
+        "precision": 0.3476923076923077,
+        "recall": 1.0
+      }
     }
   },
-  "model_size_mb": 143.09,
-  "test": {
-    "baseline": {
-      "accuracy": 0.645,
-      "backend": "transformers",
-      "macro_f1": 0.4383,
-      "mean_latency_seconds": 0.0282,
-      "model_name": "distilroberta-base",
-      "per_class_f1": {
-        "NOT_ENOUGH_INFO": 0.0,
-        "REFUTED": 0.6383,
-        "SUPPORTED": 0.6765
+  "thresholds": {
+    "accuracy_ok": false,
+    "macro_f1_ok": false
+  },
+  "train": {
+    "accuracy": 0.5044499822000712,
+    "confusion_matrix": [
+      [
+        1417,
+        0,
+        0
+      ],
+      [
+        604,
+        0,
+        0
+      ],
+      [
+        788,
+        0,
+        0
+      ]
+    ],
+    "example_count": 2809,
+    "latency_ms_per_example": 24.038056203257987,
+    "macro_f1": 0.22353683546300676,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
       },
-      "refuted_recall": 0.625,
-      "sample_size": 200
-    },
-    "challenger": {
-      "accuracy": 0.52,
-      "backend": "transformers",
-      "macro_f1": 0.2281,
-      "mean_latency_seconds": 0.041,
-      "model_name": "microsoft/deberta-v3-xsmall",
-      "per_class_f1": {
-        "NOT_ENOUGH_INFO": 0.0,
-        "REFUTED": 0.0,
-        "SUPPORTED": 0.6842
+      "REFUTED": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
       },
-      "refuted_recall": 0.0,
-      "sample_size": 200
+      "SUPPORTED": {
+        "f1": 0.6706105063890203,
+        "precision": 0.5044499822000712,
+        "recall": 1.0
+      }
+    }
+  },
+  "training_runtime_seconds": 226.501,
+  "validation": {
+    "accuracy": 0.3646153846153846,
+    "confusion_matrix": [
+      [
+        237,
+        0,
+        0
+      ],
+      [
+        176,
+        0,
+        0
+      ],
+      [
+        237,
+        0,
+        0
+      ]
+    ],
+    "example_count": 650,
+    "latency_ms_per_example": 23.829661475387045,
+    "macro_f1": 0.17812852311161217,
+    "per_class": {
+      "NOT_ENOUGH_INFO": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "REFUTED": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "SUPPORTED": {
+        "f1": 0.5343855693348365,
+        "precision": 0.3646153846153846,
+        "recall": 1.0
+      }
     }
   }
 }

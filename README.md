@@ -46,7 +46,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
 | Template faithfulness | 0.560 citation validity, 0.755 verdict consistency |
 | MLX LoRA explanation adapter | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity |
-| DeBERTa challenger (xsmall, 0.1 epoch) | 0.520 accuracy, 0.2281 macro-F1, 0.000 refuted recall |
+| DeBERTa challenger (xsmall, 0.3 epoch) | 0.348 accuracy, 0.172 macro-F1, 0.000 refuted recall |
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
 | Tests | 74 passed |
 

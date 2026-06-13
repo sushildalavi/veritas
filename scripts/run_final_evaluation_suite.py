@@ -33,7 +33,6 @@ REPORTS = [
     ReportRef("pareto", Path("reports/final_pareto_analysis.json")),
     ReportRef("retrieval_ablation", Path("reports/retrieval_ablation_research.json")),
     ReportRef("deberta_challenger", Path("reports/deberta_verifier_clean_eval.json")),
-    ReportRef("deberta_attempted", Path("reports/deberta_challenger_ATTEMPTED.md")),
     ReportRef("explanation_sft", Path("reports/explanation_sft_data_stats.json")),
 ]
 
@@ -105,6 +104,8 @@ def _highlights(loaded: dict[str, Any]) -> dict[str, Any]:
     ranking = loaded.get("ranking", {})
     mlx = loaded.get("mlx_lora", {})
     faithfulness = loaded.get("faithfulness", {})
+    deberta = loaded.get("deberta_challenger", {})
+    deberta_test = deberta.get("test", {})
     template = faithfulness.get("generators", {}).get("template", {})
     best_top_k = topk.get("best_top_k")
     top_k_metrics = topk.get("top_k", {})
@@ -125,6 +126,8 @@ def _highlights(loaded: dict[str, Any]) -> dict[str, Any]:
         "template_citation_valid_rate": template.get("citation_valid_rate"),
         "mlx_lora_verdict_accuracy": mlx.get("verdict_accuracy"),
         "mlx_lora_macro_f1": mlx.get("macro_f1"),
+        "deberta_challenger_accuracy": deberta_test.get("accuracy"),
+        "deberta_challenger_macro_f1": deberta_test.get("macro_f1"),
     }
 
 
@@ -330,11 +333,9 @@ def _pareto_summary(loaded: dict[str, Any]) -> dict[str, Any]:
 
 def _deberta_summary(loaded: dict[str, Any]) -> dict[str, Any]:
     challenger = loaded.get("deberta_challenger", {})
-    attempted = loaded.get("deberta_attempted", {})
     return {
         "measured": bool(challenger),
         "challenge_report": challenger,
-        "attempted_note": attempted if not challenger else {},
     }
 
 
