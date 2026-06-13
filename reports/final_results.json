@@ -44,21 +44,21 @@
     "challenge_report": {
       "batch_size": 1,
       "checkpoint_path": "checkpoints/deberta_verifier_clean",
-      "epochs": 0.3,
+      "epochs": 1.0,
       "label_order": [
         "SUPPORTED",
         "REFUTED",
         "NOT_ENOUGH_INFO"
       ],
-      "learning_rate": 2e-05,
-      "max_length": 128,
+      "learning_rate": 5e-06,
+      "max_length": 192,
       "metadata": {
-        "git_commit": "474d6901e78119acd20e4538e2c44c9f3e9cad66",
+        "git_commit": "7d63ab1130996943e7271c63f2651efbdbd06052",
         "python_version": "3.13.5",
         "seed": 42,
-        "training_command": "python3 scripts/train_transformer_verifier_clean.py --model-name microsoft/deberta-v3-xsmall --output-dir checkpoints/deberta_verifier_clean --report-json reports/deberta_verifier_clean_eval.json --report-md reports/deberta_verifier_clean_eval.md --epochs 0.3 --batch-size 1 --learning-rate 2e-5 --max-length 128"
+        "training_command": "python3 scripts/train_transformer_verifier_clean.py --model-name microsoft/deberta-v3-small --output-dir checkpoints/deberta_verifier_clean --report-json reports/deberta_verifier_clean_eval.json --report-md reports/deberta_verifier_clean_eval.md --epochs 1.0 --batch-size 1 --learning-rate 5e-6 --max-length 192 --gradient-accumulation-steps 4 --warmup-ratio 0.1 --weight-decay 0.01"
       },
-      "model_name": "microsoft/deberta-v3-xsmall",
+      "model_name": "microsoft/deberta-v3-small",
       "test": {
         "accuracy": 0.3476923076923077,
         "confusion_matrix": [
@@ -79,7 +79,7 @@
           ]
         ],
         "example_count": 650,
-        "latency_ms_per_example": 24.624887755355584,
+        "latency_ms_per_example": 18.580794166057157,
         "macro_f1": 0.17199391171993914,
         "per_class": {
           "NOT_ENOUGH_INFO": {
@@ -123,7 +123,7 @@
           ]
         ],
         "example_count": 2809,
-        "latency_ms_per_example": 24.038056203257987,
+        "latency_ms_per_example": 18.359336151655906,
         "macro_f1": 0.22353683546300676,
         "per_class": {
           "NOT_ENOUGH_INFO": {
@@ -143,7 +143,7 @@
           }
         }
       },
-      "training_runtime_seconds": 226.501,
+      "training_runtime_seconds": 428.335,
       "validation": {
         "accuracy": 0.3646153846153846,
         "confusion_matrix": [
@@ -164,7 +164,7 @@
           ]
         ],
         "example_count": 650,
-        "latency_ms_per_example": 23.829661475387045,
+        "latency_ms_per_example": 17.941909230744038,
         "macro_f1": 0.17812852311161217,
         "per_class": {
           "NOT_ENOUGH_INFO": {

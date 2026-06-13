@@ -36,19 +36,17 @@ ID_TO_LABEL = {index: label for label, index in LABEL_TO_ID.items()}
 @dataclass(frozen=True)
 class Example:
     claim_id: str
-    text: str
+    claim: str
+    evidence: str
     label: str
-
-
-def format_input(claim: str, evidence: str) -> str:
-    return f"Claim: {claim}\nEvidence: {evidence}"
 
 
 def load_examples(path: Path) -> list[Example]:
     return [
         Example(
             claim_id=str(row.get("claim_id", "")),
-            text=format_input(row.get("claim", ""), row.get("evidence", "")),
+            claim=str(row.get("claim", "")),
+            evidence=str(row.get("evidence", "")),
             label=row.get("label", "NOT_ENOUGH_INFO"),
         )
         for row in read_jsonl(path)
@@ -74,6 +72,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--learning-rate", type=float, default=2e-5)
     parser.add_argument("--max-length", type=int, default=256)
+    parser.add_argument("--gradient-accumulation-steps", type=int, default=4)
+    parser.add_argument("--warmup-ratio", type=float, default=0.06)
+    parser.add_argument("--weight-decay", type=float, default=0.01)
+    parser.add_argument("--max-grad-norm", type=float, default=1.0)
+    parser.add_argument("--use-class-weights", action="store_true")
+    parser.add_argument("--use-weighted-sampler", action="store_true")
+    parser.add_argument("--use-cpu", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
     return parser
 
@@ -100,6 +105,13 @@ def main() -> None:  # pragma: no cover - script entrypoint
             batch_size=args.batch_size,
             learning_rate=args.learning_rate,
             max_length=args.max_length,
+            gradient_accumulation_steps=args.gradient_accumulation_steps,
+            warmup_ratio=args.warmup_ratio,
+            weight_decay=args.weight_decay,
+            max_grad_norm=args.max_grad_norm,
+            use_class_weights=args.use_class_weights,
+            use_weighted_sampler=args.use_weighted_sampler,
+            use_cpu=args.use_cpu,
             seed=args.seed,
         )
     except Exception as exc:  # pragma: no cover - failure path is surfaced explicitly
@@ -149,6 +161,13 @@ def train_transformer_verifier(
     batch_size: int,
     learning_rate: float,
     max_length: int,
+    gradient_accumulation_steps: int,
+    warmup_ratio: float,
+    weight_decay: float,
+    max_grad_norm: float,
+    use_class_weights: bool,
+    use_weighted_sampler: bool,
+    use_cpu: bool,
     seed: int,
 ) -> dict[str, object]:
     random.seed(seed)
@@ -174,9 +193,17 @@ def train_transformer_verifier(
         batch_size=batch_size,
         learning_rate=learning_rate,
         epochs=epochs,
+        gradient_accumulation_steps=gradient_accumulation_steps,
+        warmup_ratio=warmup_ratio,
+        weight_decay=weight_decay,
+        max_grad_norm=max_grad_norm,
+        use_class_weights=use_class_weights,
+        use_weighted_sampler=use_weighted_sampler,
+        use_cpu=use_cpu,
         seed=seed,
         output_dir=output_dir,
         class_weights=class_weights,
+        train_examples=train_examples,
     )
     trainer.train()
     trainer.save_model(output_dir)
@@ -240,17 +267,29 @@ def _build_dataset(examples: list[Example], tokenizer, max_length: int):  # noqa
     from datasets import Dataset  # type: ignore
 
     if not examples:
-        return Dataset.from_dict({"input_ids": [], "attention_mask": [], "labels": []})
+        return Dataset.from_dict({"claim": [], "evidence": [], "labels": []})
 
     label_ids = [LABEL_TO_ID[_normalize_label(example.label)] for example in examples]
-    dataset = Dataset.from_dict({"text": [example.text for example in examples], "labels": label_ids})
+    dataset = Dataset.from_dict(
+        {
+            "claim": [example.claim for example in examples],
+            "evidence": [example.evidence for example in examples],
+            "labels": label_ids,
+        }
+    )
 
     def _tokenize(batch):  # noqa: ANN001
-        encoded = tokenizer(batch["text"], truncation=True, padding=False, max_length=max_length)
+        encoded = tokenizer(
+            batch["claim"],
+            batch["evidence"],
+            truncation="only_second",
+            padding=False,
+            max_length=max_length,
+        )
         encoded["labels"] = batch["labels"]
         return encoded
 
-    tokenized = dataset.map(_tokenize, batched=True, remove_columns=["text"])
+    tokenized = dataset.map(_tokenize, batched=True, remove_columns=["claim", "evidence"])
     tokenized.set_format(type="torch")
     return tokenized
 
@@ -264,13 +303,29 @@ def _build_trainer(
     batch_size: int,
     learning_rate: float,
     epochs: float,
+    gradient_accumulation_steps: int,
+    warmup_ratio: float,
+    weight_decay: float,
+    max_grad_norm: float,
+    use_class_weights: bool,
+    use_weighted_sampler: bool,
+    use_cpu: bool,
     seed: int,
     output_dir: Path,
     class_weights: list[float],
+    train_examples: list[Example],
 ):  # noqa: ANN001
+    from torch.utils.data import DataLoader, WeightedRandomSampler
     from transformers import DataCollatorWithPadding, Trainer, TrainingArguments  # type: ignore
 
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32)
+    label_counts = {label: 0 for label in LABEL_ORDER}
+    for example in train_examples:
+        label_counts[_normalize_label(example.label)] += 1
+    example_weights = [
+        1.0 / max(label_counts[_normalize_label(example.label)], 1)
+        for example in train_examples
+    ]
 
     class WeightedLossTrainer(Trainer):
         def compute_loss(self, model, inputs, return_outputs=False, **kwargs):  # noqa: ANN001
@@ -284,6 +339,30 @@ def _build_trainer(
             )
             return (loss, outputs) if return_outputs else loss
 
+        def get_train_dataloader(self):  # noqa: ANN001
+            if self.train_dataset is None:
+                raise ValueError("Trainer: training requires a train_dataset.")
+            if not use_weighted_sampler:
+                return super().get_train_dataloader()
+            sampler_generator = torch.Generator()
+            sampler_generator.manual_seed(seed)
+            sampler = WeightedRandomSampler(
+                weights=example_weights,
+                num_samples=len(example_weights),
+                replacement=True,
+                generator=sampler_generator,
+            )
+            return DataLoader(
+                self.train_dataset,
+                batch_size=self.args.train_batch_size,
+                sampler=sampler,
+                collate_fn=self.data_collator,
+                drop_last=self.args.dataloader_drop_last,
+                num_workers=self.args.dataloader_num_workers,
+                pin_memory=self.args.dataloader_pin_memory,
+                persistent_workers=self.args.dataloader_num_workers > 0,
+            )
+
     def compute_metrics(eval_pred):  # noqa: ANN001
         logits, labels = eval_pred
         predictions = np.argmax(logits, axis=1)
@@ -296,24 +375,39 @@ def _build_trainer(
         output_dir=str(output_dir),
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
+        gradient_accumulation_steps=gradient_accumulation_steps,
         learning_rate=learning_rate,
         num_train_epochs=epochs,
+        warmup_ratio=warmup_ratio,
+        weight_decay=weight_decay,
+        max_grad_norm=max_grad_norm,
+        lr_scheduler_type="cosine",
         seed=seed,
         data_seed=seed,
         logging_strategy="epoch",
         eval_strategy="epoch" if len(eval_dataset) else "no",
-        save_strategy="no",
+        save_strategy="epoch" if len(eval_dataset) else "no",
+        load_best_model_at_end=bool(len(eval_dataset)),
+        metric_for_best_model="macro_f1",
+        greater_is_better=True,
+        save_total_limit=1,
+        remove_unused_columns=False,
+        use_cpu=use_cpu,
         report_to=[],
     )
-    return WeightedLossTrainer(
-        model=model,
-        args=args,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset if len(eval_dataset) else None,
-        processing_class=tokenizer,
-        data_collator=DataCollatorWithPadding(tokenizer=tokenizer),
-        compute_metrics=compute_metrics if len(eval_dataset) else None,
-    )
+    trainer_cls = WeightedLossTrainer if use_class_weights else Trainer
+    trainer_kwargs = {
+        "model": model,
+        "args": args,
+        "train_dataset": train_dataset,
+        "eval_dataset": eval_dataset if len(eval_dataset) else None,
+        "processing_class": tokenizer,
+        "data_collator": DataCollatorWithPadding(tokenizer=tokenizer),
+        "compute_metrics": compute_metrics if len(eval_dataset) else None,
+    }
+    if use_class_weights:
+        return trainer_cls(**trainer_kwargs)
+    return trainer_cls(**trainer_kwargs)
 
 
 def _evaluate_dataset(trainer, dataset, examples: list[Example]):  # noqa: ANN001
