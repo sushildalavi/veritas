@@ -39,6 +39,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | DistilRoBERTa REFUTED recall | 0.745 |
 | Oracle evidence verifier | 0.717 accuracy, 0.710 macro-F1 |
 | End-to-end verifier with retrieved evidence | 0.440 accuracy, 0.414 macro-F1 |
+| Top-k retrieved verifier (BM25 top-5) | 0.460 accuracy, 0.454 macro-F1 |
 | Dense retrieval | 0.357 recall@1, 0.524 recall@10 |
 | Hybrid retrieval | 0.535 recall@10 |
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
@@ -148,6 +149,7 @@ Research mode:
 
 - The evaluation sets are sample-scale, not the full FEVER benchmark.
 - End-to-end performance is materially worse than oracle evidence performance.
+- Feeding top-5 retrieved evidence improves end-to-end macro-F1 to 0.454, but the oracle gap is still material.
 - Citation faithfulness is measured, not assumed.
 - The MLX LoRA explanation adapter is a small-sample result, not a benchmark claim.
 - Preference-guided reranking is a deterministic Mac-compatible replacement for DPO, not DPO itself.

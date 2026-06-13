@@ -64,6 +64,7 @@ def evaluate_retrieval_ablation(*, data_dir: Path, split: str, max_queries: int,
     if not records:
         raise ValueError(f"No records found for split={split!r}")
 
+    notes: list[str] = []
     strategies: dict[str, tuple[object, str, str]] = {
         "bm25": (BM25Retriever(corpus), "bm25_only", "lexical"),
     }
@@ -72,8 +73,6 @@ def evaluate_retrieval_ablation(*, data_dir: Path, split: str, max_queries: int,
         strategies["dense_mini"] = (DenseRetriever(corpus, embedder=mini_embedder), "sentence-transformers/all-MiniLM-L6-v2", "semantic")
     except Exception as exc:
         notes.append(f"MiniLM dense retrieval unavailable: {type(exc).__name__}: {exc}")
-
-    notes: list[str] = []
     try:
         bge_embedder = load_embedder("sentence-transformers", "BAAI/bge-m3", allow_fallback=False)
         strategies["dense_bge"] = (DenseRetriever(corpus, embedder=bge_embedder), "BAAI/bge-m3", "semantic")

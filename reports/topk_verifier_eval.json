@@ -1,0 +1,258 @@
+{
+  "best_top_k": 5,
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "evidence_corpus_source": "data/processed/evidence_corpus_large.jsonl",
+  "headline": "Top-k verifier evaluation complete. oracle macro_f1=0.708, best top_k=5 macro_f1=0.454",
+  "oracle": {
+    "accuracy": 0.7154,
+    "confusion_matrix": [
+      [
+        105,
+        116,
+        5
+      ],
+      [
+        43,
+        148,
+        9
+      ],
+      [
+        11,
+        1,
+        212
+      ]
+    ],
+    "latency_ms_per_example": 25.3836,
+    "macro_f1": 0.7081,
+    "per_class": {
+      "NOT ENOUGH INFO": {
+        "f1": 0.9422222222222222,
+        "precision": 0.9380530973451328,
+        "recall": 0.9464285714285714
+      },
+      "REFUTED": {
+        "f1": 0.6365591397849463,
+        "precision": 0.5584905660377358,
+        "recall": 0.74
+      },
+      "SUPPORTED": {
+        "f1": 0.5454545454545454,
+        "precision": 0.660377358490566,
+        "recall": 0.4646017699115044
+      }
+    },
+    "sample_size": 650
+  },
+  "oracle_vs_retrieved_gap": {
+    "top_1": {
+      "accuracy_gap": 0.2723,
+      "macro_f1_gap": 0.2754
+    },
+    "top_3": {
+      "accuracy_gap": 0.2585,
+      "macro_f1_gap": 0.2629
+    },
+    "top_5": {
+      "accuracy_gap": 0.2554,
+      "macro_f1_gap": 0.2543
+    }
+  },
+  "retrieval_backend": "bm25_only",
+  "retrieval_mode": "bm25",
+  "retrieval_runtime_seconds": 37.397,
+  "sample_size": 650,
+  "top_errors": [
+    {
+      "claim": "Pearl (Steven Universe) exists as a magical dog.",
+      "claim_id": "35882",
+      "evidence": "[E1] Pearl_-LRB-Steven_Universe-RRB-: Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body.\n[E2] The Bitterest Pills: The Troubling Story of Antipsychotic Drugs: \u00a9 Joanna Moncrieff 2013. All rights reserved. A challenging reapprais",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Temple Grandin features Claire Danes playing a cartoon penguin.",
+      "claim_id": "88346",
+      "evidence": "[E1] Temple_Grandin_-LRB-film-RRB-: Temple Grandin -LRB-film-RRB-\n[E2] Temple_Grandin_-LRB-film-RRB-: Temple Grandin -LRB-film-RRB-\n[E3] Temple_Grandin_-LRB-film-RRB-: Temple Grandin -LRB-film-RRB-\n[E4] Temple_Grandin_-LRB-film-RRB-: Temple Grandin -LRB-film-RRB-\n[E5] Temple_Grandin_-LRB-film-RRB-: ",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "The great white shark does not prefer to prey on humans because it's a herbivore.",
+      "claim_id": "145707",
+      "evidence": "[E1] Great_white_shark: Great white shark\n[E2] Lamniformes: It includes some of the most familiar species of sharks, such as the great white  and mako sharks as well as less familiar ones, such as the goblin shark and megamouth shark.\n[E3] Humans and great apes share a large frontal cortex: Some of ",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Baadshah had at least three languages dubbed over it.",
+      "claim_id": "166925",
+      "evidence": "[E1] Western_Iranian_languages: The Western Iranian languages or Western Iranic languages are a branch of the Iranian languages, attested from the time of Old Persian (6th century BC) and Median.\n[E2] Contraceptive practices of women requesting termination of pregnancy : A study from China: Abstract",
+      "predicted_label": "NOT ENOUGH INFO",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Susan Collins was the second woman to become the nominee of a major party for Governor of Maine.",
+      "claim_id": "115807",
+      "evidence": "[E1] Tony_Blair: He became involved in the Labour Party and was elected to the House of Commons in 1983 for Sedgefield.\n[E2] Tony_Blair: He became involved in the Labour Party and was elected to the House of Commons in 1983 for Sedgefield.\n[E3] Tony_Blair: He became involved in the Labour Party and ",
+      "predicted_label": "NOT ENOUGH INFO",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Nawaz Sharif is the 20th Prime Minister of Pakistan.",
+      "claim_id": "178230",
+      "evidence": "[E1] Nawaz_Sharif: Mian Muhammad Nawaz Sharif (born 25 December 1949) is a Pakistani politician and businessman who served as the prime minister of Pakistan for three non-consecutive terms, first serving from 1990 to 1993, then from 1997 to 1999 and later from 2013 to 2017.\n[E2] Narendra_Modi: Modi ",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Matt Bomer was born in Spain.",
+      "claim_id": "81480",
+      "evidence": "[E1] Matt_Bomer: Matt Bomer\n[E2] Casas_de_Pedro_Barba: Casas de Pedro Barba, or simply Pedro Barba, is a small community of summer residences on the island of La Graciosa, Canary Islands, Spain.\n[E3] Transformers-COLON-_The_Last_Knight: The film was directed by Michael Bay and written by Art Marcum,",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
+    },
+    {
+      "claim": "Scream 2 is a film that is categorized as a slasher.",
+      "claim_id": "172302",
+      "evidence": "[E1] Scream_2: Scream 2 is a 1997 American slasher film directed by Wes Craven and written by Kevin Williamson.\n[E2] Scream_-LRB-franchise-RRB-: Scream 3 (2000) received a more mixed response, as did Scream 4 (2011), Craven's final film; both were later reappraised and the fourth film was generally ",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "SummerSlam had no pre-show, but contested ten matches.",
+      "claim_id": "148171",
+      "evidence": "[E1] SummerSlam_-LRB-2015-RRB-: Ten matches were contested at the event, with no match on the pre-show.\n[E2] Royal_Rumble_-LRB-2002-RRB-: Six matches were contested at the event.\n[E3] 2014_WTA_Finals: The tournament was held at the Singapore Indoor Stadium, and contested by eight singles players and",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "There was an attempt to change Cyprus.",
+      "claim_id": "51435",
+      "evidence": "[E1] Billy_Joel: Glass Houses (1980) was an attempt to further establish him as a rock artist; it featured \"It's Still Rock and Roll to Me\" (Joel's first single to top the Billboard Hot 100), \"You May Be Right\", \"Don't Ask Me Why\", and \"Sometimes a Fantasy\".\n[E2] Validity and reliability of observat",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    }
+  ],
+  "top_k": {
+    "top_1": {
+      "accuracy": 0.4431,
+      "confusion_matrix": [
+        [
+          68,
+          123,
+          35
+        ],
+        [
+          34,
+          142,
+          24
+        ],
+        [
+          61,
+          85,
+          78
+        ]
+      ],
+      "latency_ms_per_example": 38.6077,
+      "macro_f1": 0.4327,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.43213296398891965,
+          "precision": 0.5693430656934306,
+          "recall": 0.3482142857142857
+        },
+        "REFUTED": {
+          "f1": 0.5163636363636364,
+          "precision": 0.4057142857142857,
+          "recall": 0.71
+        },
+        "SUPPORTED": {
+          "f1": 0.3496143958868895,
+          "precision": 0.4171779141104294,
+          "recall": 0.3008849557522124
+        }
+      },
+      "sample_size": 650
+    },
+    "top_3": {
+      "accuracy": 0.4569,
+      "confusion_matrix": [
+        [
+          97,
+          105,
+          24
+        ],
+        [
+          41,
+          139,
+          20
+        ],
+        [
+          88,
+          75,
+          61
+        ]
+      ],
+      "latency_ms_per_example": 43.6859,
+      "macro_f1": 0.4452,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.3708206686930091,
+          "precision": 0.580952380952381,
+          "recall": 0.27232142857142855
+        },
+        "REFUTED": {
+          "f1": 0.535645472061657,
+          "precision": 0.43573667711598746,
+          "recall": 0.695
+        },
+        "SUPPORTED": {
+          "f1": 0.42920353982300885,
+          "precision": 0.42920353982300885,
+          "recall": 0.42920353982300885
+        }
+      },
+      "sample_size": 650
+    },
+    "top_5": {
+      "accuracy": 0.46,
+      "confusion_matrix": [
+        [
+          108,
+          94,
+          24
+        ],
+        [
+          51,
+          123,
+          26
+        ],
+        [
+          86,
+          70,
+          68
+        ]
+      ],
+      "latency_ms_per_example": 43.6635,
+      "macro_f1": 0.4538,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.39766081871345027,
+          "precision": 0.576271186440678,
+          "recall": 0.30357142857142855
+        },
+        "REFUTED": {
+          "f1": 0.5051334702258727,
+          "precision": 0.42857142857142855,
+          "recall": 0.615
+        },
+        "SUPPORTED": {
+          "f1": 0.4585987261146497,
+          "precision": 0.44081632653061226,
+          "recall": 0.4778761061946903
+        }
+      },
+      "sample_size": 650
+    }
+  }
+}
