@@ -277,7 +277,11 @@ def _build_trainer(
             labels = inputs.pop("labels")
             outputs = model(**inputs)
             logits = outputs.logits
-            loss = torch.nn.functional.cross_entropy(logits, labels, weight=class_weights_tensor.to(logits.device))
+            loss = torch.nn.functional.cross_entropy(
+                logits,
+                labels,
+                weight=class_weights_tensor.to(device=logits.device, dtype=logits.dtype),
+            )
             return (loss, outputs) if return_outputs else loss
 
     def compute_metrics(eval_pred):  # noqa: ANN001

@@ -46,6 +46,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
 | Template faithfulness | 0.560 citation validity, 0.755 verdict consistency |
 | MLX LoRA explanation adapter | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity |
+| DeBERTa challenger (xsmall, 0.1 epoch) | 0.520 accuracy, 0.2281 macro-F1, 0.000 refuted recall |
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
 | Tests | 74 passed |
 
@@ -75,6 +76,7 @@ flowchart LR
 - BM25, dense retrieval, hybrid reciprocal-rank fusion, and cross-encoder reranking
 - DistilRoBERTa verifier with lightweight sklearn fallback
 - DeBERTa challenger path for comparison and future selection
+- DeBERTa challenger training and evaluation path with a measurable checkpoint
 - Qwen2.5 MLX LoRA explanation generation on Apple Silicon
 - Preference-guided explanation reranking as the Mac-compatible alternative to DPO
 - Citation checking, faithfulness scoring, and explanation diagnostics

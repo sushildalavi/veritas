@@ -12,8 +12,4 @@
 | Preference reranking | measured |
 | Faithfulness | measured |
 | Pareto | measured |
-| DeBERTa | missing |
-
-## Missing Reports
-
-- deberta_challenger
+| DeBERTa | measured |

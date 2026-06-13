@@ -853,18 +853,78 @@
 ## DeBERTa
 
 {
-  "attempted_note": {
-    "markdown": "# DeBERTa Challenger Attempted\n\n- checkpoint: checkpoints/deberta_verifier_clean\n- baseline_checkpoint: checkpoints/transformer_verifier_clean\n\nNo DeBERTa challenger checkpoint was available in the repo, so the challenger experiment was not run."
+  "attempted_note": {},
+  "challenge_report": {
+    "baseline_checkpoint": "checkpoints/transformer_verifier_clean",
+    "checkpoint": "checkpoints/deberta_verifier_clean",
+    "eval": {
+      "baseline": {
+        "accuracy": 0.545,
+        "backend": "transformers",
+        "macro_f1": 0.368,
+        "mean_latency_seconds": 0.0307,
+        "model_name": "distilroberta-base",
+        "per_class_f1": {
+          "NOT_ENOUGH_INFO": 0.0,
+          "REFUTED": 0.5114,
+          "SUPPORTED": 0.5926
+        },
+        "refuted_recall": 0.4592,
+        "sample_size": 200
+      },
+      "challenger": {
+        "accuracy": 0.51,
+        "backend": "transformers",
+        "macro_f1": 0.2252,
+        "mean_latency_seconds": 0.0347,
+        "model_name": "microsoft/deberta-v3-xsmall",
+        "per_class_f1": {
+          "NOT_ENOUGH_INFO": 0.0,
+          "REFUTED": 0.0,
+          "SUPPORTED": 0.6755
+        },
+        "refuted_recall": 0.0,
+        "sample_size": 200
+      }
+    },
+    "model_size_mb": 143.09,
+    "test": {
+      "baseline": {
+        "accuracy": 0.645,
+        "backend": "transformers",
+        "macro_f1": 0.4383,
+        "mean_latency_seconds": 0.0282,
+        "model_name": "distilroberta-base",
+        "per_class_f1": {
+          "NOT_ENOUGH_INFO": 0.0,
+          "REFUTED": 0.6383,
+          "SUPPORTED": 0.6765
+        },
+        "refuted_recall": 0.625,
+        "sample_size": 200
+      },
+      "challenger": {
+        "accuracy": 0.52,
+        "backend": "transformers",
+        "macro_f1": 0.2281,
+        "mean_latency_seconds": 0.041,
+        "model_name": "microsoft/deberta-v3-xsmall",
+        "per_class_f1": {
+          "NOT_ENOUGH_INFO": 0.0,
+          "REFUTED": 0.0,
+          "SUPPORTED": 0.6842
+        },
+        "refuted_recall": 0.0,
+        "sample_size": 200
+      }
+    }
   },
-  "challenge_report": {},
-  "measured": false
+  "measured": true
 }
 
 ## Missing Reports
 
-[
-  "deberta_challenger"
-]
+[]
 
 ## Resume-Safe Bullets
 
@@ -872,6 +932,7 @@
 - Measured the oracle-vs-retrieved gap explicitly and added a top-k verifier evaluation to test how much retrieval quality still matters.
 - Packaged the project with a FastAPI backend, Gradio frontend, and a final results/audit generator for research review.
 - Ran a retrieval ablation to compare sparse, dense, and hybrid evidence retrieval strategies.
+- Measured a DeBERTa challenger against the DistilRoBERTa verifier baseline.
 - Audited explanation faithfulness with citation validity and unsupported-sentence measurements.
 
 ## What Is Not Claimed

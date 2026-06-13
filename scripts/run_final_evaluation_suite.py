@@ -334,7 +334,7 @@ def _deberta_summary(loaded: dict[str, Any]) -> dict[str, Any]:
     return {
         "measured": bool(challenger),
         "challenge_report": challenger,
-        "attempted_note": attempted,
+        "attempted_note": attempted if not challenger else {},
     }
 
 
