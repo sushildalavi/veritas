@@ -1,0 +1,44 @@
+{
+  "corpus_size": 9804,
+  "notes": [
+    "BGE-M3 dense retrieval attempted but unavailable: RuntimeError: Invalid buffer size: 9.52 GiB"
+  ],
+  "query_count": 20,
+  "runtime_seconds": 56.038,
+  "split": "val",
+  "strategies": {
+    "bm25": {
+      "backend": "lexical",
+      "latency_seconds": 0.0581,
+      "memory_note": "Minimal incremental memory; no neural weights loaded.",
+      "model_name": "bm25_only",
+      "mrr": 0.3663,
+      "ndcg@10": 0.3686,
+      "recall@1": 0.225,
+      "recall@10": 0.4611,
+      "recall@5": 0.4
+    },
+    "dense_mini": {
+      "backend": "semantic",
+      "latency_seconds": 0.2334,
+      "memory_note": "Moderate memory footprint (~80MB model weights plus embeddings).",
+      "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+      "mrr": 0.575,
+      "ndcg@10": 0.5241,
+      "recall@1": 0.3806,
+      "recall@10": 0.5583,
+      "recall@5": 0.5278
+    },
+    "hybrid_mini": {
+      "backend": "hybrid",
+      "latency_seconds": 0.2831,
+      "memory_note": "Moderate memory footprint (~80MB model weights plus embeddings).",
+      "model_name": "bm25+all-MiniLM-L6-v2",
+      "mrr": 0.55,
+      "ndcg@10": 0.4939,
+      "recall@1": 0.3056,
+      "recall@10": 0.5278,
+      "recall@5": 0.5167
+    }
+  }
+}

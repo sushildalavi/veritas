@@ -40,12 +40,14 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Oracle evidence verifier | 0.717 accuracy, 0.710 macro-F1 |
 | End-to-end verifier with retrieved evidence | 0.440 accuracy, 0.414 macro-F1 |
 | Top-k retrieved verifier (BM25 top-5) | 0.460 accuracy, 0.454 macro-F1 |
+| Retrieval ablation (MiniLM, val split) | 0.558 recall@10, above BM25 at 0.461 |
 | Dense retrieval | 0.357 recall@1, 0.524 recall@10 |
 | Hybrid retrieval | 0.535 recall@10 |
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
 | Template faithfulness | 0.560 citation validity, 0.755 verdict consistency |
 | MLX LoRA explanation adapter | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity |
-| Tests | 73 passed |
+| Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
+| Tests | 74 passed |
 
 The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance.
 
@@ -76,6 +78,7 @@ flowchart LR
 - Qwen2.5 MLX LoRA explanation generation on Apple Silicon
 - Preference-guided explanation reranking as the Mac-compatible alternative to DPO
 - Citation checking, faithfulness scoring, and explanation diagnostics
+- Final evaluation suite and research audit packaging
 - FastAPI service with response caching, fallback metadata, and health/metrics endpoints
 - Gradio demo with a polished research-facing layout
 
