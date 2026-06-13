@@ -7,7 +7,7 @@ Outputs:
   data/processed/explanation_sft_train.jsonl
   data/processed/explanation_sft_val.jsonl
   data/processed/explanation_sft_test.jsonl
-  data/processed/explanation_sft/{train,valid,test}.jsonl
+  data/processed/explanation_sft/{train,val,valid,test}.jsonl
   reports/explanation_sft_data_stats.{json,md}
 """
 
@@ -45,7 +45,7 @@ def main() -> None:  # pragma: no cover - script entrypoint
     args = build_parser().parse_args()
     splits = {
         "train": Path(args.train_file),
-        "valid": Path(args.val_file),
+        "val": Path(args.val_file),
         "test": Path(args.test_file),
     }
     output_prefix = Path(args.output_prefix)
@@ -58,6 +58,9 @@ def main() -> None:  # pragma: no cover - script entrypoint
     stats = {
         "splits": {},
         "label_distribution": {},
+        "source_distribution": {},
+        "average_claim_length": {},
+        "average_evidence_length": {},
         "output_prefix": str(output_prefix),
     }
 
@@ -67,9 +70,16 @@ def main() -> None:  # pragma: no cover - script entrypoint
         records = [_build_record(row) for row in rows]
         _write_jsonl(output_prefix.parent / f"{output_prefix.name}_{split_name}.jsonl", records)
         _write_jsonl(output_prefix / f"{split_name}.jsonl", records)
+        if split_name == "val":
+            _write_jsonl(output_prefix.parent / f"{output_prefix.name}_valid.jsonl", records)
+            _write_jsonl(output_prefix / "valid.jsonl", records)
         stats["splits"][split_name] = len(records)
         label_counter = Counter(json.loads(record["messages"][2]["content"])["verdict"] for record in records)
         stats["label_distribution"][split_name] = dict(label_counter)
+        source_counter = Counter(str(row.get("metadata", {}).get("source", "unknown")) for row in rows)
+        stats["source_distribution"][split_name] = dict(source_counter)
+        stats["average_claim_length"][split_name] = round(sum(len(str(row.get("claim", "")).split()) for row in rows) / len(rows), 2)
+        stats["average_evidence_length"][split_name] = round(sum(len(str(row.get("evidence", "")).split()) for row in rows) / len(rows), 2)
 
     stats["total_examples"] = sum(stats["splits"].values())
     stats["prompt_template"] = "system/user/assistant JSON messages"
@@ -152,6 +162,20 @@ def _to_markdown(stats: dict[str, Any]) -> str:
         "## Label distribution",
         "",
         json.dumps(stats["label_distribution"], indent=2),
+        "",
+        "## Source distribution",
+        "",
+        json.dumps(stats["source_distribution"], indent=2),
+        "",
+        "## Average lengths",
+        "",
+        json.dumps(
+            {
+                "average_claim_length": stats["average_claim_length"],
+                "average_evidence_length": stats["average_evidence_length"],
+            },
+            indent=2,
+        ),
         "",
     ]
     return "\n".join(lines)

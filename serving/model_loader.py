@@ -46,6 +46,7 @@ class VerificationPipeline:
     checkpoint_path: str | None = None
     model_name: str = "mock"
     verifier_macro_f1: float | None = None
+    explanation_generator: object | None = None
 
 
 @dataclass
@@ -74,14 +75,20 @@ def load_pipeline(
     if evidence_corpus_path is None:
         evidence_corpus_path = settings.evidence_corpus_path
     if verifier_checkpoint is None:
-        verifier_checkpoint = _resolve_checkpoint_path(settings)
+        verifier_checkpoint = settings.verifier_checkpoint or _resolve_checkpoint_path(settings)
     passages = _load_passages(evidence_corpus_path)
     retrieval_runtime = _load_retrieval_runtime(passages, settings)
     reranker_runtime = _load_reranker_runtime(settings)
     retriever = retrieval_runtime.retriever
     prefer_deberta = settings.verifier_backend.lower() != "mock"
     verifier = ModelRouter(verifier_checkpoint=verifier_checkpoint, prefer_deberta=prefer_deberta)
-    reflection_loop = ReflectionLoop(retriever=retriever, verifier=verifier, ranker=reranker_runtime.reranker)
+    explanation_generator = _build_explanation_generator(settings)
+    reflection_loop = ReflectionLoop(
+        retriever=retriever,
+        verifier=verifier,
+        ranker=reranker_runtime.reranker,
+        explanation_generator=explanation_generator,
+    )
     backend = getattr(getattr(verifier, "_deberta", None), "_backend", "mock")
     fallback_used = backend == "mock"
     return VerificationPipeline(
@@ -106,6 +113,7 @@ def load_pipeline(
         checkpoint_path=str(verifier_checkpoint) if verifier_checkpoint else None,
         model_name=verifier.model_name,
         verifier_macro_f1=_load_verifier_macro_f1(verifier_checkpoint),
+        explanation_generator=explanation_generator,
     )
 
 
@@ -159,7 +167,7 @@ def _load_passages(evidence_corpus_path: str | Path | None) -> list[EvidenceSpan
 
 def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSettings) -> RetrievalRuntime:
     backend = settings.retrieval_backend.strip().lower()
-    if backend == "bm25_only" or not passages:
+    if backend in {"bm25_only", "bm25"} or not passages:
         return RetrievalRuntime(
             retriever=BM25Retriever(passages),
             retrieval_backend="bm25_only",
@@ -176,7 +184,7 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
             fallback_used=False,
         )
 
-    if backend == "bm25_sentence_transformer_hybrid":
+    if backend in {"bm25_sentence_transformer_hybrid", "sentence_transformer_hybrid", "sentence-transformer-hybrid"}:
         if not settings.use_neural_retrieval:
             return RetrievalRuntime(
                 retriever=BM25Retriever(passages),
@@ -202,6 +210,35 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
             retriever=HybridRetriever(BM25Retriever(passages), dense_retriever),
             retrieval_backend="bm25_sentence_transformer_hybrid",
             embedding_model=settings.embedding_model,
+            fallback_used=False,
+        )
+
+    if backend == "bge_m3_hybrid":
+        if not settings.use_neural_retrieval:
+            return RetrievalRuntime(
+                retriever=BM25Retriever(passages),
+                retrieval_backend="bm25_only",
+                embedding_model=None,
+                fallback_used=False,
+            )
+        try:
+            dense_retriever = DenseRetriever(
+                passages,
+                backend="sentence-transformers",
+                model_name=settings.optional_research_embedding_model,
+            )
+        except Exception as exc:  # pragma: no cover - defensive fallback
+            LOGGER.warning("Falling back to BM25 retrieval after research dense loader failure: %s", exc)
+            return RetrievalRuntime(
+                retriever=BM25Retriever(passages),
+                retrieval_backend="bm25_only",
+                embedding_model=None,
+                fallback_used=True,
+            )
+        return RetrievalRuntime(
+            retriever=HybridRetriever(BM25Retriever(passages), dense_retriever),
+            retrieval_backend="bge_m3_hybrid",
+            embedding_model=settings.optional_research_embedding_model,
             fallback_used=False,
         )
 
@@ -265,6 +302,29 @@ def _load_reranker_runtime(settings: ProjectSettings) -> RerankerRuntime:
     )
 
 
+def _build_explanation_generator(settings: ProjectSettings):
+    if settings.explanation_mode.strip().lower() not in {"mlx_lora", "preference_reranked"}:
+        return None
+    try:
+        from mlx_lm import generate, load  # type: ignore
+    except Exception:
+        return None
+    try:
+        model, tokenizer = load(settings.mlx_lora_model, adapter_path=str(settings.mlx_lora_adapter))
+    except Exception as exc:  # pragma: no cover - optional dependency fallback
+        LOGGER.warning("Could not load MLX explanation adapter: %s", exc)
+        return None
+
+    def _generate(prompt: str) -> str:
+        try:
+            return str(generate(model, tokenizer, prompt, max_tokens=160))
+        except Exception as exc:  # pragma: no cover - optional dependency fallback
+            LOGGER.warning("MLX explanation generation failed: %s", exc)
+            return ""
+
+    return _generate
+
+
 def _resolve_checkpoint_path(settings: ProjectSettings) -> str | Path | None:
     backend = settings.verifier_backend.lower()
     sklearn_path = Path(settings.sklearn_checkpoint)
@@ -272,7 +332,7 @@ def _resolve_checkpoint_path(settings: ProjectSettings) -> str | Path | None:
     legacy_path = Path(settings.legacy_verifier_checkpoint) if settings.legacy_verifier_checkpoint else None
     # Priority for transformer-style checkpoints: DeBERTa clean > DistilRoBERTa
     # clean > legacy/explicit override > old smoke-test transformer checkpoint.
-    transformer_candidates = [Path(settings.deberta_checkpoint), Path(settings.transformer_clean_checkpoint)]
+    transformer_candidates = [Path(settings.challenger_verifier_checkpoint), Path(settings.deberta_checkpoint), Path(settings.transformer_clean_checkpoint)]
     if legacy_path is not None:
         transformer_candidates.append(legacy_path)
     transformer_candidates.append(transformer_path)

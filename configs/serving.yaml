@@ -4,14 +4,18 @@ api:
 demo:
   top_k: 5
 verifier_backend: auto
+verifier_checkpoint: checkpoints/transformer_verifier_clean
 sklearn_checkpoint: checkpoints/verifier_clean
 transformer_checkpoint: checkpoints/transformer_verifier
 transformer_clean_checkpoint: checkpoints/transformer_verifier_clean
+challenger_verifier_checkpoint: checkpoints/deberta_verifier_clean
 mlx_lora_model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
 mlx_lora_adapter: checkpoints/mlx_lora_verifier
 explanation_mode: template
 strict_json_output: true
 max_candidates_for_reranking: 3
+num_explanation_candidates: 3
+max_claim_length: 1000
 retrieval:
   backend: bm25_only
   use_neural_retrieval: false

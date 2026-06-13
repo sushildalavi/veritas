@@ -14,7 +14,7 @@ class EvidenceItem(BaseModel):
 
 
 class VerifyRequest(BaseModel):
-    claim: str = Field(..., min_length=1, max_length=512)
+    claim: str = Field(..., min_length=1, max_length=1000)
     top_k: int = Field(default=5, ge=1, le=20)
 
     @field_validator("claim")
@@ -27,10 +27,12 @@ class VerifyRequest(BaseModel):
 
 
 class VerifyResponse(BaseModel):
+    request_id: str
     verdict: str
     confidence: float
     explanation: str
     citation_valid: bool
+    explanation_mode: str
     backend_used: str
     retrieval_backend: str
     retrieval_fallback_used: bool

@@ -1,0 +1,52 @@
+{
+  "average_claim_length": {
+    "test": 9.31,
+    "train": 9.33,
+    "val": 9.18
+  },
+  "average_evidence_length": {
+    "test": 30.84,
+    "train": 35.23,
+    "val": 30.76
+  },
+  "citations": [
+    "E1"
+  ],
+  "label_distribution": {
+    "test": {
+      "NOT_ENOUGH_INFO": 224,
+      "REFUTED": 200,
+      "SUPPORTED": 226
+    },
+    "train": {
+      "NOT_ENOUGH_INFO": 788,
+      "REFUTED": 604,
+      "SUPPORTED": 1417
+    },
+    "val": {
+      "NOT_ENOUGH_INFO": 237,
+      "REFUTED": 176,
+      "SUPPORTED": 237
+    }
+  },
+  "output_prefix": "data/processed/explanation_sft",
+  "prompt_template": "system/user/assistant JSON messages",
+  "source_distribution": {
+    "test": {
+      "unknown": 650
+    },
+    "train": {
+      "unknown": 2809
+    },
+    "val": {
+      "unknown": 650
+    }
+  },
+  "splits": {
+    "test": 650,
+    "train": 2809,
+    "val": 650
+  },
+  "strict_json_output": true,
+  "total_examples": 4109
+}

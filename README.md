@@ -12,7 +12,7 @@ license: apache-2.0
 
 # Veritas
 
-Veritas | Neural Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, DistilRoBERTa Verification, MLX LoRA Explanations & Faithfulness Reranking
+Veritas | Research-Grade Neural Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, DistilRoBERTa/DeBERTa Verification, Qwen MLX LoRA Explanations, and Faithfulness Reranking
 
 Veritas is a reproducible factual claim verification project built for Mac-first local research and CPU-friendly deployment.
 It separates verdict prediction from explanation generation:

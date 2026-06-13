@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from uuid import uuid4
+
 from fastapi import FastAPI, HTTPException
 
 from core.config import load_project_settings
@@ -24,6 +26,7 @@ _metrics = MetricsTracker()
 def health() -> dict[str, object]:
     return {
         "status": "ok",
+        "max_claim_length": _settings.max_claim_length,
         "verifier_backend": _pipeline.verifier_backend,
         "fallback_used": _pipeline.fallback_used,
         "retrieval_backend": _pipeline.retrieval_backend,
@@ -40,10 +43,11 @@ def health() -> dict[str, object]:
 
 @app.post("/verify", response_model=VerifyResponse)
 def verify(request: VerifyRequest) -> VerifyResponse:
-    if len(request.claim) > 512:
+    if len(request.claim) > _settings.max_claim_length:
         raise HTTPException(status_code=400, detail="claim too long")
 
     start = measure_latency()
+    request_id = str(uuid4())
     cache_key = f"{request.claim}:{request.top_k}"
     cached = _cache.get(cache_key)
     if cached is not None:
@@ -86,6 +90,8 @@ def verify(request: VerifyRequest) -> VerifyResponse:
         latency_ms=elapsed_ms(start),
         model_name=_pipeline.model_name,
         verifier_macro_f1=_pipeline.verifier_macro_f1,
+        request_id=request_id,
+        explanation_mode=_pipeline.explanation_mode,
     )
     _metrics.record(
         response.verdict,
@@ -103,6 +109,7 @@ def verify(request: VerifyRequest) -> VerifyResponse:
 def metrics() -> dict[str, object]:
     payload = _metrics.snapshot()
     payload["cache_entries"] = _cache.size()
+    payload["max_claim_length"] = _settings.max_claim_length
     payload["fallback_used_for_default_demo"] = _pipeline.fallback_used
     payload["verifier_backend"] = _pipeline.verifier_backend
     payload["retrieval_backend"] = _pipeline.retrieval_backend

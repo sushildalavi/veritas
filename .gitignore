@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *.so
 .Python
@@ -31,6 +32,7 @@ artifacts/*
 
 # Notebook state
 .ipynb_checkpoints/
+**/.ipynb_checkpoints/
 .snakemake/
 
 # Environment files
