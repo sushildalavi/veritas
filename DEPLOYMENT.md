@@ -1,6 +1,7 @@
 # Deployment
 
 Veritas is set up for a free Hugging Face Spaces deployment using the Gradio app in `app.py`.
+The live demo is Mac-friendly and CPU-safe; CUDA notebooks are archived and not part of deployment.
 
 ## Runtime
 
@@ -21,7 +22,7 @@ Veritas is set up for a free Hugging Face Spaces deployment using the Gradio app
 
 ## Notes
 
-- The demo uses the local fallback verifier when a transformer checkpoint is not available.
+- The demo uses the clean DistilRoBERTa verifier when available, then the sklearn fallback verifier, then the mock verifier.
 - No API server needs to be started separately for the Gradio demo.
 - The app is designed to run on CPU-only free infrastructure.
 - Keep secrets out of the Space; the demo does not require API tokens.
@@ -31,7 +32,7 @@ Veritas is set up for a free Hugging Face Spaces deployment using the Gradio app
 The backend (`serving/api.py`, `serving/model_loader.py`) reads its
 configuration from `configs/serving.yaml` (or whatever `VERITAS_CONFIG`
 points to), with every field overridable via environment variables. Two
-modes are provided:
+runtime modes are provided, plus a research profile for local use:
 
 ### Lightweight mode (default — `configs/serving.yaml`)
 
@@ -60,6 +61,12 @@ modes are provided:
   (dense embedding + cross-encoder scoring) versus lightweight mode. Use on
   a Space with more CPU/RAM, or when retrieval/ranking quality matters more
   than cold-start time and per-request latency.
+
+### Research mode (`configs/research_grade.yaml`)
+
+- Adds the Mac-local MLX explanation architecture fields, strict JSON output,
+  and preference reranking settings for local experimentation.
+- Intended for offline research runs, not the public Spaces deployment.
 
 To run advanced mode locally or in a Space:
 

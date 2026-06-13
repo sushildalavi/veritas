@@ -17,6 +17,8 @@ class ProjectSettings:
     transformer_checkpoint: str = "checkpoints/transformer_verifier"
     transformer_clean_checkpoint: str = "checkpoints/transformer_verifier_clean"
     deberta_checkpoint: str = "checkpoints/deberta_verifier_clean"
+    mlx_lora_model: str = "mlx-community/Qwen2.5-1.5B-Instruct-4bit"
+    mlx_lora_adapter: str = "checkpoints/mlx_lora_verifier"
     legacy_verifier_checkpoint: str | None = None
     retrieval_backend: str = "bm25_only"
     use_neural_retrieval: bool = False
@@ -24,7 +26,11 @@ class ProjectSettings:
     use_cross_encoder: bool = False
     embedding_backend: str = "hashing"
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    optional_research_embedding_model: str = "BAAI/bge-m3"
     cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    explanation_mode: str = "template"
+    max_candidates_for_reranking: int = 3
+    strict_json_output: bool = True
     max_evidence: int = 5
     cache_ttl_seconds: int = 120
     log_level: str = "INFO"
@@ -65,6 +71,8 @@ def load_project_settings(
         transformer_checkpoint=str(env_or_yaml("VERITAS_TRANSFORMER_CHECKPOINT", ("transformer_checkpoint",), "checkpoints/transformer_verifier")),
         transformer_clean_checkpoint=str(env_or_yaml("VERITAS_TRANSFORMER_CLEAN_CHECKPOINT", ("transformer_clean_checkpoint",), "checkpoints/transformer_verifier_clean")),
         deberta_checkpoint=str(env_or_yaml("VERITAS_DEBERTA_CHECKPOINT", ("deberta_checkpoint",), "checkpoints/deberta_verifier_clean")),
+        mlx_lora_model=str(env_or_yaml("VERITAS_MLX_LORA_MODEL", ("mlx_lora_model",), "mlx-community/Qwen2.5-1.5B-Instruct-4bit")),
+        mlx_lora_adapter=str(env_or_yaml("VERITAS_MLX_LORA_ADAPTER", ("mlx_lora_adapter",), "checkpoints/mlx_lora_verifier")),
         legacy_verifier_checkpoint=_optional_str(env.get("VERITAS_VERIFIER_CHECKPOINT")),
         retrieval_backend=str(env_or_yaml("VERITAS_RETRIEVAL_BACKEND", ("retrieval", "backend"), "bm25_only")),
         use_neural_retrieval=_coerce_bool(env_or_yaml("VERITAS_USE_NEURAL_RETRIEVAL", ("retrieval", "use_neural_retrieval"), False)),
@@ -78,7 +86,17 @@ def load_project_settings(
                 env_or_yaml("VERITAS_EMBEDDING_MODEL", ("dense", "model_name"), "sentence-transformers/all-MiniLM-L6-v2"),
             )
         ),
+        optional_research_embedding_model=str(
+            env_or_yaml(
+                "VERITAS_RESEARCH_EMBEDDING_MODEL",
+                ("retrieval", "research_embedding_model"),
+                "BAAI/bge-m3",
+            )
+        ),
         cross_encoder_model=str(env_or_yaml("VERITAS_CROSS_ENCODER_MODEL", ("ranking", "cross_encoder_model"), "cross-encoder/ms-marco-MiniLM-L-6-v2")),
+        explanation_mode=str(env_or_yaml("VERITAS_EXPLANATION_MODE", ("explanation_mode",), "template")),
+        max_candidates_for_reranking=int(env_or_yaml("VERITAS_MAX_CANDIDATES_FOR_RERANKING", ("max_candidates_for_reranking",), 3)),
+        strict_json_output=_coerce_bool(env_or_yaml("VERITAS_STRICT_JSON_OUTPUT", ("strict_json_output",), True)),
         max_evidence=int(env_or_yaml("VERITAS_MAX_EVIDENCE", ("demo", "top_k"), 5)),
         cache_ttl_seconds=int(env_or_yaml("VERITAS_CACHE_TTL_SECONDS", ("cache", "ttl_seconds"), 120)),
         log_level=str(env_or_yaml("VERITAS_LOG_LEVEL", ("log_level",), "INFO")),

@@ -3,10 +3,20 @@ api:
   port: 8000
 demo:
   top_k: 5
+verifier_backend: auto
+sklearn_checkpoint: checkpoints/verifier_clean
+transformer_checkpoint: checkpoints/transformer_verifier
+transformer_clean_checkpoint: checkpoints/transformer_verifier_clean
+mlx_lora_model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
+mlx_lora_adapter: checkpoints/mlx_lora_verifier
+explanation_mode: preference_reranked
+strict_json_output: true
+max_candidates_for_reranking: 3
 retrieval:
   backend: bm25_sentence_transformer_hybrid
   use_neural_retrieval: true
   embedding_model: sentence-transformers/all-MiniLM-L6-v2
+research_embedding_model: BAAI/bge-m3
 ranking:
   reranker_backend: cross_encoder
   use_cross_encoder: true
@@ -16,3 +26,4 @@ cache:
 fallbacks:
   use_bm25: true
   use_mock_verifier: true
+log_level: INFO

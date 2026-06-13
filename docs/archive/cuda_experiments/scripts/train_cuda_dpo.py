@@ -56,13 +56,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-train-pairs", type=int, default=0, help="0 = use all preference pairs.")
     parser.add_argument("--max-val-examples", type=int, default=0, help="0 = use all examples.")
     parser.add_argument("--max-new-tokens", type=int, default=160)
-    parser.add_argument("--beta", type=float, default=0.1)
-    parser.add_argument("--max-length", type=int, default=512)
-    parser.add_argument("--max-prompt-length", type=int, default=384)
+    parser.add_argument("--beta", type=float, default=0.05)
+    parser.add_argument("--max-length", type=int, default=384)
+    parser.add_argument("--max-prompt-length", type=int, default=256)
     parser.add_argument("--epochs", type=float, default=1.0)
     parser.add_argument("--batch-size", type=int, default=2)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=8)
-    parser.add_argument("--learning-rate", type=float, default=5e-5)
+    parser.add_argument("--learning-rate", type=float, default=2e-5)
     parser.add_argument("--seed", type=int, default=42)
     return parser
 
@@ -114,7 +114,12 @@ def main() -> None:
         bnb_4bit_compute_dtype=torch.float16,
         bnb_4bit_use_double_quant=True,
     )
-    base_model = AutoModelForCausalLM.from_pretrained(args.base_model, quantization_config=bnb_config, device_map="auto")
+    base_model = AutoModelForCausalLM.from_pretrained(
+        args.base_model,
+        quantization_config=bnb_config,
+        device_map="auto",
+        torch_dtype=torch.float16,
+    )
     model = PeftModel.from_pretrained(base_model, str(qlora_adapter_path), is_trainable=True)
 
     print(f"Evaluating QLoRA adapter (before DPO) on {len(eval_examples)} examples")
@@ -136,6 +141,11 @@ def main() -> None:
         logging_strategy="epoch",
         save_strategy="no",
         report_to=[],
+        fp16=True,
+        bf16=False,
+        fp16_full_eval=False,
+        bf16_full_eval=False,
+        max_grad_norm=0.0,
     )
     trainer = DPOTrainer(
         model=model,

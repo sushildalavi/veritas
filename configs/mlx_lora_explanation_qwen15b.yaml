@@ -1,0 +1,20 @@
+# Mac-local explanation-only LoRA config.
+#
+# The data directory is produced by scripts/build_explanation_sft_dataset.py.
+
+model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
+train: true
+data: data/processed/explanation_sft
+fine_tune_type: lora
+num_layers: 8
+batch_size: 1
+iters: 300
+val_batches: 10
+learning_rate: 1.0e-5
+steps_per_report: 20
+steps_per_eval: 50
+save_every: 100
+adapter_path: checkpoints/mlx_lora_explanation_qwen15b
+max_seq_length: 512
+grad_checkpoint: true
+seed: 42

@@ -12,10 +12,14 @@ license: apache-2.0
 
 # Veritas
 
-Veritas | Fact Verification with Neural Retrieval, Cross-Encoder Ranking, Fine-Tuned Transformer Verification, MLX LoRA & Citation Faithfulness
+Veritas | Neural Fact Verification with Hybrid Retrieval, Cross-Encoder Ranking, DistilRoBERTa Verification, MLX LoRA Explanations & Faithfulness Reranking
 
-Veritas is a reproducible factual claim verification project.
-It takes a claim through evidence retrieval, evidence ranking, claim verification, grounded explanation, citation validation, and faithfulness evaluation, then serves the system through FastAPI and Gradio.
+Veritas is a reproducible factual claim verification project built for Mac-first local research and CPU-friendly deployment.
+It separates verdict prediction from explanation generation:
+
+- DistilRoBERTa remains the source of truth for verdicts.
+- MLX LoRA explains the verdict with citation-grounded text.
+- Preference reranking improves explanation faithfulness without CUDA-only DPO.
 
 ## Results
 
@@ -40,25 +44,25 @@ These numbers come from the checked-in reports under `reports/`. The retrieval, 
 | Pareto (measured) | best frontier (quality) | `distilroberta-clean`, macro F1 0.711 | `reports/final_pareto_analysis.md` |
 | Pareto (measured) | best frontier (deployment cost) | `sklearn-tfidf-logreg`, macro F1 0.484, 0.6MB | `reports/final_pareto_analysis.md` |
 | MLX LoRA (Apple Silicon, `Qwen2.5-1.5B-Instruct-4bit`, 100 iters, best adapter) | verdict accuracy / macro F1 / citation valid rate (200 examples) | 0.695 / 0.4632 / 0.6 | `reports/mlx_lora_eval_200.md`, `reports/mlx_lora_comparison.md` |
-| DPO preference pairs | pairs / chosen-citation-valid rate | 1382 / 1.0 | `reports/preference_pair_stats.md` |
-| CUDA QLoRA | status | **ready, not run** (Kaggle/Colab) | `reports/cuda_qlora_READY.md`, `notebooks/12_cuda_qlora_kaggle_colab.ipynb` |
-| CUDA DPO | status | **ready, not run** (Kaggle/Colab) | `reports/cuda_dpo_READY.md`, `notebooks/13_cuda_dpo_kaggle_colab.ipynb` |
+| Explanation reranking | status | Mac-only research path, scripts checked in | `scripts/eval_preference_reranking.py`, `rag/preference_reranker.py` |
+| Explanation SFT | status | Mac-only data builder and training wrapper checked in | `scripts/build_explanation_sft_dataset.py`, `scripts/train_mlx_lora_explanation.py` |
 | Tests | pytest suite | 73 passed | - |
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    A[Claim] --> B[BM25 + Dense Retrieval]
-    B --> C[Hybrid RRF]
-    C --> D[Learned Ranker]
-    C --> E[Cross-Encoder Reranker]
-    D --> F[Verifier]
-    E --> F
-    F --> G[Grounded Explanation]
-    G --> H[Citation Checker]
-    H --> I[Faithfulness Evaluation]
-    I --> J[FastAPI + Gradio Demo]
+    A[Claim] --> B[Data quality checks]
+    B --> C[BM25 retrieval]
+    B --> D[Sentence-transformer dense retrieval]
+    C --> E[Hybrid RRF]
+    D --> E
+    E --> F[Cross-encoder reranking]
+    F --> G[DistilRoBERTa verifier]
+    G --> H[MLX LoRA explanation generator]
+    H --> I[Preference reranker]
+    I --> J[Citation / faithfulness evaluator]
+    J --> K[FastAPI + Gradio Demo]
 ```
 
 ## What Is Implemented
@@ -67,8 +71,9 @@ flowchart LR
 - A larger FEVER + SciFact sample pipeline under `data/processed/*_large.jsonl` for more realistic local evaluation.
 - Deterministic hashing dense retrieval for CI and a real `sentence-transformers` dense path for local neural evaluation.
 - BM25, hybrid RRF, heuristic ranking, learned ranking, and optional cross-encoder reranking.
-- Lightweight sklearn verifier checkpoint plus a real transformer fine-tuning path.
-- Citation checking and faithfulness evaluation.
+- DistilRoBERTa verifier checkpoint plus a lightweight sklearn fallback.
+- MLX LoRA explanation datasets, training wrappers, and evaluation scripts.
+- Citation checking, faithfulness evaluation, and preference-guided explanation reranking.
 - FastAPI API and Gradio demo with caching, validation, monitoring, and fallback metadata.
 - Artifact manifest generation for reports and checkpoints.
 
@@ -89,7 +94,7 @@ make manifest
 make verify-local
 ```
 
-To reproduce the Apple Silicon MLX LoRA alignment run (no CUDA, no
+To reproduce the Apple Silicon MLX LoRA explanation run (no CUDA, no
 bitsandbytes):
 
 ```bash
@@ -104,19 +109,17 @@ evaluated on 200 held-out examples in `reports/mlx_lora_eval_200.md`. A
 overfit (verdict accuracy dropped from 0.695 to 0.52), so the 100-iteration
 adapter remains the best one (`reports/mlx_lora_comparison.md`).
 
-A DPO preference-pair dataset (1,382 `{"prompt", "chosen", "rejected"}`
-triples) has been built from `data/processed/verifier_train.jsonl` for a
-future DPO run:
+An explanation-only SFT dataset builder and reranking pipeline are checked in:
 
 ```bash
-python3 scripts/build_preference_pairs_real.py
+python3 scripts/build_explanation_sft_dataset.py
+python3 scripts/train_mlx_lora_explanation.py
+python3 scripts/eval_preference_reranking.py
 ```
 
-See `reports/preference_pair_stats.md`. CUDA QLoRA and CUDA DPO
-Kaggle/Colab notebooks (`notebooks/12_cuda_qlora_kaggle_colab.ipynb`,
-`notebooks/13_cuda_dpo_kaggle_colab.ipynb`) are ready to run but have not
-been executed — see `reports/cuda_qlora_READY.md` and
-`reports/cuda_dpo_READY.md`.
+See `reports/explanation_sft_data_stats.md`, `reports/mlx_lora_explanation_eval.md`, and `reports/preference_reranking_eval.md` once those scripts have been run locally.
+
+The deprecated CUDA notebooks and scripts have been moved to `docs/archive/cuda_experiments/` and are not part of the final Mac-only architecture.
 
 To reproduce the neural benchmark runs that exist in this repo:
 
@@ -207,17 +210,16 @@ Deployment note:
 - The clean DistilRoBERTa verifier (macro F1 0.711 on oracle/gold evidence) drops to macro F1 0.414 when fed real BM25 top-1 retrieved evidence (`reports/end_to_end_verifier_eval.md`) — the oracle/retrieved gap is real and should not be hidden.
 - Template-based explanations are citation-valid 56% of the time on a 200-example validation sample (`reports/faithfulness_comparison.md`); this is the only explanation generator with measured numbers.
 - **The MLX LoRA adapter (Apple Silicon, `checkpoints/mlx_lora_verifier/`) was trained on a small sample**: 600 training examples, 100 iterations, evaluated on 200 held-out examples (verdict accuracy 0.695, macro F1 0.4632, citation valid rate 0.6; `reports/mlx_lora_eval_200.md`). A 300-iteration adapter overfit on the same data (`reports/mlx_lora_comparison.md`). This is a small-sample signal, not a benchmark result.
-- **A DPO preference-pair dataset has been built** (`data/processed/preference_pairs.jsonl`, 1,382 `{"prompt", "chosen", "rejected"}` triples; `reports/preference_pair_stats.md`), but **no DPO training has been run on either path** — this is dataset construction only, not alignment.
-- **CUDA QLoRA fine-tuning was not executed** (optional cloud path only): this machine has no CUDA GPU and no `bitsandbytes`, so no `cuda_qlora_eval` reports exist. Ready-to-run config/script/notebook are checked in (`configs/cuda_qlora_tinyllama.yaml`, `scripts/train_cuda_qlora.py`, `notebooks/12_cuda_qlora_kaggle_colab.ipynb`) along with `reports/cuda_qlora_READY.md`.
-- **CUDA DPO alignment was not executed**: it depends on the CUDA QLoRA adapter above, which does not exist on this machine. Ready-to-run config/script/notebook are checked in (`configs/cuda_dpo_tinyllama.yaml`, `scripts/train_cuda_dpo.py`, `notebooks/13_cuda_dpo_kaggle_colab.ipynb`) along with `reports/cuda_dpo_READY.md`. The MLX path is separately documented as blocked in `reports/mlx_dpo_READY.md` (`mlx-lm` 0.31.3 has no DPO trainer).
+- **The explanation SFT dataset / reranking path has been scaffolded** (`scripts/build_explanation_sft_dataset.py`, `scripts/train_mlx_lora_explanation.py`, `scripts/eval_preference_reranking.py`) but has not yet been promoted to a measured benchmark result in this repo.
+- **CUDA QLoRA and CUDA DPO experiments were archived** under `docs/archive/cuda_experiments/` and are not part of the final Mac-only architecture.
 - The public Spaces URL is [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space).
 
 ## What Not To Overclaim
 
 - Do not claim broad production accuracy from the sample reports; numbers are from 200-650 example evaluation sets.
 - Do not claim the public demo is deployed unless you are pointing to the live URL at `https://sushildalavi-veritas.hf.space`.
-- **Do not claim CUDA QLoRA or DPO were trained** — no adapter checkpoints or `cuda_qlora_eval`/`cuda_dpo_eval`/`mlx_dpo_eval` reports exist. See `reports/cuda_qlora_READY.md`, `reports/cuda_dpo_READY.md`, and `reports/mlx_dpo_READY.md`.
-- **The preference-pair dataset (`data/processed/preference_pairs.jsonl`) is dataset construction only** — do not describe it as DPO alignment having been performed.
+- **Do not claim CUDA QLoRA or DPO were trained** — those experiments are archived and not part of the final Mac-only project.
+- **Do not describe the explanation reranker as DPO** — it is a Mac-compatible preference-guided reranking pipeline, not a DPO trainer.
 - **Do not call the MLX LoRA run "QLoRA"** — the adapter (`checkpoints/mlx_lora_verifier/`) is a standard LoRA adapter trained with `mlx_lm.lora --fine-tune-type lora` on a pre-quantized `mlx-community` base model; no quantized-LoRA training was performed. Do not overstate the small-sample metrics in `reports/mlx_lora_eval_200.md` (200-example eval) as benchmark-grade.
 - Do not claim the verifier performs equally well end-to-end as it does on oracle/gold evidence; report both numbers (`reports/oracle_verifier_eval.md` vs. `reports/end_to_end_verifier_eval.md`).
 - Do not claim citation faithfulness above the measured template-generator rate (56% citation-valid on the 200-example sample in `reports/faithfulness_comparison.md`).

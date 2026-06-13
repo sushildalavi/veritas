@@ -24,9 +24,14 @@ checkpoints/*
 !checkpoints/.gitkeep
 artifacts/*
 !artifacts/.gitkeep
+*.zip
+*.tar
+*.tar.gz
+*.tgz
 
 # Notebook state
 .ipynb_checkpoints/
+.snakemake/
 
 # Environment files
 .env
