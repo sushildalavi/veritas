@@ -3,35 +3,35 @@
   "metadata": {
     "checkpoint_path": "checkpoints/verifier_clean/model.joblib",
     "data_dir": "data/processed",
-    "git_commit": "cb758630f1a1251291acf0f391784eb6f368dab9",
-    "python_version": "3.13.5",
+    "git_commit": "96980b27b3182adefad622764942da4b26e564ce",
+    "python_version": "3.13.9",
     "sample_sizes": {
-      "test_examples": 650,
-      "train_examples": 2809,
-      "validation_examples": 650
+      "test_examples": 642,
+      "train_examples": 2808,
+      "validation_examples": 649
     },
     "seed": 42,
     "sklearn_version": "1.9.0",
-    "timestamp_utc": "2026-06-12T10:51:42.552660+00:00",
-    "training_command": "python3 scripts/train_verifier_clean.py"
+    "timestamp_utc": "2026-06-14T02:04:08.003167+00:00",
+    "training_command": "python scripts/train_verifier_clean.py"
   },
   "test": {
-    "accuracy": 0.48615384615384616,
+    "accuracy": 0.48442367601246106,
     "confusion_matrix": [
       [
-        127,
-        66,
-        33
+        125,
+        68,
+        31
       ],
       [
-        92,
-        75,
-        33
-      ],
-      [
+        88,
         74,
-        36,
-        114
+        33
+      ],
+      [
+        72,
+        39,
+        112
       ]
     ],
     "confusion_matrix_labels": [
@@ -39,26 +39,26 @@
       "REFUTED",
       "NOT_ENOUGH_INFO"
     ],
-    "example_count": 650,
-    "macro_f1": 0.48387903907454266,
+    "example_count": 642,
+    "macro_f1": 0.48205988853614895,
     "per_class": {
       "NOT_ENOUGH_INFO": {
-        "f1": 0.5643564356435643,
-        "precision": 0.6333333333333333,
-        "recall": 0.5089285714285714,
-        "support": 224
+        "f1": 0.5614035087719298,
+        "precision": 0.6363636363636364,
+        "recall": 0.5022421524663677,
+        "support": 223
       },
       "REFUTED": {
-        "f1": 0.3978779840848806,
-        "precision": 0.423728813559322,
-        "recall": 0.375,
-        "support": 200
+        "f1": 0.39361702127659576,
+        "precision": 0.4088397790055249,
+        "recall": 0.37948717948717947,
+        "support": 195
       },
       "SUPPORTED": {
-        "f1": 0.48940269749518306,
-        "precision": 0.4334470989761092,
-        "recall": 0.5619469026548672,
-        "support": 226
+        "f1": 0.4911591355599214,
+        "precision": 0.43859649122807015,
+        "recall": 0.5580357142857143,
+        "support": 224
       }
     }
   },
@@ -71,13 +71,6 @@
       "claim": "Pearl (Steven Universe) exists as a magical dog.",
       "claim_id": "35882",
       "evidence": "Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body.",
-      "predicted_label": "SUPPORTED",
-      "true_label": "REFUTED"
-    },
-    {
-      "claim": "Acetylcholine prevents neuromodulation.",
-      "claim_id": "12084",
-      "evidence": "Some of the effects of neuromodulators include altering intrinsic firing activity, increasing or decreasing voltage-dependent currents, altering synaptic efficacy, increasing bursting activity and rec",
       "predicted_label": "SUPPORTED",
       "true_label": "REFUTED"
     },
@@ -99,13 +92,6 @@
       "claim": "Ed Gagliardi died on October 13, 2005.",
       "claim_id": "193837",
       "evidence": "Edward John Gagliardi (February 13, 1952 \u2013 May 11, 2014) was an American bass guitarist, best known as the original bass player for the 1970s rock band Foreigner.",
-      "predicted_label": "SUPPORTED",
-      "true_label": "REFUTED"
-    },
-    {
-      "claim": "Google Search is not the product of an American multinational technology company.",
-      "claim_id": "148376",
-      "evidence": "Google Search (also known simply as Google or google.com) is a search engine operated by Google. Google LLC ( , GOO-g\u0259l) is an American multinational technology corporation focused on information tech",
       "predicted_label": "SUPPORTED",
       "true_label": "REFUTED"
     },
@@ -206,25 +192,39 @@
       "evidence": "Caleb Reginald McLaughlin (born October 13, 2001) is an American actor. Caleb Reginald McLaughlin (born October 13, 2001) is an American actor.",
       "predicted_label": "SUPPORTED",
       "true_label": "REFUTED"
+    },
+    {
+      "claim": "Scream 2 is a slasher film.",
+      "claim_id": "172301",
+      "evidence": "Scream 2 is a 1997 American slasher film directed by Wes Craven and written by Kevin Williamson.",
+      "predicted_label": "REFUTED",
+      "true_label": "SUPPORTED"
+    },
+    {
+      "claim": "Robinson Crusoe on Mars was a Greek tragedy.",
+      "claim_id": "51260",
+      "evidence": "Robinson Crusoe on Mars is a 1964 American science fiction film directed by Byron Haskin and produced by Aubrey Schenck that stars Paul Mantee, Victor Lundin, and Adam West.",
+      "predicted_label": "SUPPORTED",
+      "true_label": "REFUTED"
     }
   ],
   "train": {
-    "accuracy": 0.8273406906372375,
+    "accuracy": 0.8254985754985755,
     "confusion_matrix": [
       [
         1126,
         172,
-        119
+        118
       ],
       [
-        20,
-        561,
-        23
+        22,
+        558,
+        24
       ],
       [
-        84,
-        67,
-        637
+        88,
+        66,
+        634
       ]
     ],
     "confusion_matrix_labels": [
@@ -232,46 +232,46 @@
       "REFUTED",
       "NOT_ENOUGH_INFO"
     ],
-    "example_count": 2809,
-    "macro_f1": 0.8209794225002348,
+    "example_count": 2808,
+    "macro_f1": 0.8190183275093762,
     "per_class": {
       "NOT_ENOUGH_INFO": {
-        "f1": 0.813018506700702,
-        "precision": 0.8177150192554558,
-        "recall": 0.8083756345177665,
+        "f1": 0.8107416879795396,
+        "precision": 0.8170103092783505,
+        "recall": 0.8045685279187818,
         "support": 788
       },
       "REFUTED": {
-        "f1": 0.7991452991452992,
-        "precision": 0.70125,
-        "recall": 0.9288079470198676,
+        "f1": 0.7971428571428572,
+        "precision": 0.7010050251256281,
+        "recall": 0.9238410596026491,
         "support": 604
       },
       "SUPPORTED": {
-        "f1": 0.8507744616547034,
-        "precision": 0.9154471544715447,
-        "recall": 0.7946365561044461,
-        "support": 1417
+        "f1": 0.8491704374057315,
+        "precision": 0.9110032362459547,
+        "recall": 0.7951977401129944,
+        "support": 1416
       }
     }
   },
   "validation": {
-    "accuracy": 0.45384615384615384,
+    "accuracy": 0.44684129429892144,
     "confusion_matrix": [
       [
-        124,
+        123,
         56,
-        57
+        58
       ],
       [
-        90,
-        55,
+        89,
+        56,
         31
       ],
       [
-        92,
-        29,
-        116
+        93,
+        32,
+        111
       ]
     ],
     "confusion_matrix_labels": [
@@ -279,25 +279,25 @@
       "REFUTED",
       "NOT_ENOUGH_INFO"
     ],
-    "example_count": 650,
-    "macro_f1": 0.4436334262046349,
+    "example_count": 649,
+    "macro_f1": 0.4376829502239976,
     "per_class": {
       "NOT_ENOUGH_INFO": {
-        "f1": 0.5260770975056689,
-        "precision": 0.5686274509803921,
-        "recall": 0.48945147679324896,
-        "support": 237
+        "f1": 0.5091743119266054,
+        "precision": 0.555,
+        "recall": 0.4703389830508475,
+        "support": 236
       },
       "REFUTED": {
-        "f1": 0.34810126582278483,
-        "precision": 0.39285714285714285,
-        "recall": 0.3125,
+        "f1": 0.35,
+        "precision": 0.3888888888888889,
+        "recall": 0.3181818181818182,
         "support": 176
       },
       "SUPPORTED": {
-        "f1": 0.4567219152854512,
-        "precision": 0.40522875816993464,
-        "recall": 0.5232067510548524,
+        "f1": 0.45387453874538747,
+        "precision": 0.40327868852459015,
+        "recall": 0.5189873417721519,
         "support": 237
       }
     }

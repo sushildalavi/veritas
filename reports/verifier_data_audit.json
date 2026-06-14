@@ -1,69 +1,72 @@
 {
   "splits": {
     "test": {
-      "average_claim_length": 9.313846153846153,
-      "average_evidence_length": 36.645338208409505,
+      "average_claim_length": 9.333333333333334,
+      "average_evidence_length": 36.492592592592594,
+      "cross_split_duplicates_removed": 8,
       "duplicate_claims": 0,
       "evidence_type_distribution": {
-        "gold": 426,
-        "no_evidence": 103,
+        "gold": 419,
+        "no_evidence": 102,
         "retrieved_negative": 121
       },
-      "example_count": 650,
+      "example_count": 642,
       "label_distribution": {
-        "NOT_ENOUGH_INFO": 224,
-        "REFUTED": 200,
-        "SUPPORTED": 226
+        "NOT_ENOUGH_INFO": 223,
+        "REFUTED": 195,
+        "SUPPORTED": 224
       },
-      "missing_evidence_count": 103,
+      "missing_evidence_count": 102,
       "skipped_missing_gold_evidence": 0,
       "source_distribution": {
-        "fever": 500,
-        "scifact": 150
+        "fever": 493,
+        "scifact": 149
       }
     },
     "train": {
-      "average_claim_length": 9.326806692773228,
-      "average_evidence_length": 41.33458646616541,
-      "duplicate_claims": 5,
+      "average_claim_length": 9.327635327635328,
+      "average_evidence_length": 41.328875888006685,
+      "cross_split_duplicates_removed": 1,
+      "duplicate_claims": 4,
       "evidence_type_distribution": {
-        "gold": 2021,
+        "gold": 2020,
         "no_evidence": 415,
         "retrieved_negative": 373
       },
-      "example_count": 2809,
+      "example_count": 2808,
       "label_distribution": {
         "NOT_ENOUGH_INFO": 788,
         "REFUTED": 604,
-        "SUPPORTED": 1417
+        "SUPPORTED": 1416
       },
       "missing_evidence_count": 415,
       "skipped_missing_gold_evidence": 0,
       "source_distribution": {
         "fever": 2000,
-        "scifact": 809
+        "scifact": 808
       }
     },
     "val": {
-      "average_claim_length": 9.178461538461539,
+      "average_claim_length": 9.186440677966102,
       "average_evidence_length": 37.58646616541353,
+      "cross_split_duplicates_removed": 1,
       "duplicate_claims": 0,
       "evidence_type_distribution": {
         "gold": 413,
-        "no_evidence": 118,
+        "no_evidence": 117,
         "retrieved_negative": 119
       },
-      "example_count": 650,
+      "example_count": 649,
       "label_distribution": {
-        "NOT_ENOUGH_INFO": 237,
+        "NOT_ENOUGH_INFO": 236,
         "REFUTED": 176,
         "SUPPORTED": 237
       },
-      "missing_evidence_count": 118,
+      "missing_evidence_count": 117,
       "skipped_missing_gold_evidence": 0,
       "source_distribution": {
         "fever": 500,
-        "scifact": 150
+        "scifact": 149
       }
     }
   }

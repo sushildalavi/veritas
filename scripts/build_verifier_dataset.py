@@ -194,14 +194,33 @@ def main() -> None:  # pragma: no cover - script entrypoint
     records_by_split = load_records(data_dir, split_names=split_names, suffix=args.suffix)
 
     report: dict[str, Any] = {"splits": {}}
+    seen_triples: set[tuple[str, str, str]] = set()
     for split_index, (split_name, source_names) in enumerate(SPLIT_SOURCES.items()):
         records = [record for source_name in source_names for record in records_by_split.get(source_name, [])]
         examples, skipped = build_examples(records, seed=args.seed + split_index)
+
+        # Drop examples whose (claim, evidence, label) triple already appeared in an
+        # earlier split (train > val > test priority) to prevent cross-split leakage.
+        cross_split_duplicates = 0
+        deduped_examples: list[dict[str, Any]] = []
+        for example in examples:
+            triple = (example["claim"], example["evidence"], example["label"])
+            if triple in seen_triples:
+                cross_split_duplicates += 1
+                continue
+            deduped_examples.append(example)
+            seen_triples.add(triple)
+        examples = deduped_examples
+
         write_jsonl(examples, output_dir / f"verifier_{split_name}.jsonl")
         split_report = audit_examples(examples)
         split_report["skipped_missing_gold_evidence"] = skipped
+        split_report["cross_split_duplicates_removed"] = cross_split_duplicates
         report["splits"][split_name] = split_report
-        print(f"verifier_{split_name}: {len(examples)} examples ({skipped} skipped, no gold evidence)")
+        print(
+            f"verifier_{split_name}: {len(examples)} examples "
+            f"({skipped} skipped, no gold evidence; {cross_split_duplicates} cross-split duplicates removed)"
+        )
 
     write_report(report, reports_dir / "verifier_data_audit.json")
     (reports_dir / "verifier_data_audit.md").write_text(build_markdown(report), encoding="utf-8")
