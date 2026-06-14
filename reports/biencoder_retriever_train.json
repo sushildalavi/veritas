@@ -1,0 +1,10 @@
+{
+  "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "batch_size": 16,
+  "learning_rate": 2e-05,
+  "max_hard_negatives": 1,
+  "num_epochs": 2,
+  "output_dir": "checkpoints/biencoder_retriever",
+  "runtime_seconds": 844.89,
+  "train_pairs": 2393
+}
