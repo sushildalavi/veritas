@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
 import random
 import shlex
@@ -173,6 +174,12 @@ def train_transformer_verifier(
     random.seed(seed)
     np.random.seed(seed)
 
+    if use_cpu:
+        # Use all available cores for CPU training; default torch thread count
+        # leaves cores idle on this machine. Pure runtime tweak, no effect on
+        # numerics/reproducibility.
+        torch.set_num_threads(os.cpu_count() or 1)
+
     train_examples = load_examples(train_file)
     val_examples = load_examples(val_file)
     test_examples = load_examples(test_file)
@@ -208,6 +215,11 @@ def train_transformer_verifier(
     trainer.train()
     trainer.save_model(output_dir)
     tokenizer.save_pretrained(output_dir)
+
+    # dataloader_drop_last=True avoids a NaN gradient from a trailing batch of
+    # size 1 during training, but it also drops the last eval batch, which
+    # would desync predictions from y_true. Evaluation needs every example.
+    trainer.args.dataloader_drop_last = False
 
     train_metrics = _evaluate_dataset(trainer, train_dataset, train_examples)
     val_metrics = _evaluate_dataset(trainer, val_dataset, val_examples)
@@ -259,6 +271,7 @@ def _load_transformer(model_name: str):
         num_labels=len(LABEL_ORDER),
         id2label=ID_TO_LABEL,
         label2id=LABEL_TO_ID,
+        dtype=torch.float32,
     )
     return tokenizer, model
 
@@ -392,6 +405,7 @@ def _build_trainer(
         greater_is_better=True,
         save_total_limit=1,
         remove_unused_columns=False,
+        dataloader_drop_last=True,
         use_cpu=use_cpu,
         report_to=[],
     )
@@ -405,8 +419,6 @@ def _build_trainer(
         "data_collator": DataCollatorWithPadding(tokenizer=tokenizer),
         "compute_metrics": compute_metrics if len(eval_dataset) else None,
     }
-    if use_class_weights:
-        return trainer_cls(**trainer_kwargs)
     return trainer_cls(**trainer_kwargs)
 
 

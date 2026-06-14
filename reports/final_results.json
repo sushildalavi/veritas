@@ -19,30 +19,30 @@
     },
     "verifier_label_distribution": {
       "test": {
-        "NOT_ENOUGH_INFO": 224,
-        "REFUTED": 200,
-        "SUPPORTED": 226
+        "NOT_ENOUGH_INFO": 223,
+        "REFUTED": 195,
+        "SUPPORTED": 224
       },
       "train": {
         "NOT_ENOUGH_INFO": 788,
         "REFUTED": 604,
-        "SUPPORTED": 1417
+        "SUPPORTED": 1416
       },
       "val": {
-        "NOT_ENOUGH_INFO": 237,
+        "NOT_ENOUGH_INFO": 236,
         "REFUTED": 176,
         "SUPPORTED": 237
       }
     },
     "verifier_splits": {
-      "test": 650,
-      "train": 2809,
-      "val": 650
+      "test": 642,
+      "train": 2808,
+      "val": 649
     }
   },
   "deberta": {
     "challenge_report": {
-      "batch_size": 1,
+      "batch_size": 8,
       "checkpoint_path": "checkpoints/deberta_verifier_clean",
       "epochs": 1.0,
       "label_order": [
@@ -50,137 +50,137 @@
         "REFUTED",
         "NOT_ENOUGH_INFO"
       ],
-      "learning_rate": 5e-06,
+      "learning_rate": 2e-05,
       "max_length": 192,
       "metadata": {
-        "git_commit": "7d63ab1130996943e7271c63f2651efbdbd06052",
-        "python_version": "3.13.5",
+        "git_commit": "96980b27b3182adefad622764942da4b26e564ce",
+        "python_version": "3.13.9",
         "seed": 42,
-        "training_command": "python3 scripts/train_transformer_verifier_clean.py --model-name microsoft/deberta-v3-small --output-dir checkpoints/deberta_verifier_clean --report-json reports/deberta_verifier_clean_eval.json --report-md reports/deberta_verifier_clean_eval.md --epochs 1.0 --batch-size 1 --learning-rate 5e-6 --max-length 192 --gradient-accumulation-steps 4 --warmup-ratio 0.1 --weight-decay 0.01"
+        "training_command": "python scripts/train_transformer_verifier_clean.py --model-name microsoft/deberta-v3-xsmall --output-dir checkpoints/deberta_verifier_clean --report-json reports/deberta_verifier_clean_eval.json --report-md reports/deberta_verifier_clean_eval.md --epochs 1 --batch-size 8 --learning-rate 2e-5 --max-length 192 --gradient-accumulation-steps 1 --warmup-ratio 0.06 --weight-decay 0.01 --use-class-weights --use-cpu --seed 42"
       },
-      "model_name": "microsoft/deberta-v3-small",
+      "model_name": "microsoft/deberta-v3-xsmall",
       "test": {
-        "accuracy": 0.3476923076923077,
+        "accuracy": 0.6355140186915887,
         "confusion_matrix": [
           [
-            226,
-            0,
-            0
+            215,
+            3,
+            6
           ],
           [
-            200,
-            0,
-            0
+            184,
+            7,
+            4
           ],
           [
-            224,
-            0,
-            0
+            31,
+            6,
+            186
           ]
         ],
-        "example_count": 650,
-        "latency_ms_per_example": 18.580794166057157,
-        "macro_f1": 0.17199391171993914,
+        "example_count": 642,
+        "latency_ms_per_example": 19.494388303813754,
+        "macro_f1": 0.5372237426439015,
         "per_class": {
           "NOT_ENOUGH_INFO": {
-            "f1": 0.0,
-            "precision": 0.0,
-            "recall": 0.0
+            "f1": 0.8878281622911695,
+            "precision": 0.9489795918367347,
+            "recall": 0.8340807174887892
           },
           "REFUTED": {
-            "f1": 0.0,
-            "precision": 0.0,
-            "recall": 0.0
+            "f1": 0.06635071090047394,
+            "precision": 0.4375,
+            "recall": 0.035897435897435895
           },
           "SUPPORTED": {
-            "f1": 0.5159817351598174,
-            "precision": 0.3476923076923077,
-            "recall": 1.0
+            "f1": 0.6574923547400612,
+            "precision": 0.5,
+            "recall": 0.9598214285714286
           }
         }
       },
       "thresholds": {
-        "accuracy_ok": false,
+        "accuracy_ok": true,
         "macro_f1_ok": false
       },
       "train": {
-        "accuracy": 0.5044499822000712,
+        "accuracy": 0.7247150997150997,
         "confusion_matrix": [
           [
-            1417,
-            0,
-            0
+            1346,
+            26,
+            44
           ],
           [
-            604,
-            0,
-            0
+            567,
+            18,
+            19
           ],
           [
-            788,
-            0,
-            0
+            95,
+            22,
+            671
           ]
         ],
-        "example_count": 2809,
-        "latency_ms_per_example": 18.359336151655906,
-        "macro_f1": 0.22353683546300676,
+        "example_count": 2808,
+        "latency_ms_per_example": 21.02999366415058,
+        "macro_f1": 0.5738936187814535,
         "per_class": {
           "NOT_ENOUGH_INFO": {
-            "f1": 0.0,
-            "precision": 0.0,
-            "recall": 0.0
+            "f1": 0.8817345597897503,
+            "precision": 0.9141689373297003,
+            "recall": 0.8515228426395939
           },
           "REFUTED": {
-            "f1": 0.0,
-            "precision": 0.0,
-            "recall": 0.0
+            "f1": 0.05373134328358209,
+            "precision": 0.2727272727272727,
+            "recall": 0.029801324503311258
           },
           "SUPPORTED": {
-            "f1": 0.6706105063890203,
-            "precision": 0.5044499822000712,
-            "recall": 1.0
+            "f1": 0.7862149532710281,
+            "precision": 0.6703187250996016,
+            "recall": 0.9505649717514124
           }
         }
       },
-      "training_runtime_seconds": 428.335,
+      "training_runtime_seconds": 297.472,
       "validation": {
-        "accuracy": 0.3646153846153846,
+        "accuracy": 0.6533127889060092,
         "confusion_matrix": [
           [
-            237,
-            0,
-            0
+            216,
+            9,
+            12
           ],
           [
-            176,
-            0,
-            0
+            165,
+            5,
+            6
           ],
           [
-            237,
-            0,
-            0
+            28,
+            5,
+            203
           ]
         ],
-        "example_count": 650,
-        "latency_ms_per_example": 17.941909230744038,
-        "macro_f1": 0.17812852311161217,
+        "example_count": 649,
+        "latency_ms_per_example": 20.437344183315894,
+        "macro_f1": 0.5361384424191397,
         "per_class": {
           "NOT_ENOUGH_INFO": {
-            "f1": 0.0,
-            "precision": 0.0,
-            "recall": 0.0
+            "f1": 0.888402625820569,
+            "precision": 0.918552036199095,
+            "recall": 0.8601694915254238
           },
           "REFUTED": {
-            "f1": 0.0,
-            "precision": 0.0,
-            "recall": 0.0
+            "f1": 0.05128205128205128,
+            "precision": 0.2631578947368421,
+            "recall": 0.028409090909090908
           },
           "SUPPORTED": {
-            "f1": 0.5343855693348365,
-            "precision": 0.3646153846153846,
-            "recall": 1.0
+            "f1": 0.6687306501547987,
+            "precision": 0.5281173594132029,
+            "recall": 0.9113924050632911
           }
         }
       }
@@ -253,8 +253,8 @@
   },
   "highlights": {
     "cross_encoder_map": 0.5,
-    "deberta_challenger_accuracy": 0.3476923076923077,
-    "deberta_challenger_macro_f1": 0.17199391171993914,
+    "deberta_challenger_accuracy": 0.6355140186915887,
+    "deberta_challenger_macro_f1": 0.5372237426439015,
     "dense_recall_at_10": 0.5583333333333333,
     "end_to_end_accuracy": 0.44,
     "end_to_end_macro_f1": 0.41358600135669815,

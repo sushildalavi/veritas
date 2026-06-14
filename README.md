@@ -33,10 +33,10 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 
 | Component | Result |
 | --- | --- |
-| Verifier dataset | 2809 train / 650 val / 650 test |
-| Sklearn verifier | 0.486 accuracy, 0.484 macro-F1 |
-| DistilRoBERTa verifier | 0.718 accuracy, 0.711 macro-F1 |
-| DistilRoBERTa REFUTED recall | 0.745 |
+| Verifier dataset | 2808 train / 649 val / 642 test (cross-split duplicate claim/evidence/label triples removed; see `reports/verifier_data_audit.md`) |
+| Sklearn verifier | 0.484 accuracy, 0.482 macro-F1 |
+| DistilRoBERTa verifier* | 0.718 accuracy, 0.711 macro-F1 |
+| DistilRoBERTa REFUTED recall* | 0.745 |
 | Oracle evidence verifier | 0.717 accuracy, 0.710 macro-F1 |
 | End-to-end verifier with retrieved evidence | 0.440 accuracy, 0.414 macro-F1 |
 | Top-k retrieved verifier (BM25 top-5) | 0.460 accuracy, 0.454 macro-F1 |
@@ -46,11 +46,13 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
 | Template faithfulness | 0.560 citation validity, 0.755 verdict consistency |
 | MLX LoRA explanation adapter | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity |
-| DeBERTa challenger (xsmall, 0.3 epoch) | 0.348 accuracy, 0.172 macro-F1, 0.000 refuted recall |
+| DeBERTa challenger (xsmall) | 0.636 accuracy, 0.537 macro-F1, 0.036 refuted recall (macro-F1 below 0.55 threshold; REFUTED recall still low) |
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
 | Tests | 74 passed |
 
 The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance.
+
+\* These rows were measured on the verifier dataset before the cross-split dedup above (2809/650/650). They are stale pending a retrain on the deduped 2808/649/642 split; the sklearn and DeBERTa rows have already been re-measured on the deduped split. The earlier DeBERTa run was also degenerate due to a separate bug: `microsoft/deberta-v3-xsmall` loads in fp16 by default on this transformers version, and training fp16 on CPU produced NaN gradients (`grad_norm: nan`, all predictions collapsed to SUPPORTED). Fixed by passing `dtype=torch.float32` in `_load_transformer()` in `scripts/train_transformer_verifier_clean.py`.
 
 ## Architecture
 
