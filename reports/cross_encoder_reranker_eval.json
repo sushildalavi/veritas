@@ -1,0 +1,53 @@
+{
+  "candidate_k": 10,
+  "checkpoint": "checkpoints/cross_encoder_reranker",
+  "evidence_corpus_size": 9804,
+  "generic_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+  "notes": [
+    "Fine-tuned vs generic cross-encoder map: regressed by 0.072 (0.6032738095238095 -> 0.5312691910486028).",
+    "Fine-tuned vs generic cross-encoder mrr: regressed by 0.0744 (0.6535714285714286 -> 0.5791666666666667).",
+    "Fine-tuned vs generic cross-encoder ndcg@5: regressed by 0.0466 (0.6073007587339552 -> 0.560732182270487).",
+    "Fine-tuned vs generic cross-encoder ndcg@10: regressed by 0.0349 (0.6037629706979012 -> 0.5688795667599646).",
+    "Fine-tuned vs generic cross-encoder recall@5: improved by 0.0194 (0.5777777777777777 -> 0.5972222222222222)."
+  ],
+  "num_queries": 20,
+  "runtime_seconds": 50.134,
+  "split": "val",
+  "strategies": {
+    "cross_encoder_finetuned": {
+      "map": 0.5312691910486028,
+      "mrr": 0.5791666666666667,
+      "ndcg@10": 0.5688795667599646,
+      "ndcg@5": 0.560732182270487,
+      "recall@5": 0.5972222222222222
+    },
+    "cross_encoder_finetuned_plus_learned": {
+      "map": 0.5697023809523809,
+      "mrr": 0.5916666666666667,
+      "ndcg@10": 0.601684071444565,
+      "ndcg@5": 0.5735185665933916,
+      "recall@5": 0.5777777777777777
+    },
+    "cross_encoder_generic": {
+      "map": 0.6032738095238095,
+      "mrr": 0.6535714285714286,
+      "ndcg@10": 0.6037629706979012,
+      "ndcg@5": 0.6073007587339552,
+      "recall@5": 0.5777777777777777
+    },
+    "learned": {
+      "map": 0.45828618911952246,
+      "mrr": 0.43182234432234434,
+      "ndcg@10": 0.49804731611369524,
+      "ndcg@5": 0.4728904649458531,
+      "recall@5": 0.5666666666666667
+    },
+    "rrf": {
+      "map": 0.20252592878136358,
+      "mrr": 0.21523809523809523,
+      "ndcg@10": 0.239661884437741,
+      "ndcg@5": 0.17753252713598225,
+      "recall@5": 0.25
+    }
+  }
+}

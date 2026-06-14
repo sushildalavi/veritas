@@ -1,0 +1,10 @@
+{
+  "base_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+  "batch_size": 16,
+  "learning_rate": 2e-05,
+  "max_length": 256,
+  "num_epochs": 1,
+  "output_dir": "checkpoints/cross_encoder_reranker",
+  "runtime_seconds": 661.9,
+  "train_pairs": 9572
+}
