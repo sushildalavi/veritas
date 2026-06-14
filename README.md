@@ -9,23 +9,31 @@ pinned: false
 license: apache-2.0
 ---
 
-# Veritas
+# Veritas | Trainable Evidence Retrieval, Cross-Encoder Ranking & Neural Fact Verification
 
 Veritas is a Mac-first research system for evidence-grounded fact verification.
-It combines retrieval, ranking, transformer-based verdict prediction, and citation-grounded explanation generation in a single reproducible workflow.
+It combines trainable retrieval, cross-encoder reranking, transformer-based verdict prediction,
+and citation-grounded explanation generation in a single reproducible workflow.
 
 The design intentionally separates two jobs:
 
 - verdict prediction, which is handled by a compact transformer verifier
-- explanation generation, which is handled by Qwen2.5 MLX LoRA and preference-guided reranking
+- explanation generation, which is handled by Qwen2.5 MLX LoRA and preference-guided reranking (optional)
 
 The verifier is the source of truth for the final label. The explanation model is not allowed to replace it.
 
 ## Why It Exists
 
-Veritas is built to answer a practical research question: how far can a fully local, Mac-compatible verification stack go without relying on CUDA, Colab, Kaggle, or bitsandbytes?
+Veritas is built to answer a practical research question: how far can a fully local, Mac-compatible
+verification stack go without relying on CUDA, Colab, Kaggle, or bitsandbytes?
 
-The answer here is not “perfect” or “SOTA.” It is a measured, honest stack with real retrieval, ranking, verifier, faithfulness, and latency tradeoffs.
+The measured bottleneck is **evidence retrieval and ranking**: the verifier performs well when
+given gold (oracle) evidence (0.710 macro-F1) but drops sharply on retrieved evidence
+(0.414 macro-F1). The project's focus is closing that oracle-vs-retrieved gap through a
+fine-tuned bi-encoder retriever, a fine-tuned cross-encoder reranker, and a verifier trained to be
+robust to retrieval noise.
+
+The answer here is not "perfect" or "SOTA." It is a measured, honest stack with real retrieval, ranking, verifier, faithfulness, and latency tradeoffs.
 
 ## Key Results
 
