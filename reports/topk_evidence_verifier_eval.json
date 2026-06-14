@@ -1,0 +1,245 @@
+{
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "headline": "oracle macro_f1=0.705, top1=0.450, top3=0.476, top5=0.467, mixed=0.588",
+  "nei_f1": {
+    "mixed": 0.7336,
+    "oracle": 0.942,
+    "top1": 0.5331,
+    "top3": 0.507,
+    "top5": 0.4541
+  },
+  "notes": [
+    "top1/top3/top5 use evidence retrieved by BM25 + fine-tuned bi-encoder (RRF fusion), reranked by the fine-tuned cross-encoder reranker, on a held-out test set the verifier was not retrained on.",
+    "top1/top3/top5 all improve macro_f1 over the previous top-1 BM25-only baseline of 0.414 (reports/end_to_end_verifier_eval.json), but remain well below the 0.55 target and far below the oracle macro_f1 of 0.705.",
+    "mixed reaches macro_f1=0.588 but is composed of 50% gold evidence rows (mixed_source == 'gold'), so it does not represent a pure retrieved-evidence result and should not be compared directly against the 0.55 target."
+  ],
+  "oracle_vs_retrieved_gap": {
+    "mixed": {
+      "accuracy_gap": 0.1231,
+      "macro_f1_gap": 0.1171
+    },
+    "top1": {
+      "accuracy_gap": 0.2523,
+      "macro_f1_gap": 0.255
+    },
+    "top3": {
+      "accuracy_gap": 0.2383,
+      "macro_f1_gap": 0.2296
+    },
+    "top5": {
+      "accuracy_gap": 0.2461,
+      "macro_f1_gap": 0.2379
+    }
+  },
+  "refuted_recall": {
+    "mixed": 0.6667,
+    "oracle": 0.7385,
+    "top1": 0.4974,
+    "top3": 0.559,
+    "top5": 0.5231
+  },
+  "results": {
+    "mixed": {
+      "accuracy": 0.5903,
+      "confusion_matrix": [
+        [
+          92,
+          106,
+          26
+        ],
+        [
+          43,
+          130,
+          22
+        ],
+        [
+          46,
+          20,
+          157
+        ]
+      ],
+      "latency_ms_per_example": 44.239,
+      "macro_f1": 0.5882,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.7336448598130841,
+          "precision": 0.7658536585365854,
+          "recall": 0.7040358744394619
+        },
+        "REFUTED": {
+          "f1": 0.5764966740576497,
+          "precision": 0.5078125,
+          "recall": 0.6666666666666666
+        },
+        "SUPPORTED": {
+          "f1": 0.454320987654321,
+          "precision": 0.5082872928176796,
+          "recall": 0.4107142857142857
+        }
+      },
+      "sample_size": 642
+    },
+    "oracle": {
+      "accuracy": 0.7134,
+      "confusion_matrix": [
+        [
+          103,
+          116,
+          5
+        ],
+        [
+          42,
+          144,
+          9
+        ],
+        [
+          11,
+          1,
+          211
+        ]
+      ],
+      "latency_ms_per_example": 25.6752,
+      "macro_f1": 0.7052,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.9419642857142857,
+          "precision": 0.9377777777777778,
+          "recall": 0.9461883408071748
+        },
+        "REFUTED": {
+          "f1": 0.631578947368421,
+          "precision": 0.5517241379310345,
+          "recall": 0.7384615384615385
+        },
+        "SUPPORTED": {
+          "f1": 0.5421052631578948,
+          "precision": 0.6602564102564102,
+          "recall": 0.45982142857142855
+        }
+      },
+      "sample_size": 642
+    },
+    "top1": {
+      "accuracy": 0.4611,
+      "confusion_matrix": [
+        [
+          62,
+          79,
+          83
+        ],
+        [
+          27,
+          97,
+          71
+        ],
+        [
+          47,
+          39,
+          137
+        ]
+      ],
+      "latency_ms_per_example": 18.0817,
+      "macro_f1": 0.4502,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.5330739299610895,
+          "precision": 0.47079037800687284,
+          "recall": 0.6143497757847534
+        },
+        "REFUTED": {
+          "f1": 0.47317073170731705,
+          "precision": 0.4511627906976744,
+          "recall": 0.49743589743589745
+        },
+        "SUPPORTED": {
+          "f1": 0.34444444444444444,
+          "precision": 0.45588235294117646,
+          "recall": 0.2767857142857143
+        }
+      },
+      "sample_size": 642
+    },
+    "top3": {
+      "accuracy": 0.4751,
+      "confusion_matrix": [
+        [
+          88,
+          79,
+          57
+        ],
+        [
+          48,
+          109,
+          38
+        ],
+        [
+          74,
+          41,
+          108
+        ]
+      ],
+      "latency_ms_per_example": 32.0173,
+      "macro_f1": 0.4756,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.5070422535211268,
+          "precision": 0.5320197044334976,
+          "recall": 0.484304932735426
+        },
+        "REFUTED": {
+          "f1": 0.5141509433962265,
+          "precision": 0.4759825327510917,
+          "recall": 0.558974358974359
+        },
+        "SUPPORTED": {
+          "f1": 0.4055299539170507,
+          "precision": 0.41904761904761906,
+          "recall": 0.39285714285714285
+        }
+      },
+      "sample_size": 642
+    },
+    "top5": {
+      "accuracy": 0.4673,
+      "confusion_matrix": [
+        [
+          114,
+          73,
+          37
+        ],
+        [
+          67,
+          102,
+          26
+        ],
+        [
+          92,
+          47,
+          84
+        ]
+      ],
+      "latency_ms_per_example": 49.0328,
+      "macro_f1": 0.4673,
+      "per_class": {
+        "NOT ENOUGH INFO": {
+          "f1": 0.4540540540540541,
+          "precision": 0.5714285714285714,
+          "recall": 0.37668161434977576
+        },
+        "REFUTED": {
+          "f1": 0.4892086330935252,
+          "precision": 0.4594594594594595,
+          "recall": 0.5230769230769231
+        },
+        "SUPPORTED": {
+          "f1": 0.45875251509054327,
+          "precision": 0.4175824175824176,
+          "recall": 0.5089285714285714
+        }
+      },
+      "sample_size": 642
+    }
+  },
+  "sample_size": 642,
+  "test_file": "data/processed/verifier_test_topk_augmented.jsonl"
+}

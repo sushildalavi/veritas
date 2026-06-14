@@ -1,0 +1,19 @@
+{
+  "biencoder_checkpoint": "checkpoints/biencoder_retriever",
+  "candidate_k": 10,
+  "cross_encoder_checkpoint": "checkpoints/cross_encoder_reranker",
+  "evidence_corpus_size": 9804,
+  "evidence_corpus_source": "data/processed/evidence_corpus_large.jsonl",
+  "max_examples_per_split": 700,
+  "notes": [
+    "Retrieval pipeline: BM25 + fine-tuned bi-encoder (RRF fusion), reranked with the fine-tuned cross-encoder reranker.",
+    "mixed_evidence alternates between gold evidence (even row index) and top3 retrieved evidence (odd row index) for mixed gold/retrieved training data.",
+    "Each split capped at 700 examples for CPU runtime; see split_counts for actual sizes."
+  ],
+  "runtime_seconds": 685.04,
+  "split_counts": {
+    "test": 642,
+    "train": 700,
+    "val": 649
+  }
+}
