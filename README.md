@@ -173,10 +173,17 @@ Research mode:
 - The evaluation sets are sample-scale, not the full FEVER benchmark.
 - End-to-end performance is materially worse than oracle evidence performance.
 - Feeding top-5 retrieved evidence improves end-to-end macro-F1 to 0.454, but the oracle gap is still material.
+- Threshold calibration and v2 oracle-vs-retrieved numbers are currently checked in from sampled runs; larger sweeps are still needed.
 - Citation faithfulness is measured, not assumed.
 - The MLX LoRA explanation adapter is a small-sample result, not a benchmark claim.
 - Preference-guided reranking is a deterministic Mac-compatible replacement for DPO, not DPO itself.
 - CUDA QLoRA, CUDA DPO, Colab, and Kaggle are not part of the final project direction.
+
+## Repository Guides
+
+- `docs/architecture_audit.md`
+- `docs/retrieval_ceiling.md`
+- `docs/vllm_serving.md`
 
 ## Do Not Overclaim
 
