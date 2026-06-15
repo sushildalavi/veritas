@@ -30,10 +30,10 @@ verification stack go without relying on CUDA, Colab, Kaggle, or bitsandbytes?
 The measured bottleneck is **evidence retrieval and ranking**: the verifier performs well when
 given gold (oracle) evidence, but drops sharply on retrieved evidence. On the full available v2
 test set (650 examples, all of `fever_test_large` + `scifact_test_large`), oracle per-passage
-macro-F1 is 0.6748 while retrieved per-passage macro-F1 is 0.3833 (recall@10 0.5334) -- a gap of
-0.2915. The smaller 100- and 200-example slices showed more favorable absolute numbers (oracle
-~0.72, retrieved ~0.45-0.46), which the full-set run shows was sample variance rather than a
-reflection of true performance; the oracle-vs-retrieved gap itself is consistent (~0.26-0.39)
+macro-F1 is 0.6728 while retrieved per-passage macro-F1 is 0.3887 (recall@10 0.5334) -- a gap of
+0.2841. The smaller 100- and 200-example slices showed more favorable absolute numbers (oracle
+~0.72, retrieved ~0.46-0.47), which the full-set run shows was sample variance rather than a
+reflection of true performance; the oracle-vs-retrieved gap itself is consistent (~0.25-0.39)
 across all slice sizes. The project's focus is closing that gap through a fine-tuned bi-encoder
 retriever, a fine-tuned cross-encoder reranker, and a verifier trained to be robust to retrieval
 noise.
@@ -53,9 +53,9 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Oracle evidence verifier | 0.717 accuracy, 0.710 macro-F1 |
 | End-to-end verifier with retrieved evidence | 0.440 accuracy, 0.414 macro-F1 |
 | Oracle vs retrieved v2 (diagnostic 20-sample slice) | oracle 0.709 macro-F1, retrieved 0.500 macro-F1, recall@10 0.667 |
-| Oracle vs retrieved v2 (100-sample slice) | oracle 0.723 macro-F1, retrieved 0.450 macro-F1, recall@10 0.543 |
-| Oracle vs retrieved v2 (200-sample slice) | oracle 0.7255 macro-F1, retrieved 0.464 macro-F1, recall@10 0.4711 |
-| Oracle vs retrieved v2 (full 650-example test set, primary result) | oracle 0.6748 macro-F1, retrieved 0.3833 macro-F1, recall@10 0.5334, gap 0.2915 |
+| Oracle vs retrieved v2 (100-sample slice) | oracle 0.7211 macro-F1, retrieved 0.4615 macro-F1, recall@10 0.5435 |
+| Oracle vs retrieved v2 (200-sample slice) | oracle 0.7206 macro-F1, retrieved 0.4715 macro-F1, recall@10 0.4711 |
+| Oracle vs retrieved v2 (full 650-example test set, primary result) | oracle 0.6728 macro-F1, retrieved 0.3887 macro-F1, recall@10 0.5334, gap 0.2841 |
 | Threshold comparison on 100-sample slice | per-passage macro-F1 0.441 -> 0.462, NEI false-positive rate 0.807 -> 0.613 |
 | Top-k retrieved verifier (BM25 top-5) | 0.460 accuracy, 0.454 macro-F1 |
 | Retrieval ablation (MiniLM, val split) | 0.558 recall@10, above BM25 at 0.461 |
@@ -81,9 +81,9 @@ skipped or faked.
 | Profile | recall@10 | nDCG@10 | Retrieved per-passage macro-F1 |
 | --- | --- | --- | --- |
 | bm25_only | 0.601 | 0.5678 | 0.3693 |
-| dense_only (hashing embeddings) | 0.1507 | 0.0801 | 0.3453 |
+| dense_only (hashing embeddings) | 0.1507 | 0.0801 | 0.281 |
 | hybrid_bm25_dense (hashing embeddings) | 0.5713 | 0.5168 | 0.4748 |
-| hybrid_with_query_expansion (hashing) | 0.597 | 0.5796 | 0.3871 |
+| hybrid_with_query_expansion (hashing) | 0.597 | 0.5796 | 0.4124 |
 | hybrid_with_reranker (hashing + cross-encoder) | 0.621 | 0.6083 | 0.3976 |
 | hybrid_bm25_sentence_transformer (real MiniLM dense) | 0.6377 | 0.6106 | 0.4595 |
 
@@ -222,7 +222,7 @@ Research mode:
 
 - The evaluation sets are sample-scale (650-example test set), not the full FEVER benchmark.
 - End-to-end performance is materially worse than oracle evidence performance.
-- Feeding top-5 retrieved evidence improves end-to-end macro-F1 to 0.454 on the smaller verifier dataset slice used for that result, but the larger 650-example v2 set shows a wider oracle gap (0.6748 vs 0.3833 per-passage macro-F1); the oracle gap is still material either way.
+- Feeding top-5 retrieved evidence improves end-to-end macro-F1 to 0.454 on the smaller verifier dataset slice used for that result, but the larger 650-example v2 set shows a wider oracle gap (0.6728 vs 0.3887 per-passage macro-F1); the oracle gap is still material either way.
 - The 20-, 100-, and 200-sample v2 reports are smaller diagnostic slices; the full 650-example v2 report is the primary checked-in verifier comparison and should be cited first.
 - All v2 reports (20/100/200/650) use the `bm25_only` serving profile and no reranker; they should not be described as a hybrid result.
 - The retrieval profile comparison (50-sample slice) measures `dense_only` and `hybrid_bm25_dense` with hashing embeddings as cheap baselines, and separately measures a real MiniLM-based hybrid (`hybrid_bm25_sentence_transformer`) and a cross-encoder reranker hybrid (`hybrid_with_reranker`); none of these profiles were skipped.

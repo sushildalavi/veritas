@@ -32,7 +32,7 @@ This document maps the current repository structure to the end-to-end verificati
 
 ## Current constraints
 
-- Retrieval remains the dominant ceiling. On the full 650-example v2 report (`reports/oracle_vs_retrieved_v2_full.json`), recall@10 is `0.5334` and the oracle-vs-retrieved per-passage macro-F1 gap is `0.2915`. The earlier 20-example sampled report (recall@10 `0.6667`) was diagnostic only.
+- Retrieval remains the dominant ceiling. On the full 650-example v2 report (`reports/oracle_vs_retrieved_v2_full.json`), recall@10 is `0.5334` and the oracle-vs-retrieved per-passage macro-F1 gap is `0.2841`. The earlier 20-example sampled report (recall@10 `0.6667`) was diagnostic only.
 - Oracle evidence still materially outperforms retrieved evidence.
 - The verifier remains the source of truth for labels; explanation generation is a separate backend.
 - The vLLM path is explanation-only and keeps template fallback for local and free environments.
