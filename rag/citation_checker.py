@@ -9,6 +9,11 @@ from typing import Callable
 from .context_builder import ContextBundle
 
 
+_CITATION_PATTERN = re.compile(r"\[(\d+)\]")
+_SENTENCE_SPLIT_PATTERN = re.compile(r"(?<=[.!?])\s+|;\s+")
+_CITATION_ONLY_PATTERN = re.compile(r"(?:\[\d+\]\s*)+")
+
+
 @dataclass(frozen=True)
 class CitationCheckResult:
     citation_precision: float
@@ -27,8 +32,9 @@ def check_citations(
 ) -> CitationCheckResult:
     citation_ids = _extract_citations(explanation)
     available = {item.citation_id: item.evidence.text for item in context.evidence_items}
-    missing_citations = sorted(citation_ids - set(available))
-    cited = citation_ids & set(available)
+    available_ids = set(available)
+    missing_citations = sorted(citation_ids - available_ids)
+    cited = citation_ids & available_ids
 
     sentences = _split_sentences(explanation)
     unsupported_sentences: list[str] = []
@@ -59,12 +65,12 @@ def check_citations(
 
 
 def _extract_citations(text: str) -> set[int]:
-    return {int(match) for match in re.findall(r"\[(\d+)\]", text)}
+    return {int(match) for match in _CITATION_PATTERN.findall(text)}
 
 
 def _split_sentences(text: str) -> list[str]:
     sentences: list[str] = []
-    for fragment in re.split(r"(?<=[.!?])\s+|;\s+", text):
+    for fragment in _SENTENCE_SPLIT_PATTERN.split(text):
         fragment = fragment.strip()
         if not fragment:
             continue
@@ -76,7 +82,7 @@ def _split_sentences(text: str) -> list[str]:
 
 
 def _is_citation_only(fragment: str) -> bool:
-    return bool(re.fullmatch(r"(?:\[\d+\]\s*)+", fragment))
+    return bool(_CITATION_ONLY_PATTERN.fullmatch(fragment))
 
 
 def _lexically_supported(sentence: str, evidence_text: str) -> bool:
