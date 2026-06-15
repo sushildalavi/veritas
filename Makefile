@@ -43,13 +43,13 @@ eval-topk-verifier:
 	python3 scripts/eval_topk_verifier.py
 
 eval-faithfulness:
-	python3 scripts/eval_faithfulness.py
+	python3 scripts/eval_faithfulness_final.py
 
 error-analysis:
 	python3 scripts/error_analysis.py
 
 pareto-analysis:
-	python3 scripts/pareto_analysis.py
+	python3 scripts/pareto_analysis_final.py
 
 retrieve-eval: eval-retrieval
 

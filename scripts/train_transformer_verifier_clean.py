@@ -327,6 +327,7 @@ def _build_trainer(
     output_dir: Path,
     class_weights: list[float],
     train_examples: list[Example],
+    callbacks: list | None = None,
 ):  # noqa: ANN001
     from torch.utils.data import DataLoader, WeightedRandomSampler
     from transformers import DataCollatorWithPadding, Trainer, TrainingArguments  # type: ignore
@@ -419,6 +420,8 @@ def _build_trainer(
         "data_collator": DataCollatorWithPadding(tokenizer=tokenizer),
         "compute_metrics": compute_metrics if len(eval_dataset) else None,
     }
+    if callbacks:
+        trainer_kwargs["callbacks"] = callbacks
     return trainer_cls(**trainer_kwargs)
 
 
