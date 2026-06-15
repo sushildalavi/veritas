@@ -1,0 +1,31 @@
+{
+  "config_path": "configs/inference_benchmark.yaml",
+  "git_commit": "cf6a4228e155f330aaed6bb4561f00d2e5e8ed87",
+  "llama_cpp": {
+    "backend": "llama.cpp",
+    "next_steps": "Build llama.cpp with Metal support (LLAMA_METAL=1), download a GGUF model, set mac_local_backends.llama_cpp.binary_path and .model_path in configs/inference_benchmark.yaml, then re-run scripts/benchmark_mac_local_inference.py.",
+    "reason": "mac_local_backends.llama_cpp.binary_path / .model_path are not configured in configs/inference_benchmark.yaml",
+    "status": "skipped"
+  },
+  "mlx_lm": {
+    "backend": "mlx-lm",
+    "device": "mps",
+    "iterations": 5,
+    "max_tokens": 32,
+    "mean_generated_tokens": 32,
+    "mean_latency_ms": 595.85,
+    "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+    "p50_latency_ms": 582.66,
+    "p95_latency_ms": 621.71,
+    "requests_per_sec": 1.678,
+    "status": "measured",
+    "tokens_per_sec": 53.7
+  },
+  "ollama": {
+    "backend": "ollama",
+    "next_steps": "Start ollama (`ollama serve`), pull a model (`ollama pull qwen2.5:1.5b`), then re-run scripts/benchmark_mac_local_inference.py.",
+    "reason": "ollama endpoint http://localhost:11434 is unreachable in this environment",
+    "status": "skipped"
+  },
+  "timestamp": "2026-06-15T21:27:49.359895+00:00"
+}

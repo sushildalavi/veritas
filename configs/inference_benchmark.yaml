@@ -47,3 +47,29 @@ triton_dense_scoring:
   vector_dim: 384
   batch_sizes: [32, 128]
   num_iterations: 20
+
+# Mac-local LLM inference backends (scripts/benchmark_mac_local_inference.py).
+# Each backend is measured if available, otherwise written as `status:
+# skipped` with the exact setup steps -- no CUDA-only backend is required.
+mac_local_backends:
+  prompt: >
+    Claim: The Eiffel Tower is located in Paris, France.
+    Evidence: The Eiffel Tower is a wrought-iron lattice tower on the
+    Champ de Mars in Paris, France.
+    Explain in one sentence whether the evidence supports the claim.
+  mlx_lm:
+    model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
+    max_tokens: 32
+    num_iterations: 5
+    warmup_iterations: 1
+  ollama:
+    base_url: http://localhost:11434
+    model: qwen2.5:1.5b
+    max_tokens: 32
+    num_iterations: 5
+    concurrency_levels: [1]
+  llama_cpp:
+    binary_path: null
+    model_path: null
+    max_tokens: 32
+    num_iterations: 5
