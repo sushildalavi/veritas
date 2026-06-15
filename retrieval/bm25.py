@@ -5,12 +5,13 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 import math
+import re
 
 from data.schemas import EvidenceSpan
 
 
 def tokenize(text: str) -> list[str]:
-    return [token for token in text.lower().split() if token]
+    return re.findall(r"[a-z0-9]+", text.lower())
 
 
 class _FallbackBM25:
