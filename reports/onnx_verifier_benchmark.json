@@ -1,5 +1,24 @@
 {
-  "next_steps": "pip install onnx onnxruntime, then run scripts/export_verifier_onnx.py and re-run this benchmark.",
-  "reason": "the 'onnxruntime' package is not installed in this environment",
-  "status": "skipped"
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "git_commit": "8d058ae08e252cea9f169387b47e68d2ef6d7214",
+  "model_path": "checkpoints/transformer_verifier_clean_onnx/model.onnx",
+  "results": [
+    {
+      "batch_size": 1,
+      "iterations": 20,
+      "mean_latency_ms": 18.167,
+      "p50_latency_ms": 17.927,
+      "p95_latency_ms": 19.813,
+      "throughput_examples_per_sec": 55.05
+    },
+    {
+      "batch_size": 8,
+      "iterations": 20,
+      "mean_latency_ms": 133.931,
+      "p50_latency_ms": 133.771,
+      "p95_latency_ms": 136.575,
+      "throughput_examples_per_sec": 59.73
+    }
+  ],
+  "status": "measured"
 }

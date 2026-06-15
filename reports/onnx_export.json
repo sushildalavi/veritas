@@ -1,7 +1,7 @@
 {
   "checkpoint": "checkpoints/transformer_verifier_clean",
-  "git_commit": "3cd0611f155789b2f39d9fb4ecca551d9737b892",
-  "next_steps": "pip install onnx onnxruntime, then re-run scripts/export_verifier_onnx.py",
-  "reason": "the 'onnx' package is not installed in this environment",
-  "status": "skipped"
+  "git_commit": "8d058ae08e252cea9f169387b47e68d2ef6d7214",
+  "opset": 17,
+  "output": "checkpoints/transformer_verifier_clean_onnx/model.onnx",
+  "status": "exported"
 }

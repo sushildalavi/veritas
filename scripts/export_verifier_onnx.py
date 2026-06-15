@@ -79,20 +79,21 @@ def main() -> None:  # pragma: no cover - CLI entrypoint
     model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
     model.eval()
 
-    dummy_inputs = tokenizer("dummy input for export", return_tensors="pt")
+    dummy_inputs = tokenizer(["dummy input for export"] * 2, return_tensors="pt")
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    batch_dim = torch.export.Dim("batch")
+    sequence_dim = torch.export.Dim("sequence")
     torch.onnx.export(
         model,
         (dummy_inputs["input_ids"], dummy_inputs["attention_mask"]),
         str(output_path),
         input_names=["input_ids", "attention_mask"],
         output_names=["logits"],
-        dynamic_axes={
-            "input_ids": {0: "batch", 1: "sequence"},
-            "attention_mask": {0: "batch", 1: "sequence"},
-            "logits": {0: "batch"},
+        dynamic_shapes={
+            "input_ids": {0: batch_dim, 1: sequence_dim},
+            "attention_mask": {0: batch_dim, 1: sequence_dim},
         },
         opset_version=args.opset,
     )
