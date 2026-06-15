@@ -6,6 +6,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 import hashlib
 import math
+import re
 from typing import Literal
 
 from data.schemas import EvidenceSpan
@@ -33,7 +34,7 @@ class HashingEmbedder(EmbeddingBackend):
 
     def _encode_text(self, text: str) -> list[float]:
         vector = [0.0] * self.dimension
-        for token in text.lower().split():
+        for token in re.findall(r"[a-z0-9]+", text.lower()):
             digest = hashlib.sha256(token.encode("utf-8")).digest()
             for index in range(self.dimension):
                 vector[index] += ((digest[index % len(digest)] / 255.0) - 0.5)
