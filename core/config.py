@@ -46,7 +46,7 @@ class ProjectSettings:
     include_metadata_window: bool = False
     verifier_aggregation: str = "per_passage_max"
     support_threshold: float = 0.55
-    refute_threshold: float = 0.3
+    refute_threshold: float = 0.5
     explanation_mode: str = "template"
     max_candidates_for_reranking: int = 3
     num_explanation_candidates: int = 3
@@ -135,7 +135,7 @@ def load_project_settings(
         include_metadata_window=_coerce_bool(env_or_yaml("VERITAS_INCLUDE_METADATA_WINDOW", (("include_metadata_window",), ("retrieval", "include_metadata_window")), False)),
         verifier_aggregation=str(env_or_yaml("VERITAS_VERIFIER_AGGREGATION", (("verifier_aggregation",), ("verifier", "aggregation")), "per_passage_max")),
         support_threshold=float(env_or_yaml("VERITAS_SUPPORT_THRESHOLD", (("support_threshold",), ("verifier", "support_threshold")), 0.55)),
-        refute_threshold=float(env_or_yaml("VERITAS_REFUTE_THRESHOLD", (("refute_threshold",), ("verifier", "refute_threshold")), 0.3)),
+        refute_threshold=float(env_or_yaml("VERITAS_REFUTE_THRESHOLD", (("refute_threshold",), ("verifier", "refute_threshold")), 0.5)),
         explanation_mode=str(env_or_yaml("VERITAS_EXPLANATION_MODE", (("explanation_mode",),), "template")),
         max_candidates_for_reranking=int(env_or_yaml("VERITAS_MAX_CANDIDATES_FOR_RERANKING", (("max_candidates_for_reranking",),), 3)),
         num_explanation_candidates=int(env_or_yaml("VERITAS_NUM_EXPLANATION_CANDIDATES", (("num_explanation_candidates",),), 3)),

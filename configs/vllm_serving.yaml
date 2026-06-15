@@ -10,7 +10,7 @@ challenger_verifier_checkpoint: checkpoints/deberta_verifier_clean
 verifier:
   aggregation: per_passage_max
   support_threshold: 0.55
-  refute_threshold: 0.3
+  refute_threshold: 0.5
 explanation_mode: vllm
 vllm:
   base_url: http://127.0.0.1:8001
