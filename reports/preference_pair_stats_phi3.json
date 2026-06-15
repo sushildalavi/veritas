@@ -1,0 +1,24 @@
+{
+  "avg_chosen_words": 28.69,
+  "avg_prompt_words": 72.1,
+  "avg_rejected_words": 23.76,
+  "chosen_citation_valid_count": 1382,
+  "chosen_citation_valid_rate": 1.0,
+  "input_file": "data/processed/verifier_train.jsonl",
+  "label_distribution": {
+    "NOT ENOUGH INFO": 213,
+    "REFUTED": 340,
+    "SUPPORTED": 829
+  },
+  "output_jsonl": "data/dpo_preferences/preferences.jsonl",
+  "rejection_type_distribution": {
+    "invalid_citation": 461,
+    "unsupported_explanation": 460,
+    "wrong_verdict": 461
+  },
+  "sample_size": 1382,
+  "source_distribution": {
+    "fever": 1090,
+    "scifact": 292
+  }
+}

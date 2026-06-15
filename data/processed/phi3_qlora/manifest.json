@@ -1,0 +1,8 @@
+{
+  "counts": {
+    "test.jsonl": 642,
+    "train.jsonl": 2808,
+    "valid.jsonl": 649
+  },
+  "output_dir": "data/processed/phi3_qlora"
+}
