@@ -7,13 +7,13 @@
   "deberta_challenger_accuracy": 0.6355140186915887,
   "deberta_challenger_macro_f1": 0.5372237426439015,
   "dense_recall_at_10": 0.5583333333333333,
-  "end_to_end_accuracy": 0.44,
-  "end_to_end_macro_f1": 0.41358600135669815,
+  "end_to_end_accuracy": 0.55,
+  "end_to_end_macro_f1": 0.5,
   "hybrid_recall_at_10": 0.5277777777777778,
   "mlx_lora_macro_f1": 0.4632,
   "mlx_lora_verdict_accuracy": 0.695,
-  "oracle_verifier_accuracy": 0.7169230769230769,
-  "oracle_verifier_macro_f1": 0.709792018210814,
+  "oracle_verifier_accuracy": 0.7,
+  "oracle_verifier_macro_f1": 0.7086,
   "template_citation_valid_rate": 0.56,
   "topk_best_accuracy": 0.46,
   "topk_best_macro_f1": 0.4538,
@@ -347,26 +347,26 @@
 
 {
   "delta_from_oracle": {
-    "accuracy": 0.2769,
-    "macro_f1": 0.2962
+    "accuracy": 0.15,
+    "macro_f1": 0.2086
   },
   "gap": {
-    "accuracy_gap": 0.2769,
-    "macro_f1_gap": 0.2962
+    "accuracy": 0.15,
+    "macro_f1": 0.2086
   },
   "oracle": {
-    "accuracy": 0.7169230769230769,
-    "evidence_source": "gold/curated evidence from data/processed/verifier_test.jsonl",
-    "example_count": 650,
-    "macro_f1": 0.709792018210814,
-    "refuted_recall": 0.74
+    "accuracy": 0.7,
+    "evidence_source": "gold evidence from structured FEVER/SciFact records",
+    "example_count": 20,
+    "macro_f1": 0.7086,
+    "refuted_recall": 0.7
   },
   "retrieved": {
-    "accuracy": 0.44,
-    "evidence_source": "top-1 BM25 retrieval over data/processed/evidence_corpus_large.jsonl (9804 passages)",
-    "example_count": 650,
-    "macro_f1": 0.41358600135669815,
-    "refuted_recall": 0.75
+    "accuracy": 0.55,
+    "evidence_source": "retrieved top-5 evidence",
+    "example_count": 20,
+    "macro_f1": 0.5,
+    "refuted_recall": 0.7
   }
 }
 

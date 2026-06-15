@@ -6,7 +6,12 @@ import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from evaluation.reporting import write_report
 
@@ -23,8 +28,7 @@ REPORTS = [
     ReportRef("retrieval", Path("reports/retrieval_eval_neural_large.json")),
     ReportRef("ranking", Path("reports/ranking_eval_cross_encoder_large.json")),
     ReportRef("verifier", Path("reports/transformer_verifier_clean_eval.json")),
-    ReportRef("oracle_verifier", Path("reports/oracle_verifier_eval.json")),
-    ReportRef("end_to_end_verifier", Path("reports/end_to_end_verifier_eval.json")),
+    ReportRef("oracle_vs_retrieved_v2", Path("reports/oracle_vs_retrieved_v2.json")),
     ReportRef("topk_verifier", Path("reports/topk_verifier_eval.json")),
     ReportRef("mlx_lora", Path("reports/mlx_lora_eval_200.json")),
     ReportRef("mlx_lora_comparison", Path("reports/mlx_lora_comparison.json")),
@@ -96,8 +100,9 @@ def _load_json(path: Path) -> dict[str, Any] | None:
 
 
 def _highlights(loaded: dict[str, Any]) -> dict[str, Any]:
-    oracle = loaded.get("oracle_verifier", {})
-    end_to_end = loaded.get("end_to_end_verifier", {})
+    oracle_vs_retrieved = loaded.get("oracle_vs_retrieved_v2", {})
+    oracle = oracle_vs_retrieved.get("oracle", {}).get("per_passage_max", {})
+    end_to_end = oracle_vs_retrieved.get("retrieved", {}).get("per_passage_max", {})
     topk = loaded.get("topk_verifier", {})
     verifier = loaded.get("verifier", {})
     retrieval = loaded.get("retrieval", {})
@@ -234,9 +239,10 @@ def _verifier_summary(loaded: dict[str, Any]) -> dict[str, Any]:
 
 
 def _oracle_vs_retrieved_summary(loaded: dict[str, Any]) -> dict[str, Any]:
-    oracle = loaded.get("oracle_verifier", {})
-    end_to_end = loaded.get("end_to_end_verifier", {})
-    gap = end_to_end.get("oracle_vs_retrieved_gap", {})
+    report = loaded.get("oracle_vs_retrieved_v2", {})
+    oracle = report.get("oracle", {}).get("per_passage_max", {})
+    end_to_end = report.get("retrieved", {}).get("per_passage_max", {})
+    gap = report.get("delta_from_oracle", {}).get("per_passage_max", {})
     oracle_accuracy = oracle.get("accuracy")
     end_accuracy = end_to_end.get("accuracy")
     oracle_macro_f1 = oracle.get("macro_f1")
@@ -246,15 +252,15 @@ def _oracle_vs_retrieved_summary(loaded: dict[str, Any]) -> dict[str, Any]:
             "accuracy": oracle_accuracy,
             "macro_f1": oracle_macro_f1,
             "refuted_recall": _nested_get(oracle, ("per_class", "REFUTED", "recall")),
-            "example_count": oracle.get("example_count"),
-            "evidence_source": oracle.get("evidence_source"),
+            "example_count": report.get("sample_size"),
+            "evidence_source": "gold evidence from structured FEVER/SciFact records",
         },
         "retrieved": {
             "accuracy": end_accuracy,
             "macro_f1": end_macro_f1,
             "refuted_recall": _nested_get(end_to_end, ("per_class", "REFUTED", "recall")),
-            "example_count": end_to_end.get("example_count"),
-            "evidence_source": end_to_end.get("evidence_source"),
+            "example_count": report.get("sample_size"),
+            "evidence_source": f"retrieved top-{report.get('top_k')} evidence",
         },
         "gap": gap,
         "delta_from_oracle": {
