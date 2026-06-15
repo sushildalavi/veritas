@@ -28,9 +28,10 @@ Veritas is built to answer a practical research question: how far can a fully lo
 verification stack go without relying on CUDA, Colab, Kaggle, or bitsandbytes?
 
 The measured bottleneck is **evidence retrieval and ranking**: the verifier performs well when
-given gold (oracle) evidence, but drops sharply on retrieved evidence. On the larger checked-in
-v2 test slice (100 examples), oracle per-passage macro-F1 is 0.723 while retrieved per-passage
-macro-F1 is 0.450. The project's focus is closing that oracle-vs-retrieved gap through a
+given gold (oracle) evidence, but drops sharply on retrieved evidence. On the largest checked-in
+v2 test slice (200 examples), oracle per-passage macro-F1 is 0.7255 while retrieved per-passage
+macro-F1 is 0.464 (recall@10 0.4711). The 100-example slice shows the same pattern (oracle 0.723
+vs retrieved 0.450). The project's focus is closing that oracle-vs-retrieved gap through a
 fine-tuned bi-encoder retriever, a fine-tuned cross-encoder reranker, and a verifier trained to be
 robust to retrieval noise.
 
@@ -49,7 +50,8 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Oracle evidence verifier | 0.717 accuracy, 0.710 macro-F1 |
 | End-to-end verifier with retrieved evidence | 0.440 accuracy, 0.414 macro-F1 |
 | Oracle vs retrieved v2 (diagnostic 20-sample slice) | oracle 0.709 macro-F1, retrieved 0.500 macro-F1, recall@10 0.667 |
-| Oracle vs retrieved v2 (larger 100-sample slice) | oracle 0.723 macro-F1, retrieved 0.450 macro-F1, recall@10 0.543 |
+| Oracle vs retrieved v2 (100-sample slice) | oracle 0.723 macro-F1, retrieved 0.450 macro-F1, recall@10 0.543 |
+| Oracle vs retrieved v2 (largest 200-sample slice) | oracle 0.7255 macro-F1, retrieved 0.464 macro-F1, recall@10 0.4711 |
 | Threshold comparison on 100-sample slice | per-passage macro-F1 0.441 -> 0.462, NEI false-positive rate 0.807 -> 0.613 |
 | Top-k retrieved verifier (BM25 top-5) | 0.460 accuracy, 0.454 macro-F1 |
 | Retrieval ablation (MiniLM, val split) | 0.558 recall@10, above BM25 at 0.461 |
@@ -60,11 +62,38 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | MLX LoRA explanation adapter | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity |
 | DeBERTa challenger (xsmall) | 0.636 accuracy, 0.537 macro-F1, 0.036 refuted recall (macro-F1 below 0.55 threshold; REFUTED recall still low) |
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
-| Tests | 74 passed |
+| Tests | 107 passed |
 
 The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance, and larger evaluation made the retrieved-evidence numbers less flattering than the earlier 20-sample diagnostic slice.
 
 \* These rows were measured on the verifier dataset before the cross-split dedup above (2809/650/650). They are stale pending a retrain on the deduped 2808/649/642 split; the sklearn and DeBERTa rows have already been re-measured on the deduped split. The earlier DeBERTa run was also degenerate due to a separate bug: `microsoft/deberta-v3-xsmall` loads in fp16 by default on this transformers version, and training fp16 on CPU produced NaN gradients (`grad_norm: nan`, all predictions collapsed to SUPPORTED). Fixed by passing `dtype=torch.float32` in `_load_transformer()` in `scripts/train_transformer_verifier_clean.py`.
+
+## Retrieval Profile Comparison
+
+Measured on a 50-example slice of `fever_test_large` + `scifact_test_large` (see
+`reports/retrieval_profile_comparison.md`). All profiles below ran end-to-end on CPU; none were
+skipped or faked.
+
+| Profile | recall@10 | nDCG@10 | Retrieved per-passage macro-F1 |
+| --- | --- | --- | --- |
+| bm25_only | 0.601 | 0.5678 | 0.3693 |
+| dense_only (hashing embeddings) | 0.1507 | 0.0801 | 0.3453 |
+| hybrid_bm25_dense (hashing embeddings) | 0.5713 | 0.5168 | 0.4748 |
+| hybrid_with_query_expansion (hashing) | 0.597 | 0.5796 | 0.3871 |
+| hybrid_with_reranker (hashing + cross-encoder) | 0.621 | 0.6083 | 0.3976 |
+| hybrid_bm25_sentence_transformer (real MiniLM dense) | 0.6377 | 0.6106 | 0.4595 |
+
+Notes:
+
+- `dense_only` with hashing embeddings is intentionally weak; it exists as a baseline, not a
+  recommended configuration.
+- The real MiniLM-based hybrid (`hybrid_bm25_sentence_transformer`) gives the best retrieval
+  metrics (recall@10, nDCG@10) of any profile measured here, but the hashing-based
+  `hybrid_bm25_dense` still has the best per-passage verifier macro-F1 at this 50-example sample
+  size. Better retrieval ranking metrics do not monotonically translate into better verifier
+  macro-F1 in this slice -- both numbers are reported rather than picking one as "the" winner.
+- The cross-encoder reranker profile (`hybrid_with_reranker`) improves recall@10 and nDCG@10 over
+  the unreranked hashing hybrid but does not improve per-passage macro-F1 on this slice.
 
 ## Architecture
 
@@ -139,6 +168,13 @@ Larger verifier eval:
 
 ```bash
 python3 scripts/eval_oracle_vs_retrieved_v2.py --config configs/serving.yaml --max-examples 100 --report-json reports/oracle_vs_retrieved_v2_100.json --report-md reports/oracle_vs_retrieved_v2_100.md
+python3 scripts/eval_oracle_vs_retrieved_v2.py --config configs/serving.yaml --max-examples 200 --report-json reports/oracle_vs_retrieved_v2_200.json --report-md reports/oracle_vs_retrieved_v2_200.md
+```
+
+Retrieval profile comparison (bm25, dense, hybrid, query expansion, cross-encoder reranker, real MiniLM hybrid):
+
+```bash
+python3 scripts/compare_retrieval_profiles.py --config configs/serving.yaml --max-examples 50
 ```
 
 ## Research Workflow
@@ -182,9 +218,9 @@ Research mode:
 - The evaluation sets are sample-scale, not the full FEVER benchmark.
 - End-to-end performance is materially worse than oracle evidence performance.
 - Feeding top-5 retrieved evidence improves end-to-end macro-F1 to 0.454, but the oracle gap is still material.
-- The 20-sample v2 report is diagnostic only; the 100-sample v2 report is the primary checked-in verifier comparison.
-- The larger 100-sample v2 report still uses the `bm25_only` serving profile and no reranker; it should not be described as a hybrid result.
-- Retrieval-profile comparison on this machine used hashing-based dense/hybrid variants for CPU feasibility; the cross-encoder reranker profile was skipped and explicitly reported as skipped.
+- The 20-sample v2 report is diagnostic only; the 100-sample and 200-sample v2 reports are the primary checked-in verifier comparisons, with the 200-sample report being the largest.
+- The 100-sample and 200-sample v2 reports use the `bm25_only` serving profile and no reranker; they should not be described as a hybrid result.
+- The retrieval profile comparison (50-sample slice) measures `dense_only` and `hybrid_bm25_dense` with hashing embeddings as cheap baselines, and separately measures a real MiniLM-based hybrid (`hybrid_bm25_sentence_transformer`) and a cross-encoder reranker hybrid (`hybrid_with_reranker`); none of these profiles were skipped.
 - Threshold calibration and threshold comparison are still slice-based, not final benchmark-wide calibration.
 - Citation faithfulness is measured, not assumed.
 - The MLX LoRA explanation adapter is a small-sample result, not a benchmark claim.
