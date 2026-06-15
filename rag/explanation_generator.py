@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from typing import Callable
 
 from models.deberta_verifier import VerificationResult
@@ -46,6 +47,12 @@ def generate_explanation(
         evidence_block=context.format_block(),
     )
     response = generator(prompt)
+    payload = _parse_json_response(response)
+    if payload is not None:
+        explanation = str(payload.get("explanation", response))
+        citations = _extract_citations(payload.get("citations"))
+        return ExplanationOutput(explanation=explanation, citations=citations)
+
     citations = sorted(
         {
             int(token.strip("[]"))
@@ -54,3 +61,31 @@ def generate_explanation(
         }
     )
     return ExplanationOutput(explanation=response, citations=citations)
+
+
+def _parse_json_response(response: str) -> dict[str, object] | None:
+    cleaned = response.strip()
+    try:
+        payload = json.loads(cleaned)
+    except json.JSONDecodeError:
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start < 0 or end <= start:
+            return None
+        try:
+            payload = json.loads(cleaned[start : end + 1])
+        except json.JSONDecodeError:
+            return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _extract_citations(value: object) -> list[int]:
+    if not isinstance(value, list):
+        return []
+    citations: list[int] = []
+    for item in value:
+        if isinstance(item, int):
+            citations.append(item)
+        elif isinstance(item, str) and item.strip().isdigit():
+            citations.append(int(item.strip()))
+    return sorted(set(citations))
