@@ -1,0 +1,388 @@
+{
+  "best_gate_calibration_macro_f1": 0.4221,
+  "best_gate_threshold": 0.5,
+  "calibration_size": 3663,
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "config_path": "configs/serving.yaml",
+  "current_on_calibration": {
+    "fever": {
+      "accuracy": 0.3811,
+      "confusion_matrix": [
+        [
+          197,
+          173,
+          9
+        ],
+        [
+          93,
+          248,
+          6
+        ],
+        [
+          1049,
+          419,
+          632
+        ]
+      ],
+      "macro_f1": 0.3691,
+      "per_class": {
+        "NEI": {
+          "f1": 0.4601,
+          "precision": 0.9768,
+          "recall": 0.301
+        },
+        "REFUTES": {
+          "f1": 0.4179,
+          "precision": 0.2952,
+          "recall": 0.7147
+        },
+        "SUPPORTS": {
+          "f1": 0.2293,
+          "precision": 0.1471,
+          "recall": 0.5198
+        }
+      },
+      "support": 2826
+    },
+    "overall": {
+      "accuracy": 0.332,
+      "confusion_matrix": [
+        [
+          214,
+          276,
+          9
+        ],
+        [
+          94,
+          294,
+          7
+        ],
+        [
+          1105,
+          956,
+          708
+        ]
+      ],
+      "macro_f1": 0.3118,
+      "per_class": {
+        "NEI": {
+          "f1": 0.4054,
+          "precision": 0.9779,
+          "recall": 0.2557
+        },
+        "REFUTES": {
+          "f1": 0.3061,
+          "precision": 0.1927,
+          "recall": 0.7443
+        },
+        "SUPPORTS": {
+          "f1": 0.2238,
+          "precision": 0.1515,
+          "recall": 0.4289
+        }
+      },
+      "support": 3663
+    },
+    "scifact": {
+      "accuracy": 0.1661,
+      "confusion_matrix": [
+        [
+          17,
+          103,
+          0
+        ],
+        [
+          1,
+          46,
+          1
+        ],
+        [
+          56,
+          537,
+          76
+        ]
+      ],
+      "macro_f1": 0.1681,
+      "per_class": {
+        "NEI": {
+          "f1": 0.2038,
+          "precision": 0.987,
+          "recall": 0.1136
+        },
+        "REFUTES": {
+          "f1": 0.1253,
+          "precision": 0.0671,
+          "recall": 0.9583
+        },
+        "SUPPORTS": {
+          "f1": 0.1753,
+          "precision": 0.2297,
+          "recall": 0.1417
+        }
+      },
+      "support": 837
+    }
+  },
+  "current_on_holdout": {
+    "fever": {
+      "accuracy": 0.3681,
+      "confusion_matrix": [
+        [
+          193,
+          172,
+          4
+        ],
+        [
+          71,
+          275,
+          9
+        ],
+        [
+          902,
+          627,
+          572
+        ]
+      ],
+      "macro_f1": 0.3541,
+      "per_class": {
+        "NEI": {
+          "f1": 0.4259,
+          "precision": 0.9778,
+          "recall": 0.2723
+        },
+        "REFUTES": {
+          "f1": 0.3849,
+          "precision": 0.2561,
+          "recall": 0.7746
+        },
+        "SUPPORTS": {
+          "f1": 0.2515,
+          "precision": 0.1655,
+          "recall": 0.523
+        }
+      },
+      "support": 2825
+    },
+    "overall": {
+      "accuracy": 0.3368,
+      "confusion_matrix": [
+        [
+          214,
+          272,
+          5
+        ],
+        [
+          74,
+          341,
+          11
+        ],
+        [
+          967,
+          1109,
+          683
+        ]
+      ],
+      "macro_f1": 0.3192,
+      "per_class": {
+        "NEI": {
+          "f1": 0.395,
+          "precision": 0.9771,
+          "recall": 0.2476
+        },
+        "REFUTES": {
+          "f1": 0.3175,
+          "precision": 0.198,
+          "recall": 0.8005
+        },
+        "SUPPORTS": {
+          "f1": 0.2451,
+          "precision": 0.1705,
+          "recall": 0.4358
+        }
+      },
+      "support": 3676
+    },
+    "scifact": {
+      "accuracy": 0.2327,
+      "confusion_matrix": [
+        [
+          21,
+          100,
+          1
+        ],
+        [
+          3,
+          66,
+          2
+        ],
+        [
+          65,
+          482,
+          111
+        ]
+      ],
+      "macro_f1": 0.2234,
+      "per_class": {
+        "NEI": {
+          "f1": 0.2876,
+          "precision": 0.9737,
+          "recall": 0.1687
+        },
+        "REFUTES": {
+          "f1": 0.1836,
+          "precision": 0.1019,
+          "recall": 0.9296
+        },
+        "SUPPORTS": {
+          "f1": 0.1991,
+          "precision": 0.236,
+          "recall": 0.1721
+        }
+      },
+      "support": 851
+    }
+  },
+  "gate_grid": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6
+  ],
+  "gated_on_holdout": {
+    "fever": {
+      "accuracy": 0.6963,
+      "confusion_matrix": [
+        [
+          89,
+          95,
+          185
+        ],
+        [
+          35,
+          122,
+          198
+        ],
+        [
+          202,
+          143,
+          1756
+        ]
+      ],
+      "macro_f1": 0.4752,
+      "per_class": {
+        "NEI": {
+          "f1": 0.8283,
+          "precision": 0.8209,
+          "recall": 0.8358
+        },
+        "REFUTES": {
+          "f1": 0.3413,
+          "precision": 0.3389,
+          "recall": 0.3437
+        },
+        "SUPPORTS": {
+          "f1": 0.2561,
+          "precision": 0.273,
+          "recall": 0.2412
+        }
+      },
+      "support": 2825
+    },
+    "overall": {
+      "accuracy": 0.6785,
+      "confusion_matrix": [
+        [
+          97,
+          161,
+          233
+        ],
+        [
+          36,
+          159,
+          231
+        ],
+        [
+          216,
+          305,
+          2238
+        ]
+      ],
+      "macro_f1": 0.4511,
+      "per_class": {
+        "NEI": {
+          "f1": 0.8196,
+          "precision": 0.8283,
+          "recall": 0.8112
+        },
+        "REFUTES": {
+          "f1": 0.3026,
+          "precision": 0.2544,
+          "recall": 0.3732
+        },
+        "SUPPORTS": {
+          "f1": 0.231,
+          "precision": 0.2779,
+          "recall": 0.1976
+        }
+      },
+      "support": 3676
+    },
+    "scifact": {
+      "accuracy": 0.6193,
+      "confusion_matrix": [
+        [
+          8,
+          66,
+          48
+        ],
+        [
+          1,
+          37,
+          33
+        ],
+        [
+          14,
+          162,
+          482
+        ]
+      ],
+      "macro_f1": 0.3734,
+      "per_class": {
+        "NEI": {
+          "f1": 0.7895,
+          "precision": 0.8561,
+          "recall": 0.7325
+        },
+        "REFUTES": {
+          "f1": 0.2202,
+          "precision": 0.1396,
+          "recall": 0.5211
+        },
+        "SUPPORTS": {
+          "f1": 0.1103,
+          "precision": 0.3478,
+          "recall": 0.0656
+        }
+      },
+      "support": 851
+    }
+  },
+  "git_commit": "0e94481e6a1977641d9fc3365fd07682dc00d823",
+  "headline": "retrieved_evidence_verifier_eval complete: per-passage holdout macro_f1 improved by 0.1319 (0.3192 -> 0.4511)",
+  "holdout_delta": {
+    "accuracy": 0.3417,
+    "macro_f1": 0.1319
+  },
+  "holdout_size": 3676,
+  "runtime_seconds": 187.995,
+  "verdict": "per-passage holdout macro_f1 improved by 0.1319 (0.3192 -> 0.4511)"
+}
