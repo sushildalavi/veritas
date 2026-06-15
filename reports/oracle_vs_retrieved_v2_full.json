@@ -8,12 +8,12 @@
       "macro_f1": 0.3914
     },
     "per_passage_max": {
-      "accuracy": 0.2969,
-      "macro_f1": 0.2915
+      "accuracy": 0.2923,
+      "macro_f1": 0.2841
     }
   },
-  "git_commit": "58029c42993686caa1f0365e52962b97c1bc2454",
-  "headline": "oracle_vs_retrieved_v2 complete: retrieval recall@10=0.533, retrieved macro_f1 bundle=0.333, per_passage=0.383",
+  "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
+  "headline": "oracle_vs_retrieved_v2 complete: retrieval recall@10=0.533, retrieved macro_f1 bundle=0.333, per_passage=0.389",
   "label_distribution": {
     "NOT ENOUGH INFO": 224,
     "REFUTED": 200,
@@ -41,8 +41,8 @@
         ]
       ],
       "latency_ms": {
-        "p50": 12.0468,
-        "p95": 40.042
+        "p50": 14.0725,
+        "p95": 45.854
       },
       "macro_f1": 0.7246,
       "nei_false_positive_rate": 0.0,
@@ -65,18 +65,18 @@
       }
     },
     "per_passage_max": {
-      "accuracy": 0.7,
-      "average_confidence": 0.7029,
+      "accuracy": 0.6985,
+      "average_confidence": 0.7033,
       "confusion_matrix": [
         [
           80,
-          116,
-          30
+          113,
+          33
         ],
         [
           30,
-          151,
-          19
+          150,
+          20
         ],
         [
           0,
@@ -85,21 +85,21 @@
         ]
       ],
       "latency_ms": {
-        "p50": 21.6307,
-        "p95": 95.6221
+        "p50": 16.4359,
+        "p95": 62.3182
       },
-      "macro_f1": 0.6748,
+      "macro_f1": 0.6728,
       "nei_false_positive_rate": 0.0,
       "per_class": {
         "NOT ENOUGH INFO": {
-          "f1": 0.9014,
-          "precision": 0.8205,
+          "f1": 0.8942,
+          "precision": 0.8087,
           "recall": 1.0
         },
         "REFUTED": {
-          "f1": 0.6467,
-          "precision": 0.5655,
-          "recall": 0.755
+          "f1": 0.6479,
+          "precision": 0.5703,
+          "recall": 0.75
         },
         "SUPPORTED": {
           "f1": 0.4762,
@@ -120,7 +120,7 @@
     "recall@5": 0.4979,
     "recall@50": 0.5706
   },
-  "retrieval_runtime_seconds": 7.349,
+  "retrieval_runtime_seconds": 8.224,
   "retrieved": {
     "bundle": {
       "accuracy": 0.36,
@@ -143,8 +143,8 @@
         ]
       ],
       "latency_ms": {
-        "p50": 41.4074,
-        "p95": 97.8393
+        "p50": 36.6221,
+        "p95": 71.9113
       },
       "macro_f1": 0.3332,
       "nei_false_positive_rate": 0.8839,
@@ -167,8 +167,8 @@
       }
     },
     "per_passage_max": {
-      "accuracy": 0.4031,
-      "average_confidence": 0.5874,
+      "accuracy": 0.4062,
+      "average_confidence": 0.5925,
       "confusion_matrix": [
         [
           57,
@@ -177,31 +177,31 @@
         ],
         [
           21,
-          145,
-          34
+          142,
+          37
         ],
         [
           51,
-          113,
-          60
+          108,
+          65
         ]
       ],
       "latency_ms": {
-        "p50": 128.8377,
-        "p95": 426.1151
+        "p50": 97.5802,
+        "p95": 400.908
       },
-      "macro_f1": 0.3833,
-      "nei_false_positive_rate": 0.7321,
+      "macro_f1": 0.3887,
+      "nei_false_positive_rate": 0.7098,
       "per_class": {
         "NOT ENOUGH INFO": {
-          "f1": 0.3279,
-          "precision": 0.4225,
-          "recall": 0.2679
+          "f1": 0.3476,
+          "precision": 0.4333,
+          "recall": 0.2902
         },
         "REFUTED": {
-          "f1": 0.5009,
-          "precision": 0.3826,
-          "recall": 0.725
+          "f1": 0.4974,
+          "precision": 0.3827,
+          "recall": 0.71
         },
         "SUPPORTED": {
           "f1": 0.3211,
@@ -217,7 +217,7 @@
     "dense_top_k": 20,
     "final_top_k": 5,
     "query_expansion_top_k": 0,
-    "refute_threshold": 0.3,
+    "refute_threshold": 0.5,
     "rerank_top_k": 20,
     "rrf_top_k": 60,
     "support_threshold": 0.55,
@@ -229,6 +229,6 @@
     "scifact_test"
   ],
   "suffix": "_large",
-  "timestamp_utc": "2026-06-15T09:11:22.752359+00:00",
+  "timestamp_utc": "2026-06-15T10:06:54.345386+00:00",
   "top_k": 5
 }

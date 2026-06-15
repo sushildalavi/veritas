@@ -8,12 +8,12 @@
       "macro_f1": 0.3518
     },
     "per_passage_max": {
-      "accuracy": 0.27,
-      "macro_f1": 0.2727
+      "accuracy": 0.26,
+      "macro_f1": 0.2596
     }
   },
-  "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
-  "headline": "oracle_vs_retrieved_v2 complete: retrieval recall@10=0.543, retrieved macro_f1 bundle=0.390, per_passage=0.450",
+  "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
+  "headline": "oracle_vs_retrieved_v2 complete: retrieval recall@10=0.543, retrieved macro_f1 bundle=0.390, per_passage=0.462",
   "label_distribution": {
     "NOT ENOUGH INFO": 31,
     "REFUTED": 33,
@@ -41,8 +41,8 @@
         ]
       ],
       "latency_ms": {
-        "p50": 27.588,
-        "p95": 176.7043
+        "p50": 31.5794,
+        "p95": 45.1152
       },
       "macro_f1": 0.7419,
       "nei_false_positive_rate": 0.0,
@@ -66,12 +66,12 @@
     },
     "per_passage_max": {
       "accuracy": 0.73,
-      "average_confidence": 0.6823,
+      "average_confidence": 0.6849,
       "confusion_matrix": [
         [
           16,
-          17,
-          3
+          16,
+          4
         ],
         [
           4,
@@ -85,20 +85,20 @@
         ]
       ],
       "latency_ms": {
-        "p50": 15.8703,
-        "p95": 71.0524
+        "p50": 16.2722,
+        "p95": 76.1506
       },
-      "macro_f1": 0.7225,
+      "macro_f1": 0.7211,
       "nei_false_positive_rate": 0.0,
       "per_class": {
         "NOT ENOUGH INFO": {
-          "f1": 0.9118,
-          "precision": 0.8378,
+          "f1": 0.8986,
+          "precision": 0.8158,
           "recall": 1.0
         },
         "REFUTED": {
-          "f1": 0.6842,
-          "precision": 0.6047,
+          "f1": 0.6933,
+          "precision": 0.619,
           "recall": 0.7879
         },
         "SUPPORTED": {
@@ -120,7 +120,7 @@
     "recall@5": 0.501,
     "recall@50": 0.5755
   },
-  "retrieval_runtime_seconds": 1.245,
+  "retrieval_runtime_seconds": 1.122,
   "retrieved": {
     "bundle": {
       "accuracy": 0.41,
@@ -143,8 +143,8 @@
         ]
       ],
       "latency_ms": {
-        "p50": 37.5895,
-        "p95": 153.7578
+        "p50": 39.9684,
+        "p95": 61.7742
       },
       "macro_f1": 0.3901,
       "nei_false_positive_rate": 0.8065,
@@ -167,8 +167,8 @@
       }
     },
     "per_passage_max": {
-      "accuracy": 0.46,
-      "average_confidence": 0.5938,
+      "accuracy": 0.47,
+      "average_confidence": 0.5979,
       "confusion_matrix": [
         [
           13,
@@ -182,25 +182,25 @@
         ],
         [
           7,
-          13,
-          11
+          12,
+          12
         ]
       ],
       "latency_ms": {
-        "p50": 67.4824,
-        "p95": 215.3914
+        "p50": 66.3116,
+        "p95": 192.2044
       },
-      "macro_f1": 0.4498,
-      "nei_false_positive_rate": 0.6452,
+      "macro_f1": 0.4615,
+      "nei_false_positive_rate": 0.6129,
       "per_class": {
         "NOT ENOUGH INFO": {
-          "f1": 0.4,
-          "precision": 0.4583,
-          "recall": 0.3548
+          "f1": 0.4286,
+          "precision": 0.48,
+          "recall": 0.3871
         },
         "REFUTED": {
-          "f1": 0.5301,
-          "precision": 0.44,
+          "f1": 0.5366,
+          "precision": 0.449,
           "recall": 0.6667
         },
         "SUPPORTED": {
@@ -217,7 +217,7 @@
     "dense_top_k": 20,
     "final_top_k": 5,
     "query_expansion_top_k": 0,
-    "refute_threshold": 0.3,
+    "refute_threshold": 0.5,
     "rerank_top_k": 20,
     "rrf_top_k": 60,
     "support_threshold": 0.55,
@@ -229,6 +229,6 @@
     "scifact_test"
   ],
   "suffix": "_large",
-  "timestamp_utc": "2026-06-15T08:38:16.497065+00:00",
+  "timestamp_utc": "2026-06-15T10:03:13.321364+00:00",
   "top_k": 5
 }

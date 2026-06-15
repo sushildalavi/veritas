@@ -3,10 +3,10 @@
   "max_examples": 50,
   "profiles": {
     "bm25_only": {
-      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
       "latency_ms": {
-        "bundle_p50": 40.784,
-        "per_passage_p50": 77.2388
+        "bundle_p50": 40.3873,
+        "per_passage_p50": 82.3247
       },
       "reranker_backend": "none",
       "retrieval_backend": "bm25_only",
@@ -23,13 +23,13 @@
       "retrieved_bundle_nei_false_positive_rate": 0.8462,
       "retrieved_per_passage_macro_f1": 0.3693,
       "retrieved_per_passage_nei_false_positive_rate": 0.7692,
-      "runtime_seconds": 14.507,
+      "runtime_seconds": 15.272,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
         "final_top_k": 5,
         "query_expansion_top_k": 0,
-        "refute_threshold": 0.3,
+        "refute_threshold": 0.5,
         "rerank_top_k": 20,
         "rrf_top_k": 60,
         "support_threshold": 0.55,
@@ -39,10 +39,10 @@
       "status": "measured"
     },
     "dense_only": {
-      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
       "latency_ms": {
-        "bundle_p50": 34.792,
-        "per_passage_p50": 65.3039
+        "bundle_p50": 40.378,
+        "per_passage_p50": 89.5324
       },
       "reranker_backend": "none",
       "retrieval_backend": "dense_only",
@@ -57,15 +57,15 @@
       },
       "retrieved_bundle_macro_f1": 0.2886,
       "retrieved_bundle_nei_false_positive_rate": 0.2308,
-      "retrieved_per_passage_macro_f1": 0.3453,
+      "retrieved_per_passage_macro_f1": 0.281,
       "retrieved_per_passage_nei_false_positive_rate": 0.3077,
-      "runtime_seconds": 14.969,
+      "runtime_seconds": 18.045,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
         "final_top_k": 5,
         "query_expansion_top_k": 0,
-        "refute_threshold": 0.3,
+        "refute_threshold": 0.5,
         "rerank_top_k": 20,
         "rrf_top_k": 60,
         "support_threshold": 0.55,
@@ -75,10 +75,10 @@
       "status": "measured"
     },
     "hybrid_bm25_dense": {
-      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
       "latency_ms": {
-        "bundle_p50": 35.0003,
-        "per_passage_p50": 60.7928
+        "bundle_p50": 39.6245,
+        "per_passage_p50": 80.5938
       },
       "reranker_backend": "none",
       "retrieval_backend": "bm25_hashing_hybrid",
@@ -95,13 +95,13 @@
       "retrieved_bundle_nei_false_positive_rate": 0.8462,
       "retrieved_per_passage_macro_f1": 0.4748,
       "retrieved_per_passage_nei_false_positive_rate": 0.6154,
-      "runtime_seconds": 14.656,
+      "runtime_seconds": 17.721,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
         "final_top_k": 5,
         "query_expansion_top_k": 0,
-        "refute_threshold": 0.3,
+        "refute_threshold": 0.5,
         "rerank_top_k": 20,
         "rrf_top_k": 60,
         "support_threshold": 0.55,
@@ -111,10 +111,10 @@
       "status": "measured"
     },
     "hybrid_bm25_sentence_transformer": {
-      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
       "latency_ms": {
-        "bundle_p50": 18.6517,
-        "per_passage_p50": 53.9622
+        "bundle_p50": 19.6913,
+        "per_passage_p50": 61.8261
       },
       "reranker_backend": "none",
       "retrieval_backend": "bm25_sentence_transformer_hybrid",
@@ -131,13 +131,13 @@
       "retrieved_bundle_nei_false_positive_rate": 0.9231,
       "retrieved_per_passage_macro_f1": 0.4595,
       "retrieved_per_passage_nei_false_positive_rate": 0.6154,
-      "runtime_seconds": 59.249,
+      "runtime_seconds": 75.7,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
         "final_top_k": 5,
         "query_expansion_top_k": 0,
-        "refute_threshold": 0.3,
+        "refute_threshold": 0.5,
         "rerank_top_k": 20,
         "rrf_top_k": 60,
         "support_threshold": 0.55,
@@ -147,10 +147,10 @@
       "status": "measured"
     },
     "hybrid_with_query_expansion": {
-      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
       "latency_ms": {
-        "bundle_p50": 21.6908,
-        "per_passage_p50": 54.908
+        "bundle_p50": 26.9615,
+        "per_passage_p50": 78.1999
       },
       "reranker_backend": "none",
       "retrieval_backend": "bm25_hashing_hybrid",
@@ -165,15 +165,15 @@
       },
       "retrieved_bundle_macro_f1": 0.4483,
       "retrieved_bundle_nei_false_positive_rate": 0.8462,
-      "retrieved_per_passage_macro_f1": 0.3871,
-      "retrieved_per_passage_nei_false_positive_rate": 0.6923,
-      "runtime_seconds": 15.255,
+      "retrieved_per_passage_macro_f1": 0.4124,
+      "retrieved_per_passage_nei_false_positive_rate": 0.6154,
+      "runtime_seconds": 19.229,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
         "final_top_k": 5,
         "query_expansion_top_k": 10,
-        "refute_threshold": 0.3,
+        "refute_threshold": 0.5,
         "rerank_top_k": 20,
         "rrf_top_k": 60,
         "support_threshold": 0.55,
@@ -183,10 +183,10 @@
       "status": "measured"
     },
     "hybrid_with_reranker": {
-      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "git_commit": "24ac3ed8a0052eb77cece7d5d717a9ada2867de5",
       "latency_ms": {
-        "bundle_p50": 20.0209,
-        "per_passage_p50": 54.177
+        "bundle_p50": 27.1172,
+        "per_passage_p50": 84.0741
       },
       "reranker_backend": "cross_encoder",
       "retrieval_backend": "bm25_hashing_hybrid",
@@ -203,13 +203,13 @@
       "retrieved_bundle_nei_false_positive_rate": 0.6923,
       "retrieved_per_passage_macro_f1": 0.3976,
       "retrieved_per_passage_nei_false_positive_rate": 0.7692,
-      "runtime_seconds": 31.524,
+      "runtime_seconds": 40.337,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
         "final_top_k": 5,
         "query_expansion_top_k": 10,
-        "refute_threshold": 0.3,
+        "refute_threshold": 0.5,
         "rerank_top_k": 20,
         "rrf_top_k": 60,
         "support_threshold": 0.55,

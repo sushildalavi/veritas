@@ -1,7 +1,7 @@
 # Oracle vs Retrieved V2
 
 - Checkpoint: `checkpoints/transformer_verifier_clean`
-- Git commit: `58029c42993686caa1f0365e52962b97c1bc2454`
+- Git commit: `24ac3ed8a0052eb77cece7d5d717a9ada2867de5`
 - Config path: `configs/serving.yaml`
 - Dataset source: `structured records from fever_test_large, scifact_test_large`
 - Retrieval backend: `bm25_only`
@@ -9,7 +9,7 @@
 - Split prefixes: `fever_test, scifact_test`
 - Suffix: `_large`
 - Sample size: 650
-- Retrieval runtime (s): 7.349
+- Retrieval runtime (s): 8.224
 
 ## Retrieval metrics
 
@@ -26,11 +26,11 @@
 | mode | evidence | accuracy | macro_f1 | nei_false_positive_rate |
 | --- | --- | --- | --- | --- |
 | bundle | oracle | 0.7354 | 0.7246 | 0.0 |
-| per_passage_max | oracle | 0.7 | 0.6748 | 0.0 |
+| per_passage_max | oracle | 0.6985 | 0.6728 | 0.0 |
 | bundle | retrieved | 0.36 | 0.3332 | 0.8839 |
-| per_passage_max | retrieved | 0.4031 | 0.3833 | 0.7321 |
+| per_passage_max | retrieved | 0.4062 | 0.3887 | 0.7098 |
 
 ## Delta from oracle
 
 - bundle: accuracy gap=0.3754, macro_f1 gap=0.3914
-- per_passage_max: accuracy gap=0.2969, macro_f1 gap=0.2915
+- per_passage_max: accuracy gap=0.2923, macro_f1 gap=0.2841
