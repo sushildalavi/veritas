@@ -27,6 +27,7 @@ class ResponseCache:
         return entry.value
 
     def set(self, key: str, value: object) -> None:
+        self._purge_expired()
         self._store[key] = CacheEntry(value=value, expires_at=monotonic() + self.ttl_seconds)
 
     def size(self) -> int:
