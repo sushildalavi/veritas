@@ -67,6 +67,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Fine-tune a transformer verifier on the clean dataset.")
     parser.add_argument("--model-name", default="distilroberta-base")
     parser.add_argument("--data-dir", default="data/processed")
+    parser.add_argument("--train-file", default=None, help="Override training file (defaults to <data-dir>/verifier_train.jsonl)")
     parser.add_argument("--output-dir", default="checkpoints/transformer_verifier_clean")
     parser.add_argument("--report-json", default="reports/transformer_verifier_clean_eval.json")
     parser.add_argument("--report-md", default="reports/transformer_verifier_clean_eval.md")
@@ -99,7 +100,7 @@ def main() -> None:  # pragma: no cover - script entrypoint
     try:
         report = train_transformer_verifier(
             model_name=args.model_name,
-            train_file=data_dir / "verifier_train.jsonl",
+            train_file=Path(args.train_file) if args.train_file else data_dir / "verifier_train.jsonl",
             val_file=data_dir / "verifier_val.jsonl",
             test_file=data_dir / "verifier_test.jsonl",
             output_dir=output_dir,
