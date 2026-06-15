@@ -12,11 +12,32 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ModelRouter:
-    def __init__(self, verifier_checkpoint: str | Path | None = None, prefer_deberta: bool = True) -> None:
+    def __init__(
+        self,
+        verifier_checkpoint: str | Path | None = None,
+        prefer_deberta: bool = True,
+        *,
+        aggregation_mode: str = "per_passage_max",
+        support_threshold: float = 0.5,
+        refute_threshold: float = 0.5,
+    ) -> None:
         self.verifier_checkpoint = Path(verifier_checkpoint) if verifier_checkpoint else None
         self.prefer_deberta = prefer_deberta
-        self._mock = MockVerifier()
-        self._deberta = DebertaVerifier(self.verifier_checkpoint) if self.prefer_deberta else None
+        self._mock = MockVerifier(
+            aggregation_mode=aggregation_mode,
+            support_threshold=support_threshold,
+            refute_threshold=refute_threshold,
+        )
+        self._deberta = (
+            DebertaVerifier(
+                self.verifier_checkpoint,
+                aggregation_mode=aggregation_mode,
+                support_threshold=support_threshold,
+                refute_threshold=refute_threshold,
+            )
+            if self.prefer_deberta
+            else None
+        )
 
     def predict(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
         if self._deberta is not None and self._deberta._pipeline is not None:

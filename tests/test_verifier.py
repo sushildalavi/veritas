@@ -21,3 +21,18 @@ def test_model_router_falls_back_when_checkpoint_missing() -> None:
 
     assert result.verdict == "NOT ENOUGH INFO"
     assert result.model_name == "mock"
+
+
+def test_mock_verifier_per_passage_is_invariant_to_evidence_order() -> None:
+    verifier = MockVerifier(aggregation_mode="per_passage_max", support_threshold=0.5, refute_threshold=0.5)
+    evidence = [
+        EvidenceSpan(doc_id="1", text="This sentence is unrelated."),
+        EvidenceSpan(doc_id="2", text="Paris is in France."),
+    ]
+
+    first = verifier.predict("Paris is in France", evidence)
+    second = verifier.predict("Paris is in France", list(reversed(evidence)))
+
+    assert first.verdict == "SUPPORTED"
+    assert second.verdict == "SUPPORTED"
+    assert first.confidence == second.confidence

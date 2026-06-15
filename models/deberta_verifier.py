@@ -34,6 +34,17 @@ class MockVerifier:
 
     model_name = "mock"
 
+    def __init__(
+        self,
+        *,
+        aggregation_mode: str = "per_passage_max",
+        support_threshold: float = 0.5,
+        refute_threshold: float = 0.5,
+    ) -> None:
+        self.aggregation_mode = aggregation_mode
+        self.support_threshold = support_threshold
+        self.refute_threshold = refute_threshold
+
     def predict(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
         if not evidence:
             return VerificationResult(
@@ -43,12 +54,26 @@ class MockVerifier:
                 logits={"SUPPORTED": 0.0, "REFUTED": 0.0, "NOT ENOUGH INFO": 1.0},
                 model_name=self.model_name,
             )
+        if self.aggregation_mode == "per_passage_max" and len(evidence) > 1:
+            results = [self._score_single(claim, span) for span in evidence]
+            return _aggregate_results(
+                claim,
+                evidence,
+                results,
+                model_name=self.model_name,
+                support_threshold=self.support_threshold,
+                refute_threshold=self.refute_threshold,
+            )
+        return self._score_single(claim, evidence[0] if len(evidence) == 1 else EvidenceSpan(doc_id="bundle", text="\n".join(span.text for span in evidence)))
+
+    def _score_single(self, claim: str, span: EvidenceSpan) -> VerificationResult:
+        evidence = [span]
 
         claim_tokens = _tokens(claim)
-        evidence_tokens = set().union(*(_tokens(span.text) for span in evidence))
+        evidence_tokens = set().union(*(_tokens(candidate.text) for candidate in evidence))
         overlap = len(claim_tokens & evidence_tokens) / len(claim_tokens or {"x"})
         verdict = "SUPPORTED" if overlap >= 0.45 else "NOT ENOUGH INFO"
-        if any(_negates(span.text, claim) for span in evidence):
+        if any(_negates(candidate.text, claim) for candidate in evidence):
             verdict = "REFUTED"
         confidence = min(0.99, 0.45 + overlap / 2.0)
         explanation = _template_explanation(claim, evidence, verdict)
@@ -69,10 +94,25 @@ class MockVerifier:
 class DebertaVerifier:
     """Optional DeBERTa verifier. Falls back to `MockVerifier` when unavailable."""
 
-    def __init__(self, checkpoint_path: str | Path | None = None, model_name: str = "microsoft/deberta-v3-base") -> None:
+    def __init__(
+        self,
+        checkpoint_path: str | Path | None = None,
+        model_name: str = "microsoft/deberta-v3-base",
+        *,
+        aggregation_mode: str = "per_passage_max",
+        support_threshold: float = 0.5,
+        refute_threshold: float = 0.5,
+    ) -> None:
         self.checkpoint_path = Path(checkpoint_path) if checkpoint_path else None
         self.model_name = model_name
-        self._fallback = MockVerifier()
+        self.aggregation_mode = aggregation_mode
+        self.support_threshold = support_threshold
+        self.refute_threshold = refute_threshold
+        self._fallback = MockVerifier(
+            aggregation_mode=aggregation_mode,
+            support_threshold=support_threshold,
+            refute_threshold=refute_threshold,
+        )
         self._pipeline = None
         self._backend = "mock"
         self._label_order = list(VALID_LABELS)
@@ -101,6 +141,21 @@ class DebertaVerifier:
         self.model_name = "mock"
 
     def predict(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
+        if self._pipeline is None:
+            return self._fallback.predict(claim, evidence)
+        if self.aggregation_mode == "per_passage_max" and len(evidence) > 1:
+            results = [self._predict_single(claim, [span]) for span in evidence]
+            return _aggregate_results(
+                claim,
+                evidence,
+                results,
+                model_name=self.model_name,
+                support_threshold=self.support_threshold,
+                refute_threshold=self.refute_threshold,
+            )
+        return self._predict_single(claim, evidence)
+
+    def _predict_single(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
         if self._pipeline is None:
             return self._fallback.predict(claim, evidence)
 
@@ -158,6 +213,47 @@ def _build_verification_input(claim: str, evidence: list[EvidenceSpan]) -> str:
 def _template_explanation(claim: str, evidence: list[EvidenceSpan], verdict: str) -> str:
     evidence_summary = evidence[0].text if evidence else "No evidence retrieved."
     return f"Verdict: {verdict}. Claim: {claim}. Supporting evidence: {evidence_summary}"
+
+
+def _aggregate_results(
+    claim: str,
+    evidence: list[EvidenceSpan],
+    results: list[VerificationResult],
+    *,
+    model_name: str,
+    support_threshold: float,
+    refute_threshold: float,
+) -> VerificationResult:
+    support_scores = [result.logits.get("SUPPORTED", result.confidence if result.verdict == "SUPPORTED" else 0.0) for result in results]
+    refute_scores = [result.logits.get("REFUTED", result.confidence if result.verdict == "REFUTED" else 0.0) for result in results]
+    nei_scores = [result.logits.get("NOT ENOUGH INFO", result.confidence if result.verdict == "NOT ENOUGH INFO" else 0.0) for result in results]
+    support_score = max(support_scores, default=0.0)
+    refute_score = max(refute_scores, default=0.0)
+    nei_score = max(nei_scores, default=0.0)
+    if support_score >= support_threshold and support_score > refute_score:
+        verdict = "SUPPORTED"
+        winning_index = support_scores.index(support_score)
+        confidence = support_score
+    elif refute_score >= refute_threshold and refute_score > support_score:
+        verdict = "REFUTED"
+        winning_index = refute_scores.index(refute_score)
+        confidence = refute_score
+    else:
+        verdict = "NOT ENOUGH INFO"
+        winning_index = nei_scores.index(nei_score) if nei_scores else 0
+        confidence = max(nei_score, 1.0 - max(support_score, refute_score))
+    supporting_span = [evidence[winning_index]] if evidence else []
+    return VerificationResult(
+        verdict=verdict,
+        confidence=float(confidence),
+        explanation=_template_explanation(claim, supporting_span, verdict),
+        logits={
+            "SUPPORTED": float(support_score),
+            "REFUTED": float(refute_score),
+            "NOT ENOUGH INFO": float(nei_score),
+        },
+        model_name=model_name,
+    )
 
 
 def _tokens(text: str) -> set[str]:

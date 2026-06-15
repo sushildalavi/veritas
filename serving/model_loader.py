@@ -82,7 +82,13 @@ def load_pipeline(
     reranker_runtime = _load_reranker_runtime(settings)
     retriever = retrieval_runtime.retriever
     prefer_deberta = settings.verifier_backend.lower() != "mock"
-    verifier = ModelRouter(verifier_checkpoint=verifier_checkpoint, prefer_deberta=prefer_deberta)
+    verifier = ModelRouter(
+        verifier_checkpoint=verifier_checkpoint,
+        prefer_deberta=prefer_deberta,
+        aggregation_mode=settings.verifier_aggregation,
+        support_threshold=settings.support_threshold,
+        refute_threshold=settings.refute_threshold,
+    )
     explanation_generator = _build_explanation_generator(settings)
     reflection_loop = ReflectionLoop(
         retriever=retriever,
