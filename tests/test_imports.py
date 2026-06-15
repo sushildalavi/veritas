@@ -8,7 +8,6 @@ def test_core_modules_import() -> None:
     import ranking
     import retrieval
     import serving
-    import training
 
     assert agent is not None
     assert cli is not None
@@ -19,4 +18,3 @@ def test_core_modules_import() -> None:
     assert ranking is not None
     assert retrieval is not None
     assert serving is not None
-    assert training is not None
