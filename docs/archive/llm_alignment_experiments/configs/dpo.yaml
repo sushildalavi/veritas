@@ -1,6 +1,0 @@
-# Offline optional extension only.
-base_model: microsoft/phi-2
-training:
-  beta: 0.1
-  max_seq_length: 1024
-  output_dir: checkpoints/dpo

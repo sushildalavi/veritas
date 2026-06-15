@@ -22,13 +22,6 @@ Veritas is a Mac-first factual claim verification system built around reproducib
 - Explanation-only SFT and preference reranking scripts
 - Production-style API and UI entrypoints
 
-## Historical archive
-
-Legacy CUDA/Colab/Kaggle experiments are preserved under `docs/archive/cuda_experiments/`.
-Earlier DPO/QLoRA alignment scaffolding is preserved under `docs/archive/llm_alignment_experiments/`.
-Neither is part of the final architecture, which focuses on evidence retrieval, reranking, and
-verifier robustness rather than LLM alignment.
-
 ## Reality check
 
 The repository is research-grade, not SOTA.
