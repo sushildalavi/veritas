@@ -32,7 +32,11 @@ class HybridRetriever:
             [[span.doc_id for span in bm25_results], [span.doc_id for span in dense_results]],
             k=self.rrf_k,
         )
-        lookup = {span.doc_id: span for span in [*bm25_results, *dense_results]}
+        lookup: dict[str, EvidenceSpan] = {}
+        for span in [*bm25_results, *dense_results]:
+            current = lookup.get(span.doc_id)
+            if current is None or (span.score or 0.0) >= (current.score or 0.0):
+                lookup[span.doc_id] = span
         fused: list[EvidenceSpan] = []
         for doc_id, score in scores[:top_k]:
             span = lookup[doc_id]
