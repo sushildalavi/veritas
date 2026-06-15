@@ -44,7 +44,11 @@ def test_deberta_pipeline_prediction_uses_truncation() -> None:
 
     def fake_pipeline(text, **kwargs):  # noqa: ANN001
         seen_kwargs.update(kwargs)
-        return {"label": "SUPPORTED", "score": 0.8}
+        return [
+            {"label": "SUPPORTED", "score": 0.8},
+            {"label": "REFUTED", "score": 0.1},
+            {"label": "NOT ENOUGH INFO", "score": 0.1},
+        ]
 
     verifier._pipeline = fake_pipeline
     verifier._backend = "transformers"
@@ -54,4 +58,7 @@ def test_deberta_pipeline_prediction_uses_truncation() -> None:
     result = verifier._predict_single("Paris is in France", [EvidenceSpan(doc_id="1", text="Paris is in France." * 100)])
 
     assert result.verdict == "SUPPORTED"
-    assert seen_kwargs == {"truncation": True, "max_length": 512}
+    assert result.logits["SUPPORTED"] == 0.8
+    assert result.logits["REFUTED"] == 0.1
+    assert result.logits["NOT ENOUGH INFO"] == 0.1
+    assert seen_kwargs == {"truncation": True, "max_length": 512, "top_k": None}

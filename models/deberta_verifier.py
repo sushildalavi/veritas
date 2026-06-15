@@ -163,16 +163,15 @@ class DebertaVerifier:
             return self._predict_with_sklearn(claim, evidence)
 
         text = _build_verification_input(claim, evidence)
-        outputs = self._pipeline(text, truncation=True, max_length=512)
-        if isinstance(outputs, list):
-            outputs = outputs[0]
-        label = normalize_label(outputs.get("label", "NOT ENOUGH INFO"))
-        score = float(outputs.get("score", 0.0))
+        outputs = self._pipeline(text, truncation=True, max_length=512, top_k=None)
+        label_scores = _coerce_label_scores(outputs)
+        label = max(label_scores, key=label_scores.get)
+        score = float(label_scores[label])
         return VerificationResult(
             verdict=label,
             confidence=score,
             explanation=_template_explanation(claim, evidence, label),
-            logits={label: score},
+            logits=label_scores,
             model_name=self.model_name,
         )
 
@@ -258,6 +257,17 @@ def _aggregate_results(
 
 def _tokens(text: str) -> set[str]:
     return {token for token in text.lower().split() if token}
+
+
+def _coerce_label_scores(outputs: Any) -> dict[str, float]:
+    if isinstance(outputs, dict):
+        label = normalize_label(outputs.get("label", "NOT ENOUGH INFO"))
+        return {candidate: float(outputs.get("score", 0.0)) if candidate == label else 0.0 for candidate in VALID_LABELS}
+    scores = {label: 0.0 for label in VALID_LABELS}
+    for item in outputs:
+        label = normalize_label(item.get("label", "NOT ENOUGH INFO"))
+        scores[label] = float(item.get("score", 0.0))
+    return scores
 
 
 def _negates(evidence_text: str, claim: str) -> bool:
