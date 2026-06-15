@@ -62,3 +62,18 @@ def test_deberta_pipeline_prediction_uses_truncation() -> None:
     assert result.logits["REFUTED"] == 0.1
     assert result.logits["NOT ENOUGH INFO"] == 0.1
     assert seen_kwargs == {"truncation": True, "max_length": 512, "top_k": None}
+
+
+def test_mock_verifier_scores_each_passage() -> None:
+    verifier = MockVerifier()
+    results = verifier.score_evidence_passages(
+        "Paris is in France",
+        [
+            EvidenceSpan(doc_id="1", text="Paris is in France."),
+            EvidenceSpan(doc_id="2", text="Ottawa is in Canada."),
+        ],
+    )
+
+    assert len(results) == 2
+    assert results[0].verdict in VALID_LABELS
+    assert results[1].verdict in VALID_LABELS

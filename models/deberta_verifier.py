@@ -55,7 +55,7 @@ class MockVerifier:
                 model_name=self.model_name,
             )
         if self.aggregation_mode == "per_passage_max" and len(evidence) > 1:
-            results = [self._score_single(claim, span) for span in evidence]
+            results = self.score_evidence_passages(claim, evidence)
             return _aggregate_results(
                 claim,
                 evidence,
@@ -65,6 +65,9 @@ class MockVerifier:
                 refute_threshold=self.refute_threshold,
             )
         return self._score_single(claim, evidence[0] if len(evidence) == 1 else EvidenceSpan(doc_id="bundle", text="\n".join(span.text for span in evidence)))
+
+    def score_evidence_passages(self, claim: str, evidence: list[EvidenceSpan]) -> list[VerificationResult]:
+        return [self._score_single(claim, span) for span in evidence]
 
     def _score_single(self, claim: str, span: EvidenceSpan) -> VerificationResult:
         evidence = [span]
@@ -144,7 +147,7 @@ class DebertaVerifier:
         if self._pipeline is None:
             return self._fallback.predict(claim, evidence)
         if self.aggregation_mode == "per_passage_max" and len(evidence) > 1:
-            results = [self._predict_single(claim, [span]) for span in evidence]
+            results = self.score_evidence_passages(claim, evidence)
             return _aggregate_results(
                 claim,
                 evidence,
@@ -154,6 +157,11 @@ class DebertaVerifier:
                 refute_threshold=self.refute_threshold,
             )
         return self._predict_single(claim, evidence)
+
+    def score_evidence_passages(self, claim: str, evidence: list[EvidenceSpan]) -> list[VerificationResult]:
+        if self._pipeline is None:
+            return self._fallback.score_evidence_passages(claim, evidence)
+        return [self._predict_single(claim, [span]) for span in evidence]
 
     def _predict_single(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
         if self._pipeline is None:

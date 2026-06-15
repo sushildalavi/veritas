@@ -45,6 +45,12 @@ class ModelRouter:
         LOGGER.warning("Using mock verifier fallback")
         return self._mock.predict(claim, evidence)
 
+    def score_evidence_passages(self, claim: str, evidence: list[EvidenceSpan]) -> list[VerificationResult]:
+        if self._deberta is not None and self._deberta._pipeline is not None:
+            return self._deberta.score_evidence_passages(claim, evidence)
+        LOGGER.warning("Using mock verifier fallback")
+        return self._mock.score_evidence_passages(claim, evidence)
+
     @property
     def model_name(self) -> str:
         if self._deberta is not None and self._deberta._pipeline is not None:
