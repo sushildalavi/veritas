@@ -163,7 +163,7 @@ class DebertaVerifier:
             return self._predict_with_sklearn(claim, evidence)
 
         text = _build_verification_input(claim, evidence)
-        outputs = self._pipeline(text)
+        outputs = self._pipeline(text, truncation=True, max_length=512)
         if isinstance(outputs, list):
             outputs = outputs[0]
         label = normalize_label(outputs.get("label", "NOT ENOUGH INFO"))

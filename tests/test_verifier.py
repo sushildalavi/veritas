@@ -36,3 +36,22 @@ def test_mock_verifier_per_passage_is_invariant_to_evidence_order() -> None:
     assert first.verdict == "SUPPORTED"
     assert second.verdict == "SUPPORTED"
     assert first.confidence == second.confidence
+
+
+def test_deberta_pipeline_prediction_uses_truncation() -> None:
+    verifier = DebertaVerifier.__new__(DebertaVerifier)
+    seen_kwargs = {}
+
+    def fake_pipeline(text, **kwargs):  # noqa: ANN001
+        seen_kwargs.update(kwargs)
+        return {"label": "SUPPORTED", "score": 0.8}
+
+    verifier._pipeline = fake_pipeline
+    verifier._backend = "transformers"
+    verifier._fallback = MockVerifier()
+    verifier.model_name = "fake"
+
+    result = verifier._predict_single("Paris is in France", [EvidenceSpan(doc_id="1", text="Paris is in France." * 100)])
+
+    assert result.verdict == "SUPPORTED"
+    assert seen_kwargs == {"truncation": True, "max_length": 512}
