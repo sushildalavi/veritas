@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data build-large-sample-data eval-retrieval eval-ranking eval-retrieval-large eval-ranking-large eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real demo ui cli export-demo-corpus audit manifest all-evals verify-local build-mlx-lora-data train-mlx-lora eval-mlx-lora eval-topk-verifier
+.PHONY: setup test lint data build-sample-data build-large-sample-data eval-retrieval eval-ranking eval-retrieval-large eval-ranking-large eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real serve-vllm-explanations demo ui cli export-demo-corpus audit manifest all-evals verify-local build-mlx-lora-data train-mlx-lora eval-mlx-lora eval-topk-verifier
 
 setup:
 	python3 -m pip install -r requirements.txt
@@ -67,6 +67,9 @@ serve:
 
 serve-real:
 	VERITAS_VERIFIER_CHECKPOINT=checkpoints/transformer_verifier_clean python3 -m uvicorn serving.api:app --reload
+
+serve-vllm-explanations:
+	python3 scripts/serve_vllm_explanations.py
 
 demo:
 	python3 app.py
