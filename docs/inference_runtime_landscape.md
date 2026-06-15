@@ -97,7 +97,7 @@ benchmark variant to add once the current numbers are reviewed.
 
 | Technology | Status in Veritas | Why it's relevant |
 | --- | --- | --- |
-| ONNX Runtime | Scaffolded (`serving/onnx_verifier_backend.py`), skips without `onnxruntime` | Portable CPU inference for the verifier |
+| ONNX Runtime | Measured on CPU (`serving/onnx_verifier_backend.py`, `reports/onnx_verifier_benchmark.json`); slower than PyTorch CPU here | Portable CPU inference for the verifier |
 | Triton (GPU kernels) | Scaffolded (`scripts/benchmark_triton_dense_scoring.py`), skips without CUDA | Dense-retrieval scoring kernel example |
 | vLLM | Implemented (`serving/vllm_client.py`), skips without a running server | Explanation generation serving |
 | SGLang | Architecture note only | Constrained JSON decoding + prefix caching for explanations |

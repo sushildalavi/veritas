@@ -95,9 +95,47 @@ vLLM: `status: skipped` (`vllm endpoint unavailable in current environment`).
 
 ## ONNX verifier runtime
 
-See `docs/inference_runtime_landscape.md` for the ONNX/Triton scaffolding
-status and how to run those benchmarks on a host with `onnxruntime` /
-`triton` / CUDA installed.
+`scripts/export_verifier_onnx.py` exports the
+`checkpoints/transformer_verifier_clean` checkpoint to ONNX, and
+`scripts/benchmark_verifier_onnx.py` benchmarks it via
+`onnxruntime.InferenceSession` (CPU execution provider), matching the batch
+sizes used in the PyTorch verifier benchmark above.
+
+```bash
+pip install onnx onnxruntime onnxscript
+python3 scripts/export_verifier_onnx.py
+python3 scripts/benchmark_verifier_onnx.py
+```
+
+Output: `reports/onnx_export.json` / `.md`, `reports/onnx_verifier_benchmark.json` / `.md`.
+
+Export note: with `torch` 2.11, `torch.onnx.export(..., dynamo=True)` (the
+default) requires a dummy batch size > 1 and `dynamic_shapes` (rather than
+`dynamic_axes`, which is ignored under `dynamo=True`) for the batch dimension
+to remain dynamic in the exported graph -- otherwise the exported model only
+accepts batch size 1. `scripts/export_verifier_onnx.py` now exports with a
+dummy batch of 2 and `dynamic_shapes`. The exported model's outputs match the
+PyTorch model to within 5.5e-6 absolute difference on a 3-example batch.
+
+Latest measured results (CPU, batch sizes 1/8), compared against the PyTorch
+CPU numbers from the table above:
+
+| backend | batch_size | mean_latency_ms | throughput (examples/sec) |
+| --- | --- | --- | --- |
+| pytorch (cpu) | 1 | 16.0 | 62.4 |
+| onnxruntime (cpu) | 1 | 18.2 | 55.1 |
+| pytorch (cpu) | 8 | 58.9 | 135.8 |
+| onnxruntime (cpu) | 8 | 133.9 | 59.7 |
+
+On this machine, ONNX Runtime (default CPU execution provider, no further
+tuning) is slower than the PyTorch CPU baseline at both batch sizes -- **no
+ONNX speedup is claimed**. This may reflect PyTorch's Accelerate/MPS-tuned
+kernels on Apple Silicon outperforming the default ONNX Runtime CPU provider;
+it has not been investigated further (e.g. `onnxruntime` execution-provider
+tuning, `CoreMLExecutionProvider`).
+
+See `docs/inference_runtime_landscape.md` for the Triton scaffolding status
+and how to run it on a host with CUDA installed.
 
 ## What is measured vs scaffolded
 
@@ -106,6 +144,12 @@ status and how to run those benchmarks on a host with `onnxruntime` /
 | Verifier (PyTorch, CPU/MPS) | Measured | `reports/verifier_inference_benchmark.json` |
 | Explanation generation (transformers, CPU/MPS) | Measured | `reports/inference_benchmark.json` |
 | Explanation generation (vLLM) | Skipped (no server running) | Runnable once a vLLM server is started |
-| Verifier (ONNX Runtime) | Scaffolded, not run | `onnxruntime` not installed locally |
+| Verifier (ONNX Runtime, CPU) | Measured (slower than PyTorch CPU here) | `reports/onnx_export.json`, `reports/onnx_verifier_benchmark.json` |
 | Dense-scoring microbenchmark (Triton/CUDA) | Scaffolded, not run | No CUDA/Triton locally |
 | SGLang / MLC / FlashAttention / TVM / MLIR | Architecture notes only | See `docs/inference_runtime_landscape.md` |
+
+## JD alignment
+
+Veritas now includes runtime benchmarking across Transformers fallback, vLLM
+endpoint serving, optional ONNX Runtime verifier inference, and optional
+Triton dense-scoring kernels.

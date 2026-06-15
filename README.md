@@ -149,11 +149,19 @@ batching, and fallback behavior, all measured (not estimated):
   otherwise it writes a `status: skipped` report with the exact command to
   start one. `serving/vllm_client.py` retries on connection errors and falls
   back to a well-formed JSON response after exhausting retries.
-- **ONNX Runtime / Triton (GPU)**: `scripts/export_verifier_onnx.py`,
-  `scripts/benchmark_verifier_onnx.py`, and `scripts/benchmark_triton_dense_scoring.py`
-  are runnable scripts that write `status: skipped` reports with required
-  dependencies/hardware on machines without `onnxruntime`/CUDA/Triton (the
-  case for this development machine).
+- **ONNX Runtime (verifier, CPU)**: `scripts/export_verifier_onnx.py` and
+  `scripts/benchmark_verifier_onnx.py` export the verifier checkpoint to ONNX
+  and measure `onnxruntime` CPU latency/throughput. On this machine, the
+  default ONNX Runtime CPU provider is slower than the PyTorch CPU baseline
+  (no ONNX speedup is claimed here).
+- **Triton (GPU)**: `scripts/benchmark_triton_dense_scoring.py` is a runnable
+  script that writes a `status: skipped` report with the required
+  CUDA/Triton environment on machines without a GPU (the case for this
+  development machine).
+
+Veritas now includes runtime benchmarking across Transformers fallback, vLLM
+endpoint serving, optional ONNX Runtime verifier inference, and optional
+Triton dense-scoring kernels.
 
 See `docs/inference_performance.md` for full results and
 `docs/inference_runtime_landscape.md` for architecture notes on
