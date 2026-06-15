@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import logging
 import sys
@@ -151,18 +152,18 @@ def _load_passages(evidence_corpus_path: str | Path | None) -> list[EvidenceSpan
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
-        import json
-
-        payload = json.loads(line)
-        passages.append(
-            EvidenceSpan(
-                doc_id=str(payload.get("doc_id", len(passages))),
-                text=str(payload.get("text", "")),
-                title=payload.get("title"),
-                score=payload.get("score"),
-            )
-        )
+        passages.append(_parse_passage(line, fallback_doc_id=len(passages)))
     return passages or build_passage_corpus(DEFAULT_DEMO_PASSAGES)
+
+
+def _parse_passage(line: str, *, fallback_doc_id: int) -> EvidenceSpan:
+    payload = json.loads(line)
+    return EvidenceSpan(
+        doc_id=str(payload.get("doc_id", fallback_doc_id)),
+        text=str(payload.get("text", "")),
+        title=payload.get("title"),
+        score=payload.get("score"),
+    )
 
 
 def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSettings) -> RetrievalRuntime:
