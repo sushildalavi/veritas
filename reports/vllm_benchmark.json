@@ -1,0 +1,14 @@
+{
+  "backends": {
+    "configured_backend": {
+      "available": true,
+      "latency_ms": 0.212,
+      "mode": "vllm"
+    }
+  },
+  "config_path": "configs/vllm_serving.yaml",
+  "reason": "vllm endpoint unavailable in current environment",
+  "status": "skipped",
+  "vllm_endpoint": "http://127.0.0.1:8001",
+  "vllm_model": "Qwen/Qwen2.5-1.5B-Instruct"
+}

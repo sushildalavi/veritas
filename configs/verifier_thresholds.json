@@ -1,0 +1,13 @@
+{
+  "calibration_split_prefixes": [
+    "fever_val",
+    "scifact_val"
+  ],
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "config_path": "configs/serving.yaml",
+  "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
+  "refute_threshold": 0.5,
+  "status": "diagnostic_calibrated_from_validation_slice",
+  "support_threshold": 0.55,
+  "timestamp_utc": "2026-06-15T08:38:05.191003+00:00"
+}

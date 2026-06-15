@@ -1,0 +1,215 @@
+{
+  "calibrated_thresholds": {
+    "refute_threshold": 0.5,
+    "retrieved": {
+      "bundle": {
+        "accuracy": 0.41,
+        "average_confidence": 0.5549,
+        "confusion_matrix": [
+          [
+            16,
+            17,
+            3
+          ],
+          [
+            12,
+            19,
+            2
+          ],
+          [
+            13,
+            12,
+            6
+          ]
+        ],
+        "latency_ms": {
+          "p50": 26.2489,
+          "p95": 49.9798
+        },
+        "macro_f1": 0.3901,
+        "nei_false_positive_rate": 0.8065,
+        "per_class": {
+          "NOT ENOUGH INFO": {
+            "f1": 0.2857,
+            "precision": 0.5455,
+            "recall": 0.1935
+          },
+          "REFUTED": {
+            "f1": 0.4691,
+            "precision": 0.3958,
+            "recall": 0.5758
+          },
+          "SUPPORTED": {
+            "f1": 0.4156,
+            "precision": 0.3902,
+            "recall": 0.4444
+          }
+        }
+      },
+      "per_passage_max": {
+        "accuracy": 0.47,
+        "average_confidence": 0.5979,
+        "confusion_matrix": [
+          [
+            13,
+            15,
+            8
+          ],
+          [
+            6,
+            22,
+            5
+          ],
+          [
+            7,
+            12,
+            12
+          ]
+        ],
+        "latency_ms": {
+          "p50": 66.1655,
+          "p95": 148.2473
+        },
+        "macro_f1": 0.4615,
+        "nei_false_positive_rate": 0.6129,
+        "per_class": {
+          "NOT ENOUGH INFO": {
+            "f1": 0.4286,
+            "precision": 0.48,
+            "recall": 0.3871
+          },
+          "REFUTED": {
+            "f1": 0.5366,
+            "precision": 0.449,
+            "recall": 0.6667
+          },
+          "SUPPORTED": {
+            "f1": 0.4194,
+            "precision": 0.5,
+            "recall": 0.3611
+          }
+        }
+      }
+    },
+    "support_threshold": 0.55
+  },
+  "default_thresholds": {
+    "refute_threshold": 0.5,
+    "retrieved": {
+      "bundle": {
+        "accuracy": 0.41,
+        "average_confidence": 0.5549,
+        "confusion_matrix": [
+          [
+            16,
+            17,
+            3
+          ],
+          [
+            12,
+            19,
+            2
+          ],
+          [
+            13,
+            12,
+            6
+          ]
+        ],
+        "latency_ms": {
+          "p50": 41.5538,
+          "p95": 63.5328
+        },
+        "macro_f1": 0.3901,
+        "nei_false_positive_rate": 0.8065,
+        "per_class": {
+          "NOT ENOUGH INFO": {
+            "f1": 0.2857,
+            "precision": 0.5455,
+            "recall": 0.1935
+          },
+          "REFUTED": {
+            "f1": 0.4691,
+            "precision": 0.3958,
+            "recall": 0.5758
+          },
+          "SUPPORTED": {
+            "f1": 0.4156,
+            "precision": 0.3902,
+            "recall": 0.4444
+          }
+        }
+      },
+      "per_passage_max": {
+        "accuracy": 0.47,
+        "average_confidence": 0.5911,
+        "confusion_matrix": [
+          [
+            19,
+            15,
+            2
+          ],
+          [
+            9,
+            22,
+            2
+          ],
+          [
+            13,
+            12,
+            6
+          ]
+        ],
+        "latency_ms": {
+          "p50": 68.2452,
+          "p95": 222.3136
+        },
+        "macro_f1": 0.4409,
+        "nei_false_positive_rate": 0.8065,
+        "per_class": {
+          "NOT ENOUGH INFO": {
+            "f1": 0.2927,
+            "precision": 0.6,
+            "recall": 0.1935
+          },
+          "REFUTED": {
+            "f1": 0.5366,
+            "precision": 0.449,
+            "recall": 0.6667
+          },
+          "SUPPORTED": {
+            "f1": 0.4935,
+            "precision": 0.4634,
+            "recall": 0.5278
+          }
+        }
+      }
+    },
+    "support_threshold": 0.5
+  },
+  "delta": {
+    "bundle_macro_f1": 0.0,
+    "per_passage_macro_f1": 0.0206,
+    "per_passage_nei_false_positive_rate": -0.1936
+  },
+  "metadata": {
+    "config_path": "configs/serving.yaml",
+    "dataset_source": "structured records from fever_test_large, scifact_test_large",
+    "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
+    "sample_size": 100
+  },
+  "threshold_config": {
+    "calibration_split_prefixes": [
+      "fever_val",
+      "scifact_val"
+    ],
+    "checkpoint": "checkpoints/transformer_verifier_clean",
+    "config_path": "configs/serving.yaml",
+    "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
+    "refute_threshold": 0.5,
+    "status": "diagnostic_calibrated_from_validation_slice",
+    "support_threshold": 0.55,
+    "timestamp_utc": "2026-06-15T08:38:05.191003+00:00"
+  },
+  "threshold_config_path": "configs/verifier_thresholds.json"
+}

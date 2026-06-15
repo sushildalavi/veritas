@@ -10,7 +10,7 @@
   },
   "notes": [
     "top1/top3/top5 use evidence retrieved by BM25 + fine-tuned bi-encoder (RRF fusion), reranked by the fine-tuned cross-encoder reranker, on a held-out test set the verifier was not retrained on.",
-    "top1/top3/top5 all improve macro_f1 over the previous top-1 BM25-only baseline of 0.414 (reports/end_to_end_verifier_eval.json), but remain well below the 0.55 target and far below the oracle macro_f1 of 0.705.",
+    "top1/top3/top5 all improve macro_f1 over the previous retrieved-evidence bundle baseline of 0.420 from reports/oracle_vs_retrieved_v2.json, but remain well below the 0.55 target and far below the oracle macro_f1 of 0.705.",
     "mixed reaches macro_f1=0.588 but is composed of 50% gold evidence rows (mixed_source == 'gold'), so it does not represent a pure retrieved-evidence result and should not be compared directly against the 0.55 target."
   ],
   "oracle_vs_retrieved_gap": {
