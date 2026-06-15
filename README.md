@@ -47,6 +47,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | DistilRoBERTa REFUTED recall* | 0.745 |
 | Oracle evidence verifier | 0.717 accuracy, 0.710 macro-F1 |
 | End-to-end verifier with retrieved evidence | 0.440 accuracy, 0.414 macro-F1 |
+| Oracle vs retrieved v2 (sampled, per-passage) | oracle 0.709 macro-F1, retrieved 0.500 macro-F1, recall@10 0.667 |
 | Top-k retrieved verifier (BM25 top-5) | 0.460 accuracy, 0.454 macro-F1 |
 | Retrieval ablation (MiniLM, val split) | 0.558 recall@10, above BM25 at 0.461 |
 | Dense retrieval | 0.357 recall@1, 0.524 recall@10 |
@@ -58,7 +59,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
 | Tests | 74 passed |
 
-The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance.
+The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance, and per-passage scoring helps retrieved evidence more than bundled evidence on the v2 report.
 
 \* These rows were measured on the verifier dataset before the cross-split dedup above (2809/650/650). They are stale pending a retrain on the deduped 2808/649/642 split; the sklearn and DeBERTa rows have already been re-measured on the deduped split. The earlier DeBERTa run was also degenerate due to a separate bug: `microsoft/deberta-v3-xsmall` loads in fp16 by default on this transformers version, and training fp16 on CPU produced NaN gradients (`grad_norm: nan`, all predictions collapsed to SUPPORTED). Fixed by passing `dtype=torch.float32` in `_load_transformer()` in `scripts/train_transformer_verifier_clean.py`.
 
