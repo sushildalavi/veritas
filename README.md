@@ -158,6 +158,11 @@ batching, and fallback behavior, all measured (not estimated):
   script that writes a `status: skipped` report with the required
   CUDA/Triton environment on machines without a GPU (the case for this
   development machine).
+- **Mac-local LLM backends**: `scripts/benchmark_mac_local_inference.py`
+  measures mlx-lm (Apple Silicon Metal/GPU), Ollama, and llama.cpp as
+  CUDA-free alternatives. On this machine, mlx-lm reaches 53.7 tok/s on
+  Qwen2.5-1.5B-Instruct-4bit; Ollama and llama.cpp are written as
+  `status: skipped` with setup steps (no server running / not configured).
 
 Veritas now includes runtime benchmarking across Transformers fallback, vLLM
 endpoint serving, optional ONNX Runtime verifier inference, and optional

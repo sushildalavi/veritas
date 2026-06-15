@@ -93,6 +93,51 @@ vLLM: `status: skipped` (`vllm endpoint unavailable in current environment`).
    The `vllm` section of the report will switch from `skipped` to `measured`
    and include per-concurrency throughput.
 
+## Mac-local LLM inference backends
+
+`scripts/benchmark_mac_local_inference.py` benchmarks LLM generation backends
+that run natively on Apple Silicon without CUDA, as alternatives to the
+vLLM/Triton paths above (which remain CUDA-only and skip on this machine):
+
+- **mlx-lm**: Apple's MLX framework (Metal/GPU). Measured if the `mlx-lm`
+  package is installed.
+- **Ollama**: measured if an Ollama server is reachable at
+  `mac_local_backends.ollama.base_url` (default `http://localhost:11434`).
+- **llama.cpp**: measured if `mac_local_backends.llama_cpp.binary_path` and
+  `.model_path` are configured and point to an existing Metal-enabled binary
+  and GGUF model.
+
+```bash
+python3 scripts/benchmark_mac_local_inference.py
+```
+
+Output: `reports/mac_local_inference_benchmark.json` / `.md`.
+
+Latest measured results:
+
+| backend | model | device | max_tokens | mean_latency_ms | p50_latency_ms | p95_latency_ms | tokens/sec | requests/sec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| mlx-lm | mlx-community/Qwen2.5-1.5B-Instruct-4bit | mps | 32 | 595.85 | 582.66 | 621.71 | 53.7 | 1.678 |
+
+Ollama: `status: skipped` (`ollama endpoint http://localhost:11434 is unreachable in this environment`).
+llama.cpp: `status: skipped` (`mac_local_backends.llama_cpp.binary_path / .model_path are not configured`).
+
+Compared to the `transformers` CPU/MPS numbers above (TinyLlama-1.1B, 16.3
+tok/s CPU / 30.7 tok/s MPS for 32 tokens), mlx-lm on a larger model
+(Qwen2.5-1.5B, 4-bit) reaches 53.7 tok/s -- these are different model sizes
+and quantizations, so this is not a same-model speedup comparison, just two
+independently measured local backends.
+
+### Enabling Ollama / llama.cpp
+
+- **Ollama**: `ollama serve` (or launch the Ollama app), then
+  `ollama pull qwen2.5:1.5b` (or update `mac_local_backends.ollama.model` in
+  `configs/inference_benchmark.yaml` to a model you have pulled), then re-run
+  the benchmark.
+- **llama.cpp**: build with Metal support (`LLAMA_METAL=1`), download a GGUF
+  model, then set `mac_local_backends.llama_cpp.binary_path` and `.model_path`
+  in `configs/inference_benchmark.yaml`.
+
 ## ONNX verifier runtime
 
 `scripts/export_verifier_onnx.py` exports the
@@ -145,6 +190,9 @@ and how to run it on a host with CUDA installed.
 | Explanation generation (transformers, CPU/MPS) | Measured | `reports/inference_benchmark.json` |
 | Explanation generation (vLLM) | Skipped (no server running) | Runnable once a vLLM server is started |
 | Verifier (ONNX Runtime, CPU) | Measured (slower than PyTorch CPU here) | `reports/onnx_export.json`, `reports/onnx_verifier_benchmark.json` |
+| Mac-local generation (mlx-lm) | Measured | `reports/mac_local_inference_benchmark.json` |
+| Mac-local generation (Ollama) | Skipped (no server running) | Runnable once `ollama serve` is started and a model is pulled |
+| Mac-local generation (llama.cpp) | Skipped (not configured) | Runnable once `binary_path`/`model_path` are set in `configs/inference_benchmark.yaml` |
 | Dense-scoring microbenchmark (Triton/CUDA) | Scaffolded, not run | No CUDA/Triton locally |
 | SGLang / MLC / FlashAttention / TVM / MLIR | Architecture notes only | See `docs/inference_runtime_landscape.md` |
 
