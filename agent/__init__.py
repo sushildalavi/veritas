@@ -1,6 +1,10 @@
 """Agentic verification loop for Veritas."""
 
-from .graph import run_reflection_graph
 from .reflection import ReflectionLoop, ReflectionOutcome
+
+
+def run_reflection_graph(loop: ReflectionLoop, claim: str, *, top_k: int = 5) -> ReflectionOutcome:
+    return loop.run(claim, top_k=top_k)
+
 
 __all__ = ["ReflectionLoop", "ReflectionOutcome", "run_reflection_graph"]
