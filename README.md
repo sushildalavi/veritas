@@ -28,8 +28,9 @@ Veritas is built to answer a practical research question: how far can a fully lo
 verification stack go without relying on CUDA, Colab, Kaggle, or bitsandbytes?
 
 The measured bottleneck is **evidence retrieval and ranking**: the verifier performs well when
-given gold (oracle) evidence (0.710 macro-F1) but drops sharply on retrieved evidence
-(0.414 macro-F1). The project's focus is closing that oracle-vs-retrieved gap through a
+given gold (oracle) evidence, but drops sharply on retrieved evidence. On the larger checked-in
+v2 test slice (100 examples), oracle per-passage macro-F1 is 0.723 while retrieved per-passage
+macro-F1 is 0.450. The project's focus is closing that oracle-vs-retrieved gap through a
 fine-tuned bi-encoder retriever, a fine-tuned cross-encoder reranker, and a verifier trained to be
 robust to retrieval noise.
 
@@ -47,7 +48,9 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | DistilRoBERTa REFUTED recall* | 0.745 |
 | Oracle evidence verifier | 0.717 accuracy, 0.710 macro-F1 |
 | End-to-end verifier with retrieved evidence | 0.440 accuracy, 0.414 macro-F1 |
-| Oracle vs retrieved v2 (sampled, per-passage) | oracle 0.709 macro-F1, retrieved 0.500 macro-F1, recall@10 0.667 |
+| Oracle vs retrieved v2 (diagnostic 20-sample slice) | oracle 0.709 macro-F1, retrieved 0.500 macro-F1, recall@10 0.667 |
+| Oracle vs retrieved v2 (larger 100-sample slice) | oracle 0.723 macro-F1, retrieved 0.450 macro-F1, recall@10 0.543 |
+| Threshold comparison on 100-sample slice | per-passage macro-F1 0.441 -> 0.462, NEI false-positive rate 0.807 -> 0.613 |
 | Top-k retrieved verifier (BM25 top-5) | 0.460 accuracy, 0.454 macro-F1 |
 | Retrieval ablation (MiniLM, val split) | 0.558 recall@10, above BM25 at 0.461 |
 | Dense retrieval | 0.357 recall@1, 0.524 recall@10 |
@@ -59,7 +62,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
 | Tests | 74 passed |
 
-The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance, and per-passage scoring helps retrieved evidence more than bundled evidence on the v2 report.
+The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance, and larger evaluation made the retrieved-evidence numbers less flattering than the earlier 20-sample diagnostic slice.
 
 \* These rows were measured on the verifier dataset before the cross-split dedup above (2809/650/650). They are stale pending a retrain on the deduped 2808/649/642 split; the sklearn and DeBERTa rows have already been re-measured on the deduped split. The earlier DeBERTa run was also degenerate due to a separate bug: `microsoft/deberta-v3-xsmall` loads in fp16 by default on this transformers version, and training fp16 on CPU produced NaN gradients (`grad_norm: nan`, all predictions collapsed to SUPPORTED). Fixed by passing `dtype=torch.float32` in `_load_transformer()` in `scripts/train_transformer_verifier_clean.py`.
 
@@ -132,6 +135,12 @@ make serve-vllm-explanations
 VERITAS_CONFIG=configs/vllm_serving.yaml python3 -m uvicorn serving.api:app --reload
 ```
 
+Larger verifier eval:
+
+```bash
+python3 scripts/eval_oracle_vs_retrieved_v2.py --config configs/serving.yaml --max-examples 100 --report-json reports/oracle_vs_retrieved_v2_100.json --report-md reports/oracle_vs_retrieved_v2_100.md
+```
+
 ## Research Workflow
 
 Veritas is designed around a simple local research loop:
@@ -173,17 +182,22 @@ Research mode:
 - The evaluation sets are sample-scale, not the full FEVER benchmark.
 - End-to-end performance is materially worse than oracle evidence performance.
 - Feeding top-5 retrieved evidence improves end-to-end macro-F1 to 0.454, but the oracle gap is still material.
-- Threshold calibration and v2 oracle-vs-retrieved numbers are currently checked in from sampled runs; larger sweeps are still needed.
+- The 20-sample v2 report is diagnostic only; the 100-sample v2 report is the primary checked-in verifier comparison.
+- The larger 100-sample v2 report still uses the `bm25_only` serving profile and no reranker; it should not be described as a hybrid result.
+- Retrieval-profile comparison on this machine used hashing-based dense/hybrid variants for CPU feasibility; the cross-encoder reranker profile was skipped and explicitly reported as skipped.
+- Threshold calibration and threshold comparison are still slice-based, not final benchmark-wide calibration.
 - Citation faithfulness is measured, not assumed.
 - The MLX LoRA explanation adapter is a small-sample result, not a benchmark claim.
 - Preference-guided reranking is a deterministic Mac-compatible replacement for DPO, not DPO itself.
-- CUDA QLoRA, CUDA DPO, Colab, and Kaggle are not part of the final project direction.
+- Phi-3 QLoRA and DPO training paths are scaffolded, but no real Phi-3 checkpoint is claimed in this repo unless the adapter directories exist.
+- The vLLM path is explanation-serving only. The verifier model still decides the label, and the checked-in vLLM benchmark is currently a skipped report because no live endpoint was available in this environment.
 
 ## Repository Guides
 
 - `docs/architecture_audit.md`
 - `docs/retrieval_ceiling.md`
 - `docs/vllm_serving.md`
+- `docs/phi3_gpu_training.md`
 
 ## Do Not Overclaim
 
