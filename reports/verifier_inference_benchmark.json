@@ -1,0 +1,67 @@
+{
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "config_path": "configs/inference_benchmark.yaml",
+  "devices_tested": [
+    "cpu",
+    "mps"
+  ],
+  "git_commit": "b8eff12678a1135732f0c32b9cfea751d600aa56",
+  "peak_rss_mb": 850.1,
+  "results": [
+    {
+      "batch_size": 1,
+      "device": "cpu",
+      "iterations": 20,
+      "mean_latency_ms": 16.02,
+      "p50_latency_ms": 15.784,
+      "p95_latency_ms": 16.912,
+      "throughput_examples_per_sec": 62.42
+    },
+    {
+      "batch_size": 8,
+      "device": "cpu",
+      "iterations": 20,
+      "mean_latency_ms": 58.92,
+      "p50_latency_ms": 59.018,
+      "p95_latency_ms": 59.709,
+      "throughput_examples_per_sec": 135.78
+    },
+    {
+      "batch_size": 32,
+      "device": "cpu",
+      "iterations": 20,
+      "mean_latency_ms": 208.287,
+      "p50_latency_ms": 208.239,
+      "p95_latency_ms": 209.36,
+      "throughput_examples_per_sec": 153.63
+    },
+    {
+      "batch_size": 1,
+      "device": "mps",
+      "iterations": 20,
+      "mean_latency_ms": 6.502,
+      "p50_latency_ms": 6.578,
+      "p95_latency_ms": 7.119,
+      "throughput_examples_per_sec": 153.79
+    },
+    {
+      "batch_size": 8,
+      "device": "mps",
+      "iterations": 20,
+      "mean_latency_ms": 23.467,
+      "p50_latency_ms": 23.481,
+      "p95_latency_ms": 23.6,
+      "throughput_examples_per_sec": 340.9
+    },
+    {
+      "batch_size": 32,
+      "device": "mps",
+      "iterations": 20,
+      "mean_latency_ms": 87.805,
+      "p50_latency_ms": 87.696,
+      "p95_latency_ms": 88.109,
+      "throughput_examples_per_sec": 364.44
+    }
+  ],
+  "torch_version": "2.11.0"
+}

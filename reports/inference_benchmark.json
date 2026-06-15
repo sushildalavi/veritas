@@ -1,0 +1,37 @@
+{
+  "config_path": "configs/inference_benchmark.yaml",
+  "git_commit": "b8eff12678a1135732f0c32b9cfea751d600aa56",
+  "torch_version": "2.11.0",
+  "transformers": {
+    "devices_tested": [
+      "cpu",
+      "mps"
+    ],
+    "max_new_tokens": 32,
+    "model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "results": [
+      {
+        "device": "cpu",
+        "iterations": 3,
+        "mean_generated_tokens": 32,
+        "mean_latency_ms": 1978.23,
+        "tokens_per_sec": 16.18
+      },
+      {
+        "device": "mps",
+        "iterations": 3,
+        "mean_generated_tokens": 32,
+        "mean_latency_ms": 1048.07,
+        "tokens_per_sec": 30.53
+      }
+    ],
+    "status": "measured"
+  },
+  "vllm": {
+    "next_steps": "Start a vLLM server (see docs/vllm_serving.md / scripts/serve_vllm_explanations.py), then re-run scripts/benchmark_inference_serving.py.",
+    "reason": "vllm endpoint unavailable in current environment",
+    "status": "skipped",
+    "vllm_base_url": "http://127.0.0.1:8001",
+    "vllm_model": "Qwen/Qwen2.5-1.5B-Instruct"
+  }
+}

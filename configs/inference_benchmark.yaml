@@ -1,0 +1,49 @@
+# Configuration for the Inference Performance Lab benchmarks
+# (scripts/benchmark_verifier_runtime.py, scripts/benchmark_inference_serving.py).
+#
+# All benchmarks run on whatever hardware is available (CPU, and MPS on Apple
+# Silicon). CUDA / Triton / vLLM-specific paths are skipped with a clear
+# reason if the required hardware or service is not present -- see
+# docs/inference_performance.md for how to run them on a GPU host.
+
+verifier:
+  checkpoint: checkpoints/transformer_verifier_clean
+  batch_sizes: [1, 8, 32]
+  devices: [cpu, mps]
+  num_iterations: 20
+  warmup_iterations: 3
+  max_length: 512
+  sample_claim: "The Eiffel Tower is located in Paris, France."
+  sample_passage: >
+    The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in
+    Paris, France. It was named after the engineer Gustave Eiffel, whose
+    company designed and built the tower between 1887 and 1889.
+
+explanation_serving:
+  transformers_backend:
+    model_name: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+    devices: [cpu, mps]
+    max_new_tokens: 32
+    num_iterations: 3
+    warmup_iterations: 1
+    prompt: >
+      Claim: The Eiffel Tower is located in Paris, France.
+      Evidence: The Eiffel Tower is a wrought-iron lattice tower on the
+      Champ de Mars in Paris, France.
+      Explain in one sentence whether the evidence supports the claim.
+  vllm:
+    config_path: configs/vllm_serving.yaml
+    concurrency_levels: [1, 4]
+    num_requests_per_level: 4
+
+onnx_verifier:
+  checkpoint: checkpoints/transformer_verifier_clean
+  exported_model_path: checkpoints/transformer_verifier_clean_onnx/model.onnx
+  batch_sizes: [1, 8]
+  num_iterations: 20
+  warmup_iterations: 3
+
+triton_dense_scoring:
+  vector_dim: 384
+  batch_sizes: [32, 128]
+  num_iterations: 20
