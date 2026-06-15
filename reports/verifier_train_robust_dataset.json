@@ -1,0 +1,32 @@
+{
+  "combined_label_counts": {
+    "NOT_ENOUGH_INFO": 3557,
+    "REFUTED": 999,
+    "SUPPORTED": 1915
+  },
+  "oracle_count": 2808,
+  "oracle_file": "data/processed/verifier_train.jsonl",
+  "oracle_label_counts": {
+    "NOT_ENOUGH_INFO": 788,
+    "REFUTED": 604,
+    "SUPPORTED": 1416
+  },
+  "output": "data/processed/verifier_train_robust.jsonl",
+  "retrieved_count": 3663,
+  "retrieved_file": "data/processed/retrieved_evidence_verifier_calibration.jsonl",
+  "retrieved_label_counts": {
+    "NOT_ENOUGH_INFO": 2769,
+    "REFUTED": 395,
+    "SUPPORTED": 499
+  },
+  "retrieved_pair_type_counts": {
+    "irrelevant": 1439,
+    "near_miss": 622,
+    "positive_oracle": 413,
+    "positive_retrieved": 481,
+    "same_entity_insufficient": 101,
+    "same_topic_missing_fact": 607
+  },
+  "seed": 42,
+  "total_count": 6471
+}
