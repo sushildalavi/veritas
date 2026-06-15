@@ -143,6 +143,23 @@ def test_live_retrieval_runtime_hashing_hybrid_path() -> None:
     assert runtime.retriever.query_expansion_top_k == 5
 
 
+def test_live_retrieval_runtime_dense_only_hashing_path() -> None:
+    passages = build_passage_corpus(["red apple", "blue sky"])
+    settings = ProjectSettings(
+        retrieval_backend="dense_only",
+        use_neural_retrieval=False,
+        embedding_backend="hashing",
+        embedding_model="sentence-transformers/all-MiniLM-L6-v2",
+    )
+
+    runtime = _load_retrieval_runtime(passages, settings)
+
+    assert runtime.retrieval_backend == "dense_only"
+    assert runtime.embedding_model == "hashing"
+    assert runtime.fallback_used is False
+    assert isinstance(runtime.retriever, DenseRetriever)
+
+
 def test_live_retrieval_runtime_sentence_transformer_hybrid_path(monkeypatch) -> None:
     passages = build_passage_corpus(["red apple", "blue sky"])
     settings = ProjectSettings(

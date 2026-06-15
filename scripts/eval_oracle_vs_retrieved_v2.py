@@ -6,6 +6,7 @@ import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
+import subprocess
 import sys
 from time import perf_counter
 
@@ -36,6 +37,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--split-prefixes", default="fever_test,scifact_test")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--max-examples", type=int, default=0)
+    parser.add_argument("--threshold-support", type=float, default=None)
+    parser.add_argument("--threshold-refute", type=float, default=None)
     parser.add_argument("--report-json", default="reports/oracle_vs_retrieved_v2.json")
     parser.add_argument("--report-md", default="reports/oracle_vs_retrieved_v2.md")
     return parser
@@ -54,6 +57,9 @@ def main() -> None:  # pragma: no cover - CLI entrypoint
         split_prefixes=split_prefixes,
         top_k=args.top_k,
         max_examples=args.max_examples,
+        config_path=args.config,
+        support_threshold=args.threshold_support,
+        refute_threshold=args.threshold_refute,
     )
     write_report(report, Path(args.report_json))
     Path(args.report_md).write_text(_to_markdown(report), encoding="utf-8")
@@ -69,7 +75,12 @@ def evaluate_oracle_vs_retrieved_v2(
     split_prefixes: tuple[str, ...] = DEFAULT_SPLIT_PREFIXES,
     top_k: int,
     max_examples: int = 0,
+    config_path: str | None = None,
+    support_threshold: float | None = None,
+    refute_threshold: float | None = None,
 ) -> dict[str, object]:
+    support_threshold = settings.support_threshold if support_threshold is None else support_threshold
+    refute_threshold = settings.refute_threshold if refute_threshold is None else refute_threshold
     records = _load_eval_records(data_dir, suffix=suffix, split_prefixes=split_prefixes, max_examples=max_examples)
     corpus = load_evidence_corpus(data_dir, suffix=suffix)
     retrieval_runtime = _load_retrieval_runtime(corpus, settings)
@@ -96,15 +107,15 @@ def evaluate_oracle_vs_retrieved_v2(
         verifier_checkpoint=checkpoint,
         prefer_deberta=prefer_deberta,
         aggregation_mode="bundle",
-        support_threshold=settings.support_threshold,
-        refute_threshold=settings.refute_threshold,
+        support_threshold=support_threshold,
+        refute_threshold=refute_threshold,
     )
     per_passage_router = ModelRouter(
         verifier_checkpoint=checkpoint,
         prefer_deberta=prefer_deberta,
         aggregation_mode="per_passage_max",
-        support_threshold=settings.support_threshold,
-        refute_threshold=settings.refute_threshold,
+        support_threshold=support_threshold,
+        refute_threshold=refute_threshold,
     )
 
     oracle_bundle = _evaluate_router(bundle_router, claims, labels, oracle_examples)
@@ -121,7 +132,10 @@ def evaluate_oracle_vs_retrieved_v2(
             f"per_passage={retrieved_per_passage['macro_f1']:.3f}"
         ),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "git_commit": _git_commit_hash(),
         "checkpoint": checkpoint,
+        "config_path": config_path,
+        "dataset_source": _dataset_source(split_prefixes, suffix),
         "retrieval_backend": retrieval_runtime.retrieval_backend,
         "reranker_backend": reranker_runtime.reranker_backend,
         "top_k": top_k,
@@ -140,8 +154,8 @@ def evaluate_oracle_vs_retrieved_v2(
             "rerank_top_k": settings.rerank_top_k,
             "final_top_k": settings.final_top_k,
             "verifier_aggregation": settings.verifier_aggregation,
-            "support_threshold": settings.support_threshold,
-            "refute_threshold": settings.refute_threshold,
+            "support_threshold": support_threshold,
+            "refute_threshold": refute_threshold,
         },
         "oracle": {
             "bundle": oracle_bundle,
@@ -249,6 +263,28 @@ def _parse_prefixes(raw: str) -> tuple[str, ...]:
     return prefixes or DEFAULT_SPLIT_PREFIXES
 
 
+def _dataset_source(split_prefixes: tuple[str, ...], suffix: str) -> str:
+    joined = ", ".join(f"{prefix}{suffix}" for prefix in split_prefixes)
+    return f"structured records from {joined}"
+
+
+def _git_commit_hash() -> str | None:
+    try:
+        return (
+            subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            .stdout.strip()
+            or None
+        )
+    except Exception:
+        return None
+
+
 def _delta(oracle: dict[str, object], retrieved: dict[str, object]) -> dict[str, float]:
     return {
         "accuracy": round(float(oracle["accuracy"]) - float(retrieved["accuracy"]), 4),
@@ -269,6 +305,9 @@ def _to_markdown(report: dict[str, object]) -> str:
         "# Oracle vs Retrieved V2",
         "",
         f"- Checkpoint: `{report['checkpoint']}`",
+        f"- Git commit: `{report.get('git_commit')}`",
+        f"- Config path: `{report.get('config_path')}`",
+        f"- Dataset source: `{report.get('dataset_source')}`",
         f"- Retrieval backend: `{report['retrieval_backend']}`",
         f"- Reranker backend: `{report['reranker_backend']}`",
         f"- Split prefixes: `{', '.join(report['split_prefixes'])}`",

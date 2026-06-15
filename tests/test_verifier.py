@@ -1,5 +1,6 @@
 from data.schemas import EvidenceSpan
 from models import DebertaVerifier, MockVerifier, ModelRouter, VALID_LABELS, normalize_label
+from models.deberta_verifier import VerificationResult, _aggregate_results
 
 
 def test_normalize_label_accepts_common_variants() -> None:
@@ -77,3 +78,42 @@ def test_mock_verifier_scores_each_passage() -> None:
     assert len(results) == 2
     assert results[0].verdict in VALID_LABELS
     assert results[1].verdict in VALID_LABELS
+
+
+def test_per_passage_aggregation_prefers_refute_when_threshold_crosses() -> None:
+    result = _aggregate_results(
+        "Paris is in France",
+        [
+            EvidenceSpan(doc_id="1", text="Unrelated."),
+            EvidenceSpan(doc_id="2", text="Paris is not in France."),
+        ],
+        [
+            VerificationResult(verdict="NOT ENOUGH INFO", confidence=0.6, logits={"SUPPORTED": 0.2, "REFUTED": 0.1, "NOT ENOUGH INFO": 0.6}),
+            VerificationResult(verdict="REFUTED", confidence=0.7, logits={"SUPPORTED": 0.1, "REFUTED": 0.7, "NOT ENOUGH INFO": 0.2}),
+        ],
+        model_name="fake",
+        support_threshold=0.55,
+        refute_threshold=0.5,
+    )
+
+    assert result.verdict == "REFUTED"
+    assert result.confidence == 0.7
+
+
+def test_per_passage_aggregation_falls_back_to_nei_below_thresholds() -> None:
+    result = _aggregate_results(
+        "Paris is in France",
+        [EvidenceSpan(doc_id="1", text="Unrelated.")],
+        [
+            VerificationResult(
+                verdict="NOT ENOUGH INFO",
+                confidence=0.4,
+                logits={"SUPPORTED": 0.4, "REFUTED": 0.3, "NOT ENOUGH INFO": 0.3},
+            )
+        ],
+        model_name="fake",
+        support_threshold=0.55,
+        refute_threshold=0.5,
+    )
+
+    assert result.verdict == "NOT ENOUGH INFO"

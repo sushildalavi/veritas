@@ -5,8 +5,9 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import json
 from pathlib import Path
-from statistics import mean
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,6 +43,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--split-prefixes", default="fever_val,scifact_val")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--max-examples", type=int, default=0)
+    parser.add_argument("--threshold-config-out", default="configs/verifier_thresholds.json")
     parser.add_argument("--report-json", default="reports/verifier_threshold_calibration.json")
     parser.add_argument("--report-md", default="reports/verifier_threshold_calibration.md")
     return parser
@@ -60,6 +62,26 @@ def main() -> None:  # pragma: no cover - CLI entrypoint
         split_prefixes=split_prefixes,
         top_k=args.top_k,
         max_examples=args.max_examples,
+        config_path=args.config,
+    )
+    threshold_path = Path(args.threshold_config_out)
+    threshold_path.parent.mkdir(parents=True, exist_ok=True)
+    threshold_path.write_text(
+        json.dumps(
+            {
+                "checkpoint": report["checkpoint"],
+                "config_path": args.config,
+                "git_commit": report["git_commit"],
+                "status": "diagnostic_calibrated_from_validation_slice",
+                "calibration_split_prefixes": report["split_prefixes"],
+                "support_threshold": report["best"]["support_threshold"],
+                "refute_threshold": report["best"]["refute_threshold"],
+                "timestamp_utc": report["timestamp_utc"],
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
     )
     write_report(report, Path(args.report_json))
     Path(args.report_md).write_text(_to_markdown(report), encoding="utf-8")
@@ -75,6 +97,7 @@ def calibrate_verifier_thresholds(
     split_prefixes: tuple[str, ...] = DEFAULT_SPLIT_PREFIXES,
     top_k: int,
     max_examples: int = 0,
+    config_path: str | None = None,
 ) -> dict[str, object]:
     records = _load_eval_records(data_dir, suffix=suffix, split_prefixes=split_prefixes, max_examples=max_examples)
     corpus = load_evidence_corpus(data_dir, suffix=suffix)
@@ -126,7 +149,10 @@ def calibrate_verifier_thresholds(
             f"{best['macro_f1']:.3f} at support={best['support_threshold']:.2f}, refute={best['refute_threshold']:.2f}"
         ),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "git_commit": _git_commit_hash(),
         "checkpoint": checkpoint,
+        "config_path": config_path,
+        "dataset_source": _dataset_source(split_prefixes, suffix),
         "retrieval_backend": retrieval_runtime.retrieval_backend,
         "reranker_backend": reranker_runtime.reranker_backend,
         "sample_size": len(records),
@@ -213,6 +239,28 @@ def _parse_prefixes(raw: str) -> tuple[str, ...]:
     return prefixes or DEFAULT_SPLIT_PREFIXES
 
 
+def _dataset_source(split_prefixes: tuple[str, ...], suffix: str) -> str:
+    joined = ", ".join(f"{prefix}{suffix}" for prefix in split_prefixes)
+    return f"structured records from {joined}"
+
+
+def _git_commit_hash() -> str | None:
+    try:
+        return (
+            subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            .stdout.strip()
+            or None
+        )
+    except Exception:
+        return None
+
+
 def _float_range(start: float, stop: float, step: float) -> list[float]:
     values = []
     current = start
@@ -229,6 +277,9 @@ def _to_markdown(report: dict[str, object]) -> str:
         "# Verifier Threshold Calibration",
         "",
         f"- Checkpoint: `{report['checkpoint']}`",
+        f"- Git commit: `{report.get('git_commit')}`",
+        f"- Config path: `{report.get('config_path')}`",
+        f"- Dataset source: `{report.get('dataset_source')}`",
         f"- Retrieval backend: `{report['retrieval_backend']}`",
         f"- Reranker backend: `{report['reranker_backend']}`",
         f"- Split prefixes: `{', '.join(report['split_prefixes'])}`",

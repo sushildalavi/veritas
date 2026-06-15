@@ -89,3 +89,23 @@ ranking:
     assert settings.query_expansion_top_k == 12
     assert settings.reranker_backend == "heuristic"
     assert settings.use_cross_encoder is False
+
+
+def test_load_project_settings_reads_verifier_thresholds_from_yaml(tmp_path: Path, monkeypatch) -> None:
+    config_path = tmp_path / "serving.yaml"
+    config_path.write_text(
+        """
+verifier:
+  aggregation: per_passage_max
+  support_threshold: 0.61
+  refute_threshold: 0.42
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("VERITAS_CONFIG", str(config_path))
+
+    settings = load_project_settings()
+
+    assert settings.verifier_aggregation == "per_passage_max"
+    assert settings.support_threshold == 0.61
+    assert settings.refute_threshold == 0.42

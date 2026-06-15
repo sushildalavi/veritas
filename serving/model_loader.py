@@ -186,6 +186,45 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
             fallback_used=False,
         )
 
+    if backend in {"dense_only", "dense"}:
+        if not settings.use_neural_retrieval and settings.embedding_backend.strip().lower() != "hashing":
+            return RetrievalRuntime(
+                retriever=BM25Retriever(
+                    passages,
+                    include_title_in_index=settings.include_title_in_index,
+                    include_metadata_window=settings.include_metadata_window,
+                ),
+                retrieval_backend="bm25_only",
+                embedding_model=None,
+                fallback_used=True,
+            )
+        try:
+            dense_retriever = DenseRetriever(
+                passages,
+                backend=settings.embedding_backend.strip().lower(),
+                model_name=settings.embedding_model,
+                include_title_in_index=settings.include_title_in_index,
+                include_metadata_window=settings.include_metadata_window,
+            )
+        except Exception as exc:  # pragma: no cover - defensive fallback
+            LOGGER.warning("Falling back to BM25 retrieval after dense loader failure: %s", exc)
+            return RetrievalRuntime(
+                retriever=BM25Retriever(
+                    passages,
+                    include_title_in_index=settings.include_title_in_index,
+                    include_metadata_window=settings.include_metadata_window,
+                ),
+                retrieval_backend="bm25_only",
+                embedding_model=None,
+                fallback_used=True,
+            )
+        return RetrievalRuntime(
+            retriever=dense_retriever,
+            retrieval_backend="dense_only",
+            embedding_model=getattr(dense_retriever, "backend_name", settings.embedding_backend),
+            fallback_used=False,
+        )
+
     if backend == "bm25_hashing_hybrid":
         dense_retriever = DenseRetriever(
             passages,
