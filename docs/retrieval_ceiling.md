@@ -38,3 +38,24 @@ Measured from `reports/oracle_vs_retrieved_v2.json` after threshold calibration 
   despite SciFact having higher recall@10 (0.63 vs 0.51) -- evidence of a dataset-specific verifier
   weakness on top of the shared retrieval ceiling.
 - Keep reporting oracle and retrieved numbers side by side; reporting only verifier macro-F1 hides the real ceiling.
+
+## Negative results: retrieval profile and threshold calibration (full 650-set)
+
+Two follow-up experiments were run on the full 650-example set
+(`reports/retrieval_profile_comparison_650.md`, `reports/threshold_calibration_650.md`) and
+neither beat the current `bm25_only` + `support_threshold=0.55` / `refute_threshold=0.5` defaults:
+
+- `hybrid_bm25_sentence_transformer` improved retrieval recall@10 (`0.5334` -> `0.5714`) and
+  nDCG@10 (`0.4816` -> `0.5234`), but retrieved per-passage macro-F1 went down (`0.3887` ->
+  `0.3776`) and the oracle gap widened slightly (`0.2841` -> `0.2952`), at more than double the
+  runtime.
+- `hybrid_bm25_dense` did not beat `bm25_only` on recall@10, nDCG@10, or retrieved macro-F1.
+- A support/refute/margin grid search on a calibration split (`fever_val_large` +
+  `scifact_val_large`, 650 examples) found the current defaults (`0.55` / `0.5` / `0.0`) already
+  optimal on the tested grid; held-out macro-F1, accuracy, and REFUTED prediction rate were
+  unchanged.
+
+Together these indicate the next bottleneck is **verifier robustness under noisy retrieved
+evidence**, not retrieval depth or simple threshold tuning -- better retrieval (the
+sentence-transformer hybrid) did not translate into a better verifier verdict, and threshold
+recalibration had nothing left to gain.
