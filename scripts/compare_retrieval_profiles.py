@@ -86,6 +86,18 @@ def main() -> None:  # pragma: no cover - CLI entrypoint
                 query_expansion_top_k=max(base_settings.query_expansion_top_k, 10),
             ),
         ),
+        (
+            "hybrid_bm25_sentence_transformer",
+            replace(
+                base_settings,
+                retrieval_backend="bm25_sentence_transformer_hybrid",
+                embedding_backend="sentence-transformers",
+                use_neural_retrieval=True,
+                reranker_backend="none",
+                use_cross_encoder=False,
+                query_expansion_top_k=0,
+            ),
+        ),
     ]
 
     report = {
@@ -97,20 +109,6 @@ def main() -> None:  # pragma: no cover - CLI entrypoint
     }
     for profile_name, settings in profiles:
         started = time.perf_counter()
-        if profile_name == "hybrid_with_reranker" and _cpu_only_environment():
-            report["profiles"][profile_name] = {
-                "status": "skipped",
-                "reason": "CPU-only environment; cross-encoder reranker profile skipped for runtime budget",
-                "runtime_seconds": round(time.perf_counter() - started, 3),
-                "settings": {
-                    "retrieval_backend": settings.retrieval_backend,
-                    "embedding_backend": settings.embedding_backend,
-                    "reranker_backend": settings.reranker_backend,
-                    "use_cross_encoder": settings.use_cross_encoder,
-                    "query_expansion_top_k": settings.query_expansion_top_k,
-                },
-            }
-            continue
         try:
             profile_report = evaluate_oracle_vs_retrieved_v2(
                 settings=settings,
@@ -157,15 +155,6 @@ def main() -> None:  # pragma: no cover - CLI entrypoint
     Path(args.report_json).write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     Path(args.report_md).write_text(_to_markdown(report), encoding="utf-8")
     print("retrieval profile comparison complete")
-
-
-def _cpu_only_environment() -> bool:
-    try:
-        import torch
-
-        return not bool(torch.cuda.is_available())
-    except Exception:
-        return True
 
 
 def _to_markdown(report: dict[str, object]) -> str:

@@ -3,10 +3,10 @@
   "max_examples": 50,
   "profiles": {
     "bm25_only": {
-      "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
+      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
       "latency_ms": {
-        "bundle_p50": 41.8065,
-        "per_passage_p50": 94.7138
+        "bundle_p50": 40.784,
+        "per_passage_p50": 77.2388
       },
       "reranker_backend": "none",
       "retrieval_backend": "bm25_only",
@@ -23,7 +23,7 @@
       "retrieved_bundle_nei_false_positive_rate": 0.8462,
       "retrieved_per_passage_macro_f1": 0.3693,
       "retrieved_per_passage_nei_false_positive_rate": 0.7692,
-      "runtime_seconds": 16.017,
+      "runtime_seconds": 14.507,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
@@ -39,10 +39,10 @@
       "status": "measured"
     },
     "dense_only": {
-      "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
+      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
       "latency_ms": {
-        "bundle_p50": 35.604,
-        "per_passage_p50": 84.9756
+        "bundle_p50": 34.792,
+        "per_passage_p50": 65.3039
       },
       "reranker_backend": "none",
       "retrieval_backend": "dense_only",
@@ -59,7 +59,7 @@
       "retrieved_bundle_nei_false_positive_rate": 0.2308,
       "retrieved_per_passage_macro_f1": 0.3453,
       "retrieved_per_passage_nei_false_positive_rate": 0.3077,
-      "runtime_seconds": 19.107,
+      "runtime_seconds": 14.969,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
@@ -75,10 +75,10 @@
       "status": "measured"
     },
     "hybrid_bm25_dense": {
-      "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
+      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
       "latency_ms": {
-        "bundle_p50": 36.7,
-        "per_passage_p50": 61.4027
+        "bundle_p50": 35.0003,
+        "per_passage_p50": 60.7928
       },
       "reranker_backend": "none",
       "retrieval_backend": "bm25_hashing_hybrid",
@@ -95,7 +95,43 @@
       "retrieved_bundle_nei_false_positive_rate": 0.8462,
       "retrieved_per_passage_macro_f1": 0.4748,
       "retrieved_per_passage_nei_false_positive_rate": 0.6154,
-      "runtime_seconds": 17.821,
+      "runtime_seconds": 14.656,
+      "settings": {
+        "bm25_top_k": 20,
+        "dense_top_k": 20,
+        "final_top_k": 5,
+        "query_expansion_top_k": 0,
+        "refute_threshold": 0.3,
+        "rerank_top_k": 20,
+        "rrf_top_k": 60,
+        "support_threshold": 0.55,
+        "title_top_k": 0,
+        "verifier_aggregation": "per_passage_max"
+      },
+      "status": "measured"
+    },
+    "hybrid_bm25_sentence_transformer": {
+      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "latency_ms": {
+        "bundle_p50": 18.6517,
+        "per_passage_p50": 53.9622
+      },
+      "reranker_backend": "none",
+      "retrieval_backend": "bm25_sentence_transformer_hybrid",
+      "retrieval_metrics": {
+        "ndcg@10": 0.6106,
+        "ndcg@5": 0.6086,
+        "recall@1": 0.4669,
+        "recall@10": 0.6377,
+        "recall@3": 0.5706,
+        "recall@5": 0.628,
+        "recall@50": 0.6443
+      },
+      "retrieved_bundle_macro_f1": 0.3586,
+      "retrieved_bundle_nei_false_positive_rate": 0.9231,
+      "retrieved_per_passage_macro_f1": 0.4595,
+      "retrieved_per_passage_nei_false_positive_rate": 0.6154,
+      "runtime_seconds": 59.249,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
@@ -111,10 +147,10 @@
       "status": "measured"
     },
     "hybrid_with_query_expansion": {
-      "git_commit": "a21ede24d7b0f051091cb5405c50080ad46e0838",
+      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
       "latency_ms": {
-        "bundle_p50": 21.8524,
-        "per_passage_p50": 53.4951
+        "bundle_p50": 21.6908,
+        "per_passage_p50": 54.908
       },
       "reranker_backend": "none",
       "retrieval_backend": "bm25_hashing_hybrid",
@@ -131,7 +167,7 @@
       "retrieved_bundle_nei_false_positive_rate": 0.8462,
       "retrieved_per_passage_macro_f1": 0.3871,
       "retrieved_per_passage_nei_false_positive_rate": 0.6923,
-      "runtime_seconds": 15.77,
+      "runtime_seconds": 15.255,
       "settings": {
         "bm25_top_k": 20,
         "dense_top_k": 20,
@@ -147,16 +183,40 @@
       "status": "measured"
     },
     "hybrid_with_reranker": {
-      "reason": "CPU-only environment; cross-encoder reranker profile skipped for runtime budget",
-      "runtime_seconds": 0.0,
-      "settings": {
-        "embedding_backend": "hashing",
-        "query_expansion_top_k": 10,
-        "reranker_backend": "cross_encoder",
-        "retrieval_backend": "bm25_hashing_hybrid",
-        "use_cross_encoder": true
+      "git_commit": "36fa254ec914f1ed465e99759b72b7b47e19d5dd",
+      "latency_ms": {
+        "bundle_p50": 20.0209,
+        "per_passage_p50": 54.177
       },
-      "status": "skipped"
+      "reranker_backend": "cross_encoder",
+      "retrieval_backend": "bm25_hashing_hybrid",
+      "retrieval_metrics": {
+        "ndcg@10": 0.6083,
+        "ndcg@5": 0.6061,
+        "recall@1": 0.4702,
+        "recall@10": 0.621,
+        "recall@3": 0.6006,
+        "recall@5": 0.6113,
+        "recall@50": 0.621
+      },
+      "retrieved_bundle_macro_f1": 0.484,
+      "retrieved_bundle_nei_false_positive_rate": 0.6923,
+      "retrieved_per_passage_macro_f1": 0.3976,
+      "retrieved_per_passage_nei_false_positive_rate": 0.7692,
+      "runtime_seconds": 31.524,
+      "settings": {
+        "bm25_top_k": 20,
+        "dense_top_k": 20,
+        "final_top_k": 5,
+        "query_expansion_top_k": 10,
+        "refute_threshold": 0.3,
+        "rerank_top_k": 20,
+        "rrf_top_k": 60,
+        "support_threshold": 0.55,
+        "title_top_k": 0,
+        "verifier_aggregation": "per_passage_max"
+      },
+      "status": "measured"
     }
   },
   "split_prefixes": [
