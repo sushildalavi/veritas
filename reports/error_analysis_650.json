@@ -1,0 +1,180 @@
+{
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "config_path": "configs/serving.yaml",
+  "dataset_source": "structured records from fever_test_large, scifact_test_large",
+  "failure_examples_count": 40,
+  "git_commit": "9246750c5450024958da312637f61dc42f04da0c",
+  "headline": "error_analysis_650 complete: retrieved per_passage_max accuracy=0.406, macro_f1=0.389, retrieval_hit_top10_rate=0.575",
+  "label_distribution": {
+    "NOT ENOUGH INFO": 224,
+    "REFUTED": 200,
+    "SUPPORTED": 226
+  },
+  "oracle_vs_retrieved": {
+    "counts": {
+      "oracle_correct_retrieved_correct": 232,
+      "oracle_correct_retrieved_wrong": 222,
+      "oracle_wrong_retrieved_correct": 32,
+      "oracle_wrong_retrieved_wrong": 164
+    },
+    "rates": {
+      "oracle_correct_retrieved_correct": 0.3569,
+      "oracle_correct_retrieved_wrong": 0.3415,
+      "oracle_wrong_retrieved_correct": 0.0492,
+      "oracle_wrong_retrieved_wrong": 0.2523
+    },
+    "total": 650
+  },
+  "per_dataset": {
+    "fever": {
+      "count": 500,
+      "label_distribution": {
+        "NOT ENOUGH INFO": 175,
+        "REFUTED": 163,
+        "SUPPORTED": 162
+      },
+      "oracle_per_passage_max": {
+        "accuracy": 0.714,
+        "macro_f1": 0.6879
+      },
+      "retrieval_metrics": {
+        "ndcg@10": 0.4611,
+        "recall@10": 0.5055,
+        "recall@50": 0.5458
+      },
+      "retrieved_per_passage_max": {
+        "accuracy": 0.448,
+        "macro_f1": 0.4392
+      }
+    },
+    "scifact": {
+      "count": 150,
+      "label_distribution": {
+        "NOT ENOUGH INFO": 49,
+        "REFUTED": 37,
+        "SUPPORTED": 64
+      },
+      "oracle_per_passage_max": {
+        "accuracy": 0.6467,
+        "macro_f1": 0.6289
+      },
+      "retrieval_metrics": {
+        "ndcg@10": 0.55,
+        "recall@10": 0.6267,
+        "recall@50": 0.6533
+      },
+      "retrieved_per_passage_max": {
+        "accuracy": 0.2667,
+        "macro_f1": 0.1817
+      }
+    }
+  },
+  "reranker_backend": "none",
+  "retrieval_backend": "bm25_only",
+  "retrieval_hit_breakdown": {
+    "top10": {
+      "accuracy": 0.4786,
+      "count": 374,
+      "hit_rate": 0.5754,
+      "macro_f1": 0.3311
+    },
+    "top50": {
+      "accuracy": 0.4798,
+      "count": 396,
+      "hit_rate": 0.6092,
+      "macro_f1": 0.3338
+    }
+  },
+  "retrieval_profile_summary": {
+    "best_per_passage_macro_f1": {
+      "per_passage_macro_f1": 0.4748,
+      "profile": "hybrid_bm25_dense"
+    },
+    "best_recall@10": {
+      "profile": "hybrid_bm25_sentence_transformer",
+      "recall@10": 0.6377
+    },
+    "bm25_only_baseline": {
+      "per_passage_macro_f1": 0.3693,
+      "recall@10": 0.601
+    },
+    "max_examples": 50,
+    "source": "reports/retrieval_profile_comparison.json",
+    "status": "ok",
+    "vs_bm25_only": {
+      "hybrid_bm25_dense": {
+        "per_passage_macro_f1_delta": 0.1055,
+        "recall@10_delta": -0.0297
+      },
+      "hybrid_bm25_sentence_transformer": {
+        "per_passage_macro_f1_delta": 0.0902,
+        "recall@10_delta": 0.0367
+      },
+      "hybrid_with_query_expansion": {
+        "per_passage_macro_f1_delta": 0.0431,
+        "recall@10_delta": -0.004
+      },
+      "hybrid_with_reranker": {
+        "per_passage_macro_f1_delta": 0.0283,
+        "recall@10_delta": 0.02
+      }
+    }
+  },
+  "retrieval_runtime_seconds": 7.466,
+  "retrieved_per_passage_max": {
+    "accuracy": 0.4062,
+    "confusion_matrix": [
+      [
+        57,
+        121,
+        48
+      ],
+      [
+        21,
+        142,
+        37
+      ],
+      [
+        51,
+        108,
+        65
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "SUPPORTED",
+      "REFUTED",
+      "NOT ENOUGH INFO"
+    ],
+    "macro_f1": 0.3887,
+    "per_class": {
+      "NOT ENOUGH INFO": {
+        "f1": 0.3476,
+        "precision": 0.4333,
+        "recall": 0.2902
+      },
+      "REFUTED": {
+        "f1": 0.4974,
+        "precision": 0.3827,
+        "recall": 0.71
+      },
+      "SUPPORTED": {
+        "f1": 0.3211,
+        "precision": 0.4419,
+        "recall": 0.2522
+      }
+    }
+  },
+  "sample_size": 650,
+  "settings": {
+    "refute_threshold": 0.5,
+    "support_threshold": 0.55,
+    "verifier_aggregation": "per_passage_max"
+  },
+  "split_prefixes": [
+    "fever_test",
+    "scifact_test"
+  ],
+  "suffix": "_large",
+  "timestamp_utc": "2026-06-15T19:47:42.135882+00:00",
+  "top_k": 5
+}

@@ -28,4 +28,13 @@ Measured from `reports/oracle_vs_retrieved_v2.json` after threshold calibration 
   of `0.2841`, consistent with the 20/100/200-example slices.
 - Done: BM25-only, dense, hybrid, query-expansion, cross-encoder reranked, and real MiniLM-hybrid
   profiles have been compared under the same evaluator (`reports/retrieval_profile_comparison.md`).
+- Done: a failure-mode breakdown of the full 650-example run (`reports/error_analysis_650.md`,
+  `reports/error_analysis_650.json`) decomposes the gap further. The largest single bucket (34%,
+  222/650) is `oracle_correct_retrieved_wrong` -- cases where the verifier would have been correct
+  given gold evidence but retrieved evidence flipped the verdict, ahead of `oracle_wrong_retrieved_wrong`
+  (25%, 164/650), where the verifier is wrong even with gold evidence. The retrieved-evidence verifier
+  is also heavily REFUTED-biased (REFUTED predicted for 371/650 examples vs. 200 gold REFUTED;
+  precision 0.38, recall 0.71), and SciFact retrieved macro-F1 (0.18) is far below FEVER's (0.44)
+  despite SciFact having higher recall@10 (0.63 vs 0.51) -- evidence of a dataset-specific verifier
+  weakness on top of the shared retrieval ceiling.
 - Keep reporting oracle and retrieved numbers side by side; reporting only verifier macro-F1 hides the real ceiling.
