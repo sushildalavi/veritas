@@ -1,0 +1,50 @@
+{
+  "splits": {
+    "calibration": {
+      "claim_count": 650,
+      "class_distribution": {
+        "NEI": 2769,
+        "REFUTES": 395,
+        "SUPPORTS": 499
+      },
+      "hard_negative_count": 2769,
+      "pair_type_distribution": {
+        "irrelevant": 1439,
+        "near_miss": 622,
+        "positive_oracle": 413,
+        "positive_retrieved": 481,
+        "same_entity_insufficient": 101,
+        "same_topic_missing_fact": 607
+      },
+      "positive_count": 894,
+      "source_distribution": {
+        "fever": 2826,
+        "scifact": 837
+      },
+      "total_examples": 3663
+    },
+    "holdout": {
+      "claim_count": 649,
+      "class_distribution": {
+        "NEI": 2759,
+        "REFUTES": 426,
+        "SUPPORTS": 491
+      },
+      "hard_negative_count": 2759,
+      "pair_type_distribution": {
+        "irrelevant": 1493,
+        "near_miss": 601,
+        "positive_oracle": 426,
+        "positive_retrieved": 491,
+        "same_entity_insufficient": 127,
+        "same_topic_missing_fact": 538
+      },
+      "positive_count": 917,
+      "source_distribution": {
+        "fever": 2825,
+        "scifact": 851
+      },
+      "total_examples": 3676
+    }
+  }
+}
