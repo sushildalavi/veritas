@@ -51,56 +51,16 @@ def verify(request: VerifyRequest) -> VerifyResponse:
     cache_key = f"{request.claim}:{request.top_k}"
     cached = _cache.get(cache_key)
     if cached is not None:
-        _metrics.record(
-            cached.verdict,
-            cached.confidence,
-            cached.fallback_used,
-            elapsed_ms(start),
-            backend_used=cached.backend_used,
-            citation_valid=cached.citation_valid,
-        )
-        return cached
+        cached_response = cached.model_copy(update={"request_id": request_id, "latency_ms": elapsed_ms(start)})
+        _record_metrics(cached_response)
+        return cached_response
 
     try:
         outcome = _pipeline.reflection_loop.run(request.claim, top_k=request.top_k)
     except Exception as exc:  # pragma: no cover - defensive serving guard
         raise HTTPException(status_code=503, detail="verification unavailable") from exc
-    evidence = [
-        EvidenceItem(
-            doc_id=item.doc_id,
-            text=item.text,
-            title=item.title,
-            score=item.score,
-            citation_id=index + 1,
-        )
-        for index, item in enumerate(outcome.evidence)
-    ]
-    response = VerifyResponse(
-        verdict=outcome.verification.verdict if outcome.verification else "NOT ENOUGH INFO",
-        confidence=outcome.verification.confidence if outcome.verification else 0.0,
-        explanation=outcome.explanation or (outcome.verification.explanation if outcome.verification else ""),
-        citation_valid=outcome.citation_valid,
-        backend_used=_pipeline.verifier_backend,
-        retrieval_backend=_pipeline.retrieval_backend,
-        retrieval_fallback_used=_pipeline.retrieval_fallback_used,
-        reranker_backend=_pipeline.reranker_backend,
-        reranker_fallback_used=_pipeline.reranker_fallback_used,
-        evidence=evidence,
-        fallback_used=_pipeline.fallback_used,
-        latency_ms=elapsed_ms(start),
-        model_name=_pipeline.model_name,
-        verifier_macro_f1=_pipeline.verifier_macro_f1,
-        request_id=request_id,
-        explanation_mode=_pipeline.explanation_mode,
-    )
-    _metrics.record(
-        response.verdict,
-        response.confidence,
-        response.fallback_used,
-        response.latency_ms,
-        backend_used=response.backend_used,
-        citation_valid=response.citation_valid,
-    )
+    response = _build_response(outcome, request_id=request_id, latency_ms=elapsed_ms(start))
+    _record_metrics(response)
     _cache.set(cache_key, response)
     return response
 
@@ -122,3 +82,46 @@ def metrics() -> dict[str, object]:
     payload["model_name"] = _pipeline.model_name
     payload["verifier_macro_f1"] = _pipeline.verifier_macro_f1
     return payload
+
+
+def _build_response(outcome, *, request_id: str, latency_ms: float) -> VerifyResponse:
+    evidence = [
+        EvidenceItem(
+            doc_id=item.doc_id,
+            text=item.text,
+            title=item.title,
+            score=item.score,
+            citation_id=index + 1,
+        )
+        for index, item in enumerate(outcome.evidence)
+    ]
+    verification = outcome.verification
+    return VerifyResponse(
+        verdict=verification.verdict if verification else "NOT ENOUGH INFO",
+        confidence=verification.confidence if verification else 0.0,
+        explanation=outcome.explanation or (verification.explanation if verification else ""),
+        citation_valid=outcome.citation_valid,
+        backend_used=_pipeline.verifier_backend,
+        retrieval_backend=_pipeline.retrieval_backend,
+        retrieval_fallback_used=_pipeline.retrieval_fallback_used,
+        reranker_backend=_pipeline.reranker_backend,
+        reranker_fallback_used=_pipeline.reranker_fallback_used,
+        evidence=evidence,
+        fallback_used=_pipeline.fallback_used,
+        latency_ms=latency_ms,
+        model_name=_pipeline.model_name,
+        verifier_macro_f1=_pipeline.verifier_macro_f1,
+        request_id=request_id,
+        explanation_mode=_pipeline.explanation_mode,
+    )
+
+
+def _record_metrics(response: VerifyResponse) -> None:
+    _metrics.record(
+        response.verdict,
+        response.confidence,
+        response.fallback_used,
+        response.latency_ms,
+        backend_used=response.backend_used,
+        citation_valid=response.citation_valid,
+    )
