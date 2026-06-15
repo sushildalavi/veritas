@@ -59,3 +59,37 @@ Together these indicate the next bottleneck is **verifier robustness under noisy
 evidence**, not retrieval depth or simple threshold tuning -- better retrieval (the
 sentence-transformer hybrid) did not translate into a better verifier verdict, and threshold
 recalibration had nothing left to gain.
+
+## Analysis-only: retrieved-evidence verifier robustness dataset
+
+To investigate the verifier-robustness hypothesis above, a new per-passage diagnostic dataset
+was built (`scripts/build_retrieved_evidence_dataset.py`,
+`reports/retrieved_evidence_dataset_stats.md`). Each example is a single (claim, passage) pair
+labeled `SUPPORTS` / `REFUTES` / `NEI`, covering both gold (`positive_oracle`) and retrieved
+(`positive_retrieved`) positives plus four hard-negative categories
+(`same_entity_insufficient`, `same_topic_missing_fact`, `near_miss`, `irrelevant`), with a
+claim/passage lexical-overlap score stored per pair as an inference-time relevance signal.
+The calibration split (650 claims, `fever_val_large` + `scifact_val_large`) has 3663 pairs;
+the holdout split (650 claims, `fever_test_large` + `scifact_test_large`) has 3676 pairs.
+Both splits are roughly 75% `NEI` pairs, reflecting that most retrieved passages are not gold
+evidence.
+
+A new eval (`scripts/eval_retrieved_evidence_verifier.py`,
+`reports/retrieved_evidence_verifier_eval.md`) compares the verifier's current per-passage
+prediction against the same prediction forced to `NEI` whenever the lexical-overlap score is
+below a threshold tuned on the calibration split (best threshold: `0.5`). On the holdout split,
+the relevance-gated predictor improves per-passage macro-F1 from `0.3192` to `0.4511`
+(+0.1319), driven almost entirely by `NEI` F1 (`0.395` -> `0.8196`); `SUPPORTS`/`REFUTES` F1
+hold roughly flat or drop slightly. The gain holds on both FEVER (`0.3541` -> `0.4752`) and
+SciFact (`0.2234` -> `0.3734`).
+
+**This is a per-passage diagnostic result, not a full-650-set improvement.** The official
+oracle-vs-retrieved metric (`reports/oracle_vs_retrieved_v2_full.json`, retrieved macro-F1
+`0.3887`) is unaffected by this experiment -- the gate has not been integrated into
+`ModelRouter`, and this benchmark's heavy `NEI` skew means a gate that defaults to `NEI` scores
+well here without yet being validated against the claim-level REFUTED-overprediction problem
+documented above. A reasonable next step, if pursued, would be to prototype the lexical-overlap
+gate inside `ModelRouter.predict` (forcing `NOT ENOUGH INFO` when no retrieved passage clears
+the relevance threshold) and re-run `scripts/eval_oracle_vs_retrieved_v2.py` on the full 650-set
+to check whether it actually reduces REFUTED overprediction and improves retrieved macro-F1
+end-to-end -- no such claim is made here.
