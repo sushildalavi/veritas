@@ -95,9 +95,9 @@ def main() -> None:  # pragma: no cover - script entrypoint
             "top1/top3/top5 use evidence retrieved by BM25 + fine-tuned bi-encoder (RRF fusion), "
             "reranked by the fine-tuned cross-encoder reranker, on a held-out test set the "
             "verifier was not retrained on.",
-            "top1/top3/top5 all improve macro_f1 over the previous top-1 BM25-only baseline "
-            "of 0.414 (reports/end_to_end_verifier_eval.json), but remain well below the "
-            "0.55 target and far below the oracle macro_f1 of "
+            "top1/top3/top5 all improve macro_f1 over the previous retrieved-evidence bundle "
+            "baseline of 0.420 (reports/oracle_vs_retrieved_v2.json on the sampled v2 eval), "
+            "but remain well below the 0.55 target and far below the oracle macro_f1 of "
             f"{oracle.macro_f1:.3f}.",
             "mixed reaches macro_f1="
             f"{results['mixed'].macro_f1:.3f} but is composed of 50% gold evidence rows "
