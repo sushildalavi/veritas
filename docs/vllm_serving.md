@@ -17,6 +17,10 @@ Use `configs/vllm_serving.yaml` or set:
 - `VERITAS_VLLM_MODEL`
 - `VERITAS_VLLM_API_KEY`
 - `VERITAS_VLLM_TIMEOUT_SECONDS`
+- `VERITAS_VLLM_MAX_RETRIES` (default `2`) -- request retries on connection/timeout errors
+- `VERITAS_VLLM_MAX_NEW_TOKENS` (default `256`) -- sent as `max_tokens` in the chat-completions payload
+- `VERITAS_EXPLANATION_BACKEND` (default `vllm`) -- set to `template` to force template explanations
+  even when `explanation_mode: vllm` is configured (useful for CPU-only/local runs)
 
 ## Launch
 
@@ -40,4 +44,10 @@ VERITAS_CONFIG=configs/vllm_serving.yaml python3 -m uvicorn serving.api:app --re
 
 ## Failure mode
 
-If the vLLM endpoint is missing or errors, explanation generation falls back to the template path rather than changing verifier behavior.
+- If `VllmExplanationGenerator` cannot be constructed (e.g. import error), explanation generation
+  falls back to the template path.
+- If the vLLM endpoint is unreachable at request time, the generator retries up to
+  `vllm_max_retries` times, then returns a JSON fallback (`{"explanation": "Explanation
+  unavailable: vLLM request failed (...)", "citations": []}`) so the response is well-formed
+  instead of raising.
+- Verifier behavior is unaffected in either case -- only explanation text changes.

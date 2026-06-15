@@ -89,3 +89,19 @@ def test_build_explanation_generator_vllm(monkeypatch) -> None:
     assert isinstance(generator, FakeGenerator)
     assert generator.kwargs["base_url"] == "http://127.0.0.1:9000"
     assert generator.kwargs["model"] == "Qwen/Test"
+    assert generator.kwargs["max_retries"] == settings.vllm_max_retries
+    assert generator.kwargs["max_tokens"] == settings.vllm_max_new_tokens
+
+
+def test_build_explanation_generator_backend_override_skips_vllm(monkeypatch) -> None:
+    class FakeGenerator:
+        def __init__(self, **kwargs) -> None:
+            raise AssertionError("VllmExplanationGenerator should not be constructed")
+
+    monkeypatch.setattr("serving.vllm_client.VllmExplanationGenerator", FakeGenerator)
+
+    settings = ProjectSettings(explanation_mode="vllm", explanation_backend="template")
+
+    generator = _build_explanation_generator(settings)
+
+    assert generator is None

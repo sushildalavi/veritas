@@ -1,4 +1,5 @@
 import json
+from urllib import error
 
 from serving.vllm_client import VllmExplanationGenerator, _extract_message_text
 
@@ -44,3 +45,87 @@ def test_vllm_generator_posts_openai_compatible_payload(monkeypatch) -> None:
     assert seen["body"]["model"] == "Qwen/Test"
     assert seen["body"]["messages"][0]["content"] == "Explain this claim."
     assert seen["timeout"] == 12.0
+
+
+def test_vllm_generator_includes_max_tokens_when_set(monkeypatch) -> None:
+    seen = {}
+
+    class _FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
+            return False
+
+        def read(self) -> bytes:
+            return json.dumps({"choices": [{"message": {"content": "done"}}]}).encode("utf-8")
+
+    def fake_urlopen(req, timeout):  # noqa: ANN001
+        seen["body"] = json.loads(req.data.decode("utf-8"))
+        return _FakeResponse()
+
+    monkeypatch.setattr("serving.vllm_client.request.urlopen", fake_urlopen)
+    generator = VllmExplanationGenerator(
+        base_url="http://127.0.0.1:8001",
+        model="Qwen/Test",
+        max_tokens=64,
+    )
+
+    generator("Explain this claim.")
+
+    assert seen["body"]["max_tokens"] == 64
+
+
+def test_vllm_generator_retries_on_connection_error(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    class _FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
+            return False
+
+        def read(self) -> bytes:
+            return json.dumps({"choices": [{"message": {"content": "done"}}]}).encode("utf-8")
+
+    def fake_urlopen(req, timeout):  # noqa: ANN001
+        calls["count"] += 1
+        if calls["count"] < 2:
+            raise error.URLError("connection refused")
+        return _FakeResponse()
+
+    monkeypatch.setattr("serving.vllm_client.request.urlopen", fake_urlopen)
+    generator = VllmExplanationGenerator(
+        base_url="http://127.0.0.1:8001",
+        model="Qwen/Test",
+        max_retries=2,
+    )
+
+    result = generator("Explain this claim.")
+
+    assert result == "done"
+    assert calls["count"] == 2
+
+
+def test_vllm_generator_falls_back_to_json_after_exhausting_retries(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    def fake_urlopen(req, timeout):  # noqa: ANN001
+        calls["count"] += 1
+        raise error.URLError("connection refused")
+
+    monkeypatch.setattr("serving.vllm_client.request.urlopen", fake_urlopen)
+    generator = VllmExplanationGenerator(
+        base_url="http://127.0.0.1:8001",
+        model="Qwen/Test",
+        max_retries=1,
+        timeout_seconds=1.0,
+    )
+
+    result = generator("Explain this claim.")
+    payload = json.loads(result)
+
+    assert calls["count"] == 2  # initial attempt + 1 retry
+    assert payload["citations"] == []
+    assert "vLLM request failed" in payload["explanation"]

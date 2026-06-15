@@ -25,6 +25,9 @@ class ProjectSettings:
     vllm_model: str = "Qwen/Qwen2.5-1.5B-Instruct"
     vllm_api_key: str | None = None
     vllm_timeout_seconds: float = 30.0
+    vllm_max_retries: int = 2
+    vllm_max_new_tokens: int = 256
+    explanation_backend: str = "vllm"
     legacy_verifier_checkpoint: str | None = None
     retrieval_backend: str = "bm25_only"
     use_neural_retrieval: bool = False
@@ -103,6 +106,9 @@ def load_project_settings(
         vllm_model=str(env_or_yaml("VERITAS_VLLM_MODEL", (("vllm_model",), ("vllm", "model")), "Qwen/Qwen2.5-1.5B-Instruct")),
         vllm_api_key=_optional_str(env_or_yaml("VERITAS_VLLM_API_KEY", (("vllm_api_key",), ("vllm", "api_key")), None)),
         vllm_timeout_seconds=float(env_or_yaml("VERITAS_VLLM_TIMEOUT_SECONDS", (("vllm_timeout_seconds",), ("vllm", "timeout_seconds")), 30.0)),
+        vllm_max_retries=int(env_or_yaml("VERITAS_VLLM_MAX_RETRIES", (("vllm_max_retries",), ("vllm", "max_retries")), 2)),
+        vllm_max_new_tokens=int(env_or_yaml("VERITAS_VLLM_MAX_NEW_TOKENS", (("vllm_max_new_tokens",), ("vllm", "max_new_tokens")), 256)),
+        explanation_backend=str(env_or_yaml("VERITAS_EXPLANATION_BACKEND", (("explanation_backend",),), "vllm")),
         legacy_verifier_checkpoint=_optional_str(env.get("VERITAS_VERIFIER_CHECKPOINT")),
         retrieval_backend=str(env_or_yaml("VERITAS_RETRIEVAL_BACKEND", (("retrieval_backend",), ("retrieval", "backend")), "bm25_only")),
         use_neural_retrieval=_coerce_bool(env_or_yaml("VERITAS_USE_NEURAL_RETRIEVAL", (("use_neural_retrieval",), ("retrieval", "use_neural_retrieval")), False)),

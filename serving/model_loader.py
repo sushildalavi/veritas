@@ -405,6 +405,12 @@ def _load_reranker_runtime(settings: ProjectSettings) -> RerankerRuntime:
 def _build_explanation_generator(settings: ProjectSettings):
     mode = settings.explanation_mode.strip().lower()
     if mode == "vllm":
+        if settings.explanation_backend.strip().lower() != "vllm":
+            LOGGER.info(
+                "explanation_backend=%s overrides explanation_mode=vllm; using template explanations",
+                settings.explanation_backend,
+            )
+            return None
         try:
             from serving.vllm_client import VllmExplanationGenerator
 
@@ -413,6 +419,8 @@ def _build_explanation_generator(settings: ProjectSettings):
                 model=settings.vllm_model,
                 api_key=settings.vllm_api_key,
                 timeout_seconds=settings.vllm_timeout_seconds,
+                max_retries=settings.vllm_max_retries,
+                max_tokens=settings.vllm_max_new_tokens,
             )
         except Exception as exc:  # pragma: no cover - optional dependency fallback
             LOGGER.warning("Could not create vLLM explanation generator: %s", exc)

@@ -12,10 +12,13 @@ verifier:
   support_threshold: 0.55
   refute_threshold: 0.5
 explanation_mode: vllm
+explanation_backend: vllm
 vllm:
   base_url: http://127.0.0.1:8001
   model: Qwen/Qwen2.5-1.5B-Instruct
   timeout_seconds: 30.0
+  max_retries: 2
+  max_new_tokens: 256
 retrieval:
   backend: bm25_only
   use_neural_retrieval: false
