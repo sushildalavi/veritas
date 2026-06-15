@@ -22,6 +22,10 @@ Measured from `reports/oracle_vs_retrieved_v2.json` after threshold calibration 
 
 ## Practical next steps
 
-- Re-run the v2 evaluator on larger held-out samples once runtime budget allows.
-- Compare BM25-only, hybrid, and cross-encoder reranked profiles under the same evaluator.
+- Done: the v2 evaluator has been re-run on larger held-out samples, up to the full 650-example
+  `fever_test_large` + `scifact_test_large` test set (`reports/oracle_vs_retrieved_v2_full.md`).
+  Oracle per-passage macro-F1 is `0.6748`, retrieved is `0.3833`, recall@10 is `0.5334` -- a gap
+  of `0.2915`, consistent with the 20/100/200-example slices.
+- Done: BM25-only, dense, hybrid, query-expansion, cross-encoder reranked, and real MiniLM-hybrid
+  profiles have been compared under the same evaluator (`reports/retrieval_profile_comparison.md`).
 - Keep reporting oracle and retrieved numbers side by side; reporting only verifier macro-F1 hides the real ceiling.
