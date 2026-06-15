@@ -131,6 +131,34 @@ flowchart LR
 - FastAPI service with response caching, fallback metadata, and health/metrics endpoints
 - Gradio demo with a polished research-facing layout
 
+## LLM Inference and Runtime Benchmarking
+
+Veritas includes an "Inference Performance Lab" that benchmarks the
+production verifier and explanation-generation paths -- latency, throughput,
+batching, and fallback behavior, all measured (not estimated):
+
+- **Verifier (PyTorch, CPU/MPS)**: `scripts/benchmark_verifier_runtime.py`
+  measures forward-pass latency/throughput across batch sizes for the
+  production `transformer_verifier_clean` checkpoint. On this machine, MPS
+  gives ~2.4x the CPU throughput at batch size 32 (364 vs 154 examples/sec).
+- **Explanation generation (transformers, CPU/MPS)**: `scripts/benchmark_inference_serving.py`
+  measures local-generation latency and tokens/sec for a small causal LM
+  (TinyLlama-1.1B).
+- **vLLM serving**: the same script health-checks an OpenAI-compatible vLLM
+  endpoint and measures concurrent request throughput if one is running;
+  otherwise it writes a `status: skipped` report with the exact command to
+  start one. `serving/vllm_client.py` retries on connection errors and falls
+  back to a well-formed JSON response after exhausting retries.
+- **ONNX Runtime / Triton (GPU)**: `scripts/export_verifier_onnx.py`,
+  `scripts/benchmark_verifier_onnx.py`, and `scripts/benchmark_triton_dense_scoring.py`
+  are runnable scripts that write `status: skipped` reports with required
+  dependencies/hardware on machines without `onnxruntime`/CUDA/Triton (the
+  case for this development machine).
+
+See `docs/inference_performance.md` for full results and
+`docs/inference_runtime_landscape.md` for architecture notes on
+SGLang/MLC-LLM/FlashAttention/TVM-MLIR relative to Veritas's bottlenecks.
+
 ## Live Demo
 
 Public demo: [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space)
@@ -239,6 +267,8 @@ Research mode:
 - `docs/retrieval_ceiling.md`
 - `docs/vllm_serving.md`
 - `docs/phi3_gpu_training.md`
+- `docs/inference_performance.md`
+- `docs/inference_runtime_landscape.md`
 
 ## Do Not Overclaim
 
@@ -252,3 +282,9 @@ Research mode:
 ## Resume-Safe Summary
 
 Veritas is a Mac-compatible research and production ML project for evidence-grounded fact verification, with hybrid retrieval, transformer verdict classification, MLX LoRA explanation generation, and preference-guided explanation reranking.
+
+**Resume bullet (inference performance):** Built an inference benchmarking
+suite measuring PyTorch verifier latency/throughput across batch sizes and
+devices (CPU/MPS), local and vLLM-served LLM explanation generation with
+retry/fallback handling, and added ONNX Runtime and Triton GPU benchmark
+scaffolds that run and report cleanly on hardware without those dependencies.
