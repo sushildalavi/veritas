@@ -364,7 +364,21 @@ def _load_reranker_runtime(settings: ProjectSettings) -> RerankerRuntime:
 
 
 def _build_explanation_generator(settings: ProjectSettings):
-    if settings.explanation_mode.strip().lower() not in {"mlx_lora", "preference_reranked"}:
+    mode = settings.explanation_mode.strip().lower()
+    if mode == "vllm":
+        try:
+            from serving.vllm_client import VllmExplanationGenerator
+
+            return VllmExplanationGenerator(
+                base_url=settings.vllm_base_url,
+                model=settings.vllm_model,
+                api_key=settings.vllm_api_key,
+                timeout_seconds=settings.vllm_timeout_seconds,
+            )
+        except Exception as exc:  # pragma: no cover - optional dependency fallback
+            LOGGER.warning("Could not create vLLM explanation generator: %s", exc)
+            return None
+    if mode not in {"mlx_lora", "preference_reranked"}:
         return None
     try:
         from mlx_lm import generate, load  # type: ignore

@@ -1,5 +1,5 @@
 from core.config import ProjectSettings
-from serving.model_loader import _load_reranker_runtime
+from serving.model_loader import _build_explanation_generator, _load_reranker_runtime
 
 
 def test_load_reranker_runtime_none_backend() -> None:
@@ -67,3 +67,25 @@ def test_load_reranker_runtime_cross_encoder_falls_back(monkeypatch) -> None:
     assert runtime.reranker_backend == "heuristic"
     assert runtime.cross_encoder_model == "fake-model"
     assert runtime.fallback_used is True
+
+
+def test_build_explanation_generator_vllm(monkeypatch) -> None:
+    class FakeGenerator:
+        def __init__(self, **kwargs) -> None:
+            self.kwargs = kwargs
+
+    monkeypatch.setattr("serving.vllm_client.VllmExplanationGenerator", FakeGenerator)
+
+    settings = ProjectSettings(
+        explanation_mode="vllm",
+        vllm_base_url="http://127.0.0.1:9000",
+        vllm_model="Qwen/Test",
+        vllm_api_key="token",
+        vllm_timeout_seconds=15.0,
+    )
+
+    generator = _build_explanation_generator(settings)
+
+    assert isinstance(generator, FakeGenerator)
+    assert generator.kwargs["base_url"] == "http://127.0.0.1:9000"
+    assert generator.kwargs["model"] == "Qwen/Test"
