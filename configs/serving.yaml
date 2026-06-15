@@ -13,6 +13,7 @@ verifier:
   aggregation: per_passage_max
   support_threshold: 0.55
   refute_threshold: 0.5
+  relevance_gate_threshold: null
 mlx_lora_model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
 mlx_lora_adapter: checkpoints/mlx_lora_verifier
 explanation_mode: template

@@ -13,7 +13,7 @@ import joblib
 import sklearn
 from sklearn.exceptions import InconsistentVersionWarning
 
-from core.evidence_formatting import format_verifier_text, sanitize_evidence_text
+from core.evidence_formatting import format_verifier_text, lexical_token_overlap, sanitize_evidence_text
 from data.schemas import EvidenceSpan
 from models.labels import VALID_LABELS, normalize_label
 
@@ -29,6 +29,35 @@ class VerificationResult:
     model_name: str = "mock"
 
 
+_NEI_LABEL = "NOT ENOUGH INFO"
+_NEI_LOGITS = {"SUPPORTED": 0.0, "REFUTED": 0.0, _NEI_LABEL: 1.0}
+
+
+def _gate_results(
+    claim: str,
+    evidence: list[EvidenceSpan],
+    results: list[VerificationResult],
+    gate_threshold: float,
+    model_name: str,
+) -> list[VerificationResult]:
+    """Force passages below the lexical overlap gate threshold to NEI."""
+    gated = []
+    for span, result in zip(evidence, results):
+        if lexical_token_overlap(claim, span.text) < gate_threshold:
+            gated.append(
+                VerificationResult(
+                    verdict=_NEI_LABEL,
+                    confidence=1.0,
+                    explanation="Passage filtered by relevance gate.",
+                    logits=dict(_NEI_LOGITS),
+                    model_name=model_name,
+                )
+            )
+        else:
+            gated.append(result)
+    return gated
+
+
 class MockVerifier:
     """Deterministic verifier used for CI and free-demo fallback."""
 
@@ -40,22 +69,26 @@ class MockVerifier:
         aggregation_mode: str = "per_passage_max",
         support_threshold: float = 0.5,
         refute_threshold: float = 0.5,
+        relevance_gate_threshold: float | None = None,
     ) -> None:
         self.aggregation_mode = aggregation_mode
         self.support_threshold = support_threshold
         self.refute_threshold = refute_threshold
+        self.relevance_gate_threshold = relevance_gate_threshold
 
     def predict(self, claim: str, evidence: list[EvidenceSpan]) -> VerificationResult:
         if not evidence:
             return VerificationResult(
-                verdict="NOT ENOUGH INFO",
+                verdict=_NEI_LABEL,
                 confidence=0.34,
                 explanation="No evidence was retrieved.",
-                logits={"SUPPORTED": 0.0, "REFUTED": 0.0, "NOT ENOUGH INFO": 1.0},
+                logits=dict(_NEI_LOGITS),
                 model_name=self.model_name,
             )
         if self.aggregation_mode == "per_passage_max" and len(evidence) > 1:
             results = self.score_evidence_passages(claim, evidence)
+            if self.relevance_gate_threshold is not None:
+                results = _gate_results(claim, evidence, results, self.relevance_gate_threshold, self.model_name)
             return _aggregate_results(
                 claim,
                 evidence,
@@ -105,16 +138,19 @@ class DebertaVerifier:
         aggregation_mode: str = "per_passage_max",
         support_threshold: float = 0.5,
         refute_threshold: float = 0.5,
+        relevance_gate_threshold: float | None = None,
     ) -> None:
         self.checkpoint_path = Path(checkpoint_path) if checkpoint_path else None
         self.model_name = model_name
         self.aggregation_mode = aggregation_mode
         self.support_threshold = support_threshold
         self.refute_threshold = refute_threshold
+        self.relevance_gate_threshold = relevance_gate_threshold
         self._fallback = MockVerifier(
             aggregation_mode=aggregation_mode,
             support_threshold=support_threshold,
             refute_threshold=refute_threshold,
+            relevance_gate_threshold=relevance_gate_threshold,
         )
         self._pipeline = None
         self._backend = "mock"
@@ -148,6 +184,8 @@ class DebertaVerifier:
             return self._fallback.predict(claim, evidence)
         if self.aggregation_mode == "per_passage_max" and len(evidence) > 1:
             results = self.score_evidence_passages(claim, evidence)
+            if self.relevance_gate_threshold is not None:
+                results = _gate_results(claim, evidence, results, self.relevance_gate_threshold, self.model_name)
             return _aggregate_results(
                 claim,
                 evidence,

@@ -20,6 +20,7 @@ class ModelRouter:
         aggregation_mode: str = "per_passage_max",
         support_threshold: float = 0.5,
         refute_threshold: float = 0.5,
+        relevance_gate_threshold: float | None = None,
     ) -> None:
         self.verifier_checkpoint = Path(verifier_checkpoint) if verifier_checkpoint else None
         self.prefer_deberta = prefer_deberta
@@ -27,6 +28,7 @@ class ModelRouter:
             aggregation_mode=aggregation_mode,
             support_threshold=support_threshold,
             refute_threshold=refute_threshold,
+            relevance_gate_threshold=relevance_gate_threshold,
         )
         self._deberta = (
             DebertaVerifier(
@@ -34,6 +36,7 @@ class ModelRouter:
                 aggregation_mode=aggregation_mode,
                 support_threshold=support_threshold,
                 refute_threshold=refute_threshold,
+                relevance_gate_threshold=relevance_gate_threshold,
             )
             if self.prefer_deberta
             else None

@@ -1,6 +1,7 @@
+from core.evidence_formatting import lexical_token_overlap
 from data.schemas import EvidenceSpan
 from models import DebertaVerifier, MockVerifier, ModelRouter, VALID_LABELS, normalize_label
-from models.deberta_verifier import VerificationResult, _aggregate_results
+from models.deberta_verifier import VerificationResult, _aggregate_results, _gate_results
 
 
 def test_normalize_label_accepts_common_variants() -> None:
@@ -98,6 +99,61 @@ def test_per_passage_aggregation_prefers_refute_when_threshold_crosses() -> None
 
     assert result.verdict == "REFUTED"
     assert result.confidence == 0.7
+
+
+def test_lexical_token_overlap_matching_claim() -> None:
+    overlap = lexical_token_overlap("Paris is in France", "Paris is the capital of France.")
+    assert overlap > 0.0
+
+
+def test_lexical_token_overlap_irrelevant_passage() -> None:
+    overlap = lexical_token_overlap("The Eiffel Tower is in Paris", "Ottawa is the capital of Canada.")
+    assert overlap == 0.0
+
+
+def test_gate_results_forces_nei_below_threshold() -> None:
+    evidence = [
+        EvidenceSpan(doc_id="1", text="completely unrelated text about something else"),
+        EvidenceSpan(doc_id="2", text="Paris is the capital of France and sits on the Seine river"),
+    ]
+    results = [
+        VerificationResult(verdict="SUPPORTED", confidence=0.8, logits={"SUPPORTED": 0.8, "REFUTED": 0.1, "NOT ENOUGH INFO": 0.1}),
+        VerificationResult(verdict="SUPPORTED", confidence=0.9, logits={"SUPPORTED": 0.9, "REFUTED": 0.05, "NOT ENOUGH INFO": 0.05}),
+    ]
+    gated = _gate_results("Paris is in France", evidence, results, gate_threshold=0.5, model_name="test")
+
+    assert gated[0].verdict == "NOT ENOUGH INFO", "irrelevant passage should be gated to NEI"
+    assert gated[1].verdict == "SUPPORTED", "relevant passage should pass through unchanged"
+
+
+def test_gate_disabled_passes_all_results_through() -> None:
+    verifier = MockVerifier(aggregation_mode="per_passage_max", relevance_gate_threshold=None)
+    evidence = [EvidenceSpan(doc_id="1", text="completely irrelevant passage about dogs")]
+    result = verifier.predict("Paris is in France", evidence)
+    assert result.verdict in VALID_LABELS
+
+
+def test_gate_threshold_zero_passes_all_through() -> None:
+    verifier = MockVerifier(aggregation_mode="per_passage_max", relevance_gate_threshold=0.0)
+    evidence = [EvidenceSpan(doc_id="1", text="completely irrelevant passage")]
+    result = verifier.predict("Paris is in France", [evidence[0], evidence[0]])
+    assert result.verdict in VALID_LABELS
+
+
+def test_gate_threshold_high_forces_unrelated_claim_to_nei() -> None:
+    # claim tokens: {rhinoceros, conservation} (unique, not in evidence)
+    verifier = MockVerifier(aggregation_mode="per_passage_max", relevance_gate_threshold=0.9)
+    evidence = [
+        EvidenceSpan(doc_id="1", text="Paris is a beautiful city located in France"),
+        EvidenceSpan(doc_id="2", text="The Eiffel Tower stands in Paris France"),
+    ]
+    result = verifier.predict("rhinoceros conservation efforts", evidence)
+    assert result.verdict == "NOT ENOUGH INFO", "high gate threshold should force irrelevant passages to NEI"
+
+
+def test_model_router_passes_gate_threshold() -> None:
+    router = ModelRouter(verifier_checkpoint="does-not-exist", relevance_gate_threshold=0.5)
+    assert router._mock.relevance_gate_threshold == 0.5
 
 
 def test_per_passage_aggregation_falls_back_to_nei_below_thresholds() -> None:

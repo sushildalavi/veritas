@@ -12,6 +12,11 @@ from data.schemas import EvidenceSpan
 EvidenceStyle = Literal["plain", "passage", "evidence_letter", "bullet", "bracket"]
 
 _WHITESPACE_PATTERN = re.compile(r"\s+")
+_WORD_RE = re.compile(r"\b[a-z]{3,}\b")
+_STOPWORDS = frozenset(
+    "the and for are but not you all can her was one our out day get has him his how its now old see two who did did not "
+    "does from into know let man new other over said she the their them then there they this was way with".split()
+)
 _MARKER_PATTERNS = (
     re.compile(r"^\[(?:E\d+|\d+)\]\s*", re.IGNORECASE),
     re.compile(r"^passage\s+\d+\s*:\s*", re.IGNORECASE),
@@ -116,6 +121,20 @@ def _format_block(block: EvidenceBlock, *, index: int, style: EvidenceStyle) -> 
     if style == "bullet":
         return f"- {body}"
     return f"[E{index}] {body}"
+
+
+def lexical_token_overlap(claim: str, passage: str) -> float:
+    """Fraction of non-trivial claim tokens that also appear in passage.
+
+    Mirrors the lexical_overlap column in the retrieved-evidence dataset
+    (built by ``scripts/build_retrieved_evidence_dataset.py``) so the same
+    threshold value can be reused in the serving gate.
+    """
+    claim_tokens = {t for t in _WORD_RE.findall(claim.lower()) if t not in _STOPWORDS}
+    if not claim_tokens:
+        return 0.0
+    passage_tokens = {t for t in _WORD_RE.findall(passage.lower()) if t not in _STOPWORDS}
+    return len(claim_tokens & passage_tokens) / len(claim_tokens)
 
 
 def _clean_block(text: str) -> str:

@@ -39,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-examples", type=int, default=0)
     parser.add_argument("--threshold-support", type=float, default=None)
     parser.add_argument("--threshold-refute", type=float, default=None)
+    parser.add_argument("--gate-threshold", type=float, default=None, help="Relevance gate lexical overlap threshold (None = disabled)")
     parser.add_argument("--report-json", default="reports/oracle_vs_retrieved_v2.json")
     parser.add_argument("--report-md", default="reports/oracle_vs_retrieved_v2.md")
     return parser
@@ -60,6 +61,7 @@ def main() -> None:  # pragma: no cover - CLI entrypoint
         config_path=args.config,
         support_threshold=args.threshold_support,
         refute_threshold=args.threshold_refute,
+        gate_threshold=args.gate_threshold,
     )
     write_report(report, Path(args.report_json))
     Path(args.report_md).write_text(_to_markdown(report), encoding="utf-8")
@@ -78,9 +80,11 @@ def evaluate_oracle_vs_retrieved_v2(
     config_path: str | None = None,
     support_threshold: float | None = None,
     refute_threshold: float | None = None,
+    gate_threshold: float | None = None,
 ) -> dict[str, object]:
     support_threshold = settings.support_threshold if support_threshold is None else support_threshold
     refute_threshold = settings.refute_threshold if refute_threshold is None else refute_threshold
+    gate_threshold = settings.relevance_gate_threshold if gate_threshold is None else gate_threshold
     records = _load_eval_records(data_dir, suffix=suffix, split_prefixes=split_prefixes, max_examples=max_examples)
     corpus = load_evidence_corpus(data_dir, suffix=suffix)
     retrieval_runtime = _load_retrieval_runtime(corpus, settings)
@@ -109,6 +113,7 @@ def evaluate_oracle_vs_retrieved_v2(
         aggregation_mode="bundle",
         support_threshold=support_threshold,
         refute_threshold=refute_threshold,
+        relevance_gate_threshold=gate_threshold,
     )
     per_passage_router = ModelRouter(
         verifier_checkpoint=checkpoint,
@@ -116,6 +121,7 @@ def evaluate_oracle_vs_retrieved_v2(
         aggregation_mode="per_passage_max",
         support_threshold=support_threshold,
         refute_threshold=refute_threshold,
+        relevance_gate_threshold=gate_threshold,
     )
 
     oracle_bundle = _evaluate_router(bundle_router, claims, labels, oracle_examples)

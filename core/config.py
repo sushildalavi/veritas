@@ -50,6 +50,7 @@ class ProjectSettings:
     verifier_aggregation: str = "per_passage_max"
     support_threshold: float = 0.55
     refute_threshold: float = 0.5
+    relevance_gate_threshold: float | None = None
     explanation_mode: str = "template"
     max_candidates_for_reranking: int = 3
     num_explanation_candidates: int = 3
@@ -142,6 +143,7 @@ def load_project_settings(
         verifier_aggregation=str(env_or_yaml("VERITAS_VERIFIER_AGGREGATION", (("verifier_aggregation",), ("verifier", "aggregation")), "per_passage_max")),
         support_threshold=float(env_or_yaml("VERITAS_SUPPORT_THRESHOLD", (("support_threshold",), ("verifier", "support_threshold")), 0.55)),
         refute_threshold=float(env_or_yaml("VERITAS_REFUTE_THRESHOLD", (("refute_threshold",), ("verifier", "refute_threshold")), 0.5)),
+        relevance_gate_threshold=_coerce_optional_float(env_or_yaml("VERITAS_RELEVANCE_GATE_THRESHOLD", (("relevance_gate_threshold",), ("verifier", "relevance_gate_threshold")), None)),
         explanation_mode=str(env_or_yaml("VERITAS_EXPLANATION_MODE", (("explanation_mode",),), "template")),
         max_candidates_for_reranking=int(env_or_yaml("VERITAS_MAX_CANDIDATES_FOR_RERANKING", (("max_candidates_for_reranking",),), 3)),
         num_explanation_candidates=int(env_or_yaml("VERITAS_NUM_EXPLANATION_CANDIDATES", (("num_explanation_candidates",),), 3)),
@@ -170,6 +172,12 @@ def _optional_str(value: str | None) -> str | None:
     if value is None or value == "":
         return None
     return value
+
+
+def _coerce_optional_float(value: Any) -> float | None:
+    if value is None or str(value).strip().lower() in {"null", "none", ""}:
+        return None
+    return float(value)
 
 
 def _coerce_bool(value: Any) -> bool:
