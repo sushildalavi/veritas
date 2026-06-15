@@ -6,7 +6,7 @@
 - Split prefixes: `fever_test, scifact_test`
 - Suffix: `_large`
 - Sample size: 20
-- Retrieval runtime (s): 0.245
+- Retrieval runtime (s): 0.243
 
 ## Retrieval metrics
 
@@ -25,9 +25,9 @@
 | bundle | oracle | 0.7 | 0.7086 | 0.0 |
 | per_passage_max | oracle | 0.7 | 0.7086 | 0.0 |
 | bundle | retrieved | 0.55 | 0.4205 | 1.0 |
-| per_passage_max | retrieved | 0.55 | 0.4873 | 0.75 |
+| per_passage_max | retrieved | 0.55 | 0.5 | 0.5 |
 
 ## Delta from oracle
 
 - bundle: accuracy gap=0.15, macro_f1 gap=0.2881
-- per_passage_max: accuracy gap=0.15, macro_f1 gap=0.2213
+- per_passage_max: accuracy gap=0.15, macro_f1 gap=0.2086

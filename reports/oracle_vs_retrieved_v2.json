@@ -7,10 +7,10 @@
     },
     "per_passage_max": {
       "accuracy": 0.15,
-      "macro_f1": 0.2213
+      "macro_f1": 0.2086
     }
   },
-  "headline": "oracle_vs_retrieved_v2 complete: retrieval recall@10=0.667, retrieved macro_f1 bundle=0.420, per_passage=0.487",
+  "headline": "oracle_vs_retrieved_v2 complete: retrieval recall@10=0.667, retrieved macro_f1 bundle=0.420, per_passage=0.500",
   "label_distribution": {
     "NOT ENOUGH INFO": 4,
     "REFUTED": 10,
@@ -38,8 +38,8 @@
         ]
       ],
       "latency_ms": {
-        "p50": 28.058,
-        "p95": 34.6775
+        "p50": 30.5077,
+        "p95": 36.1133
       },
       "macro_f1": 0.7086,
       "nei_false_positive_rate": 0.0,
@@ -63,7 +63,7 @@
     },
     "per_passage_max": {
       "accuracy": 0.7,
-      "average_confidence": 0.6499,
+      "average_confidence": 0.6479,
       "confusion_matrix": [
         [
           3,
@@ -82,8 +82,8 @@
         ]
       ],
       "latency_ms": {
-        "p50": 10.0559,
-        "p95": 61.5664
+        "p50": 11.0254,
+        "p95": 62.9184
       },
       "macro_f1": 0.7086,
       "nei_false_positive_rate": 0.0,
@@ -117,7 +117,7 @@
     "recall@5": 0.6417,
     "recall@50": 0.7167
   },
-  "retrieval_runtime_seconds": 0.245,
+  "retrieval_runtime_seconds": 0.243,
   "retrieved": {
     "bundle": {
       "accuracy": 0.55,
@@ -140,8 +140,8 @@
         ]
       ],
       "latency_ms": {
-        "p50": 32.9905,
-        "p95": 52.1033
+        "p50": 33.8517,
+        "p95": 60.2754
       },
       "macro_f1": 0.4205,
       "nei_false_positive_rate": 1.0,
@@ -165,35 +165,35 @@
     },
     "per_passage_max": {
       "accuracy": 0.55,
-      "average_confidence": 0.5974,
+      "average_confidence": 0.5852,
       "confusion_matrix": [
         [
-          3,
           2,
-          1
+          2,
+          2
         ],
         [
-          3,
-          7,
-          0
-        ],
-        [
-          2,
           1,
-          1
+          7,
+          2
+        ],
+        [
+          1,
+          1,
+          2
         ]
       ],
       "latency_ms": {
-        "p50": 99.0462,
-        "p95": 177.4011
+        "p50": 94.7367,
+        "p95": 177.8571
       },
-      "macro_f1": 0.4873,
-      "nei_false_positive_rate": 0.75,
+      "macro_f1": 0.5,
+      "nei_false_positive_rate": 0.5,
       "per_class": {
         "NOT ENOUGH INFO": {
-          "f1": 0.3333,
-          "precision": 0.5,
-          "recall": 0.25
+          "f1": 0.4,
+          "precision": 0.3333,
+          "recall": 0.5
         },
         "REFUTED": {
           "f1": 0.7,
@@ -201,9 +201,9 @@
           "recall": 0.7
         },
         "SUPPORTED": {
-          "f1": 0.4286,
-          "precision": 0.375,
-          "recall": 0.5
+          "f1": 0.4,
+          "precision": 0.5,
+          "recall": 0.3333
         }
       }
     }
@@ -214,10 +214,10 @@
     "dense_top_k": 20,
     "final_top_k": 5,
     "query_expansion_top_k": 0,
-    "refute_threshold": 0.5,
+    "refute_threshold": 0.3,
     "rerank_top_k": 20,
     "rrf_top_k": 60,
-    "support_threshold": 0.5,
+    "support_threshold": 0.55,
     "title_top_k": 0,
     "verifier_aggregation": "per_passage_max"
   },
@@ -226,6 +226,6 @@
     "scifact_test"
   ],
   "suffix": "_large",
-  "timestamp_utc": "2026-06-15T08:15:44.787212+00:00",
+  "timestamp_utc": "2026-06-15T08:20:04.913755+00:00",
   "top_k": 5
 }
