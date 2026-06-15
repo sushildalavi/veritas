@@ -9,7 +9,7 @@ from data.schemas import EvidenceSpan
 from models.deberta_verifier import DebertaVerifier, _load_joblib_model
 from core.config import ProjectSettings
 from serving.model_loader import _resolve_checkpoint_path
-from scripts.train_transformer_verifier import _to_markdown
+from scripts.train_transformer_verifier_clean import LABEL_ORDER, _to_markdown
 
 
 def test_deberta_verifier_loads_joblib_checkpoint(tmp_path: Path) -> None:
@@ -57,28 +57,34 @@ def test_transformer_checkpoint_takes_priority_over_sklearn(tmp_path: Path) -> N
     assert resolved == transformer_dir
 
 
-def test_transformer_verifier_report_markdown_schema() -> None:
+def test_transformer_verifier_clean_report_markdown_schema() -> None:
+    per_class = {label: {"precision": 1.0, "recall": 1.0, "f1": 1.0} for label in LABEL_ORDER}
     report = {
         "model_name": "distilroberta-base",
-        "checkpoint_path": "checkpoints/transformer_verifier",
-        "train_example_count": 2,
-        "validation_example_count": 1,
-        "test_example_count": 1,
-        "test_latency_ms_per_example": 12.5,
+        "checkpoint_path": "checkpoints/transformer_verifier_clean",
+        "epochs": 3,
+        "batch_size": 16,
+        "learning_rate": 2e-5,
+        "training_runtime_seconds": 120.0,
         "train": {"example_count": 2, "accuracy": 0.5, "macro_f1": 0.33},
         "validation": {"example_count": 1, "accuracy": 0.0, "macro_f1": 0.0},
-        "test": {"example_count": 1, "accuracy": 1.0, "macro_f1": 1.0},
-        "test_per_class": {
-            "SUPPORTED": {"precision": 1.0, "recall": 1.0, "f1": 1.0},
-            "REFUTED": {"precision": 0.0, "recall": 0.0, "f1": 0.0},
-            "NOT_ENOUGH_INFO": {"precision": 0.0, "recall": 0.0, "f1": 0.0},
+        "test": {
+            "example_count": 1,
+            "accuracy": 1.0,
+            "macro_f1": 1.0,
+            "per_class": per_class,
+            "confusion_matrix": [[1, 0, 0], [0, 0, 0], [0, 0, 0]],
         },
-        "test_confusion_matrix": [[1, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "thresholds": {"macro_f1_ok": True, "accuracy_ok": True},
+        "metadata": {
+            "git_commit": "abc123",
+            "training_command": "python3 scripts/train_transformer_verifier_clean.py",
+        },
     }
 
     markdown = _to_markdown(report)
 
-    assert "Transformer Verifier Evaluation" in markdown
+    assert "Transformer Verifier (Clean Dataset) Evaluation" in markdown
     assert "distilroberta-base" in markdown
     assert "SUPPORTED" in markdown
 

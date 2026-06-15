@@ -54,18 +54,19 @@ pareto-analysis:
 retrieve-eval: eval-retrieval
 
 train-verifier:
-	python3 scripts/train_verifier.py
+	python3 scripts/train_verifier_clean.py
 
 train-verifier-smoke:
-	python3 scripts/train_verifier.py --checkpoint-dir /tmp/veritas-verifier-checkpoint
+	python3 scripts/train_verifier_clean.py --checkpoint-dir /tmp/veritas-verifier-checkpoint
 
-train-deberta: train-verifier
+train-deberta:
+	python3 scripts/train_deberta_challenger.py
 
 serve:
 	python3 -m uvicorn serving.api:app --reload
 
 serve-real:
-	VERITAS_VERIFIER_CHECKPOINT=checkpoints/verifier python3 -m uvicorn serving.api:app --reload
+	VERITAS_VERIFIER_CHECKPOINT=checkpoints/transformer_verifier_clean python3 -m uvicorn serving.api:app --reload
 
 demo:
 	python3 app.py
