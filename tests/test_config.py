@@ -28,6 +28,11 @@ demo:
     monkeypatch.setenv("VERITAS_RERANKER_BACKEND", "cross_encoder")
     monkeypatch.setenv("VERITAS_USE_CROSS_ENCODER", "true")
     monkeypatch.setenv("VERITAS_CROSS_ENCODER_MODEL", "fake-reranker")
+    monkeypatch.setenv("VERITAS_BM25_TOP_K", "100")
+    monkeypatch.setenv("VERITAS_DENSE_TOP_K", "80")
+    monkeypatch.setenv("VERITAS_TITLE_TOP_K", "25")
+    monkeypatch.setenv("VERITAS_QUERY_EXPANSION_TOP_K", "15")
+    monkeypatch.setenv("VERITAS_INCLUDE_TITLE_IN_INDEX", "true")
     monkeypatch.setenv("VERITAS_CACHE_TTL_SECONDS", "45")
     monkeypatch.setenv("VERITAS_EVIDENCE_CORPUS", "custom.jsonl")
 
@@ -40,6 +45,11 @@ demo:
     assert settings.reranker_backend == "cross_encoder"
     assert settings.use_cross_encoder is True
     assert settings.cross_encoder_model == "fake-reranker"
+    assert settings.bm25_top_k == 100
+    assert settings.dense_top_k == 80
+    assert settings.title_top_k == 25
+    assert settings.query_expansion_top_k == 15
+    assert settings.include_title_in_index is True
     assert settings.cache_ttl_seconds == 45
     assert settings.api_host == "127.0.0.1"
     assert settings.api_port == 9000
@@ -55,6 +65,10 @@ transformer_checkpoint: checkpoints/transformer_verifier
 retrieval:
   backend: bm25_only
   use_neural_retrieval: false
+  bm25_top_k: 40
+  dense_top_k: 30
+  title_top_k: 10
+  query_expansion_top_k: 12
 ranking:
   reranker_backend: heuristic
   use_cross_encoder: false
@@ -69,5 +83,9 @@ ranking:
     assert settings.transformer_checkpoint == "checkpoints/transformer_verifier"
     assert settings.retrieval_backend == "bm25_only"
     assert settings.use_neural_retrieval is False
+    assert settings.bm25_top_k == 40
+    assert settings.dense_top_k == 30
+    assert settings.title_top_k == 10
+    assert settings.query_expansion_top_k == 12
     assert settings.reranker_backend == "heuristic"
     assert settings.use_cross_encoder is False

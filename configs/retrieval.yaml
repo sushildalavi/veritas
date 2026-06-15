@@ -2,6 +2,15 @@ bm25:
   k1: 1.5
   b: 0.75
 backend: bm25_only
+bm25_top_k: 20
+dense_top_k: 20
+title_top_k: 0
+query_expansion_top_k: 0
+rrf_top_k: 60
+rerank_top_k: 20
+final_top_k: 10
+include_title_in_index: false
+include_metadata_window: false
 dense:
   model_name: sentence-transformers/all-MiniLM-L6-v2
 use_neural_retrieval: false

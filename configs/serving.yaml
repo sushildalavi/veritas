@@ -20,6 +20,15 @@ retrieval:
   backend: bm25_only
   use_neural_retrieval: false
   embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  bm25_top_k: 20
+  dense_top_k: 20
+  title_top_k: 0
+  query_expansion_top_k: 0
+  rrf_top_k: 60
+  rerank_top_k: 20
+  final_top_k: 5
+  include_title_in_index: false
+  include_metadata_window: false
 research_embedding_model: BAAI/bge-m3
 ranking:
   reranker_backend: none

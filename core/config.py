@@ -31,6 +31,15 @@ class ProjectSettings:
     research_embedding_model: str = "BAAI/bge-m3"
     optional_research_embedding_model: str = "BAAI/bge-m3"
     cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    bm25_top_k: int = 20
+    dense_top_k: int = 20
+    title_top_k: int = 0
+    query_expansion_top_k: int = 0
+    rrf_top_k: int = 60
+    rerank_top_k: int = 20
+    final_top_k: int = 5
+    include_title_in_index: bool = False
+    include_metadata_window: bool = False
     explanation_mode: str = "template"
     max_candidates_for_reranking: int = 3
     num_explanation_candidates: int = 3
@@ -104,6 +113,15 @@ def load_project_settings(
             )
         ),
         cross_encoder_model=str(env_or_yaml("VERITAS_CROSS_ENCODER_MODEL", (("cross_encoder_model",), ("ranking", "cross_encoder_model")), "cross-encoder/ms-marco-MiniLM-L-6-v2")),
+        bm25_top_k=int(env_or_yaml("VERITAS_BM25_TOP_K", (("bm25_top_k",), ("retrieval", "bm25_top_k")), 20)),
+        dense_top_k=int(env_or_yaml("VERITAS_DENSE_TOP_K", (("dense_top_k",), ("retrieval", "dense_top_k")), 20)),
+        title_top_k=int(env_or_yaml("VERITAS_TITLE_TOP_K", (("title_top_k",), ("retrieval", "title_top_k")), 0)),
+        query_expansion_top_k=int(env_or_yaml("VERITAS_QUERY_EXPANSION_TOP_K", (("query_expansion_top_k",), ("retrieval", "query_expansion_top_k")), 0)),
+        rrf_top_k=int(env_or_yaml("VERITAS_RRF_TOP_K", (("rrf_top_k",), ("retrieval", "rrf_top_k"), ("hybrid", "rrf_k")), 60)),
+        rerank_top_k=int(env_or_yaml("VERITAS_RERANK_TOP_K", (("rerank_top_k",), ("retrieval", "rerank_top_k")), 20)),
+        final_top_k=int(env_or_yaml("VERITAS_FINAL_TOP_K", (("final_top_k",), ("retrieval", "final_top_k")), 5)),
+        include_title_in_index=_coerce_bool(env_or_yaml("VERITAS_INCLUDE_TITLE_IN_INDEX", (("include_title_in_index",), ("retrieval", "include_title_in_index")), False)),
+        include_metadata_window=_coerce_bool(env_or_yaml("VERITAS_INCLUDE_METADATA_WINDOW", (("include_metadata_window",), ("retrieval", "include_metadata_window")), False)),
         explanation_mode=str(env_or_yaml("VERITAS_EXPLANATION_MODE", (("explanation_mode",),), "template")),
         max_candidates_for_reranking=int(env_or_yaml("VERITAS_MAX_CANDIDATES_FOR_RERANKING", (("max_candidates_for_reranking",),), 3)),
         num_explanation_candidates=int(env_or_yaml("VERITAS_NUM_EXPLANATION_CANDIDATES", (("num_explanation_candidates",),), 3)),

@@ -10,6 +10,7 @@ import re
 from typing import Literal
 
 from data.schemas import EvidenceSpan
+from retrieval.indexing import build_index_text
 
 DenseBackendName = Literal["auto", "hashing", "sentence-transformers"]
 
@@ -101,6 +102,8 @@ class DenseRetriever:
     backend: DenseBackendName = "hashing"
     model_name: str | None = None
     hashing_dimension: int = 64
+    include_title_in_index: bool = False
+    include_metadata_window: bool = False
 
     def __post_init__(self) -> None:
         if self.embedder is None:
@@ -111,7 +114,16 @@ class DenseRetriever:
                 allow_fallback=True,
             )
         self.backend_name = getattr(self.embedder, "backend_name", self.backend)
-        self._passage_embeddings = self.embedder.encode([passage.text for passage in self.passages])
+        self._passage_embeddings = self.embedder.encode(
+            [
+                build_index_text(
+                    passage,
+                    include_title=self.include_title_in_index,
+                    include_metadata_window=self.include_metadata_window,
+                )
+                for passage in self.passages
+            ]
+        )
 
     def retrieve(self, query: str, top_k: int = 5) -> list[EvidenceSpan]:
         if not self.passages:

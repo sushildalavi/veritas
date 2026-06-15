@@ -33,6 +33,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dense-backend", choices=["hashing", "sentence-transformers"], default="hashing")
     parser.add_argument("--embedding-model", default="sentence-transformers/all-MiniLM-L6-v2")
     parser.add_argument("--top-k", default="1,5,10", help="Comma-separated retrieval cutoffs, e.g. 1,5,10")
+    parser.add_argument("--bm25-top-k", type=int, default=20)
+    parser.add_argument("--dense-top-k", type=int, default=20)
+    parser.add_argument("--title-top-k", type=int, default=0)
+    parser.add_argument("--query-expansion-top-k", type=int, default=0)
+    parser.add_argument("--rrf-k", type=int, default=60)
+    parser.add_argument("--include-title-in-index", action="store_true")
+    parser.add_argument("--include-metadata-window", action="store_true")
     parser.add_argument("--file-suffix", default="", help="Suffix for split/corpus files, e.g. _large")
     parser.add_argument("--output-json", default="reports/retrieval_eval.json")
     parser.add_argument("--output-md", default="reports/retrieval_eval.md")
@@ -55,6 +62,13 @@ def main() -> None:  # pragma: no cover - script entrypoint
             dense_backend=args.dense_backend,
             embedding_model=args.embedding_model,
             top_k=parse_top_k(args.top_k),
+            bm25_top_k=args.bm25_top_k,
+            dense_top_k=args.dense_top_k,
+            title_top_k=args.title_top_k,
+            query_expansion_top_k=args.query_expansion_top_k,
+            rrf_k=args.rrf_k,
+            include_title_in_index=args.include_title_in_index,
+            include_metadata_window=args.include_metadata_window,
             file_suffix=args.file_suffix,
         )
     except Exception as exc:  # pragma: no cover - failure path is surfaced explicitly
@@ -92,6 +106,13 @@ def evaluate_retrieval(
     dense_backend: str,
     embedding_model: str,
     top_k: list[int],
+    bm25_top_k: int,
+    dense_top_k: int,
+    title_top_k: int,
+    query_expansion_top_k: int,
+    rrf_k: int,
+    include_title_in_index: bool,
+    include_metadata_window: bool,
     file_suffix: str = "",
 ) -> dict[str, object]:
     started = perf_counter()
@@ -106,9 +127,31 @@ def evaluate_retrieval(
         embedding_model if dense_backend == "sentence-transformers" else None,
         allow_fallback=False,
     )
-    bm25 = BM25Retriever(corpus)
-    dense = DenseRetriever(corpus, embedder=embedder)
-    hybrid = HybridRetriever(bm25, dense)
+    bm25 = BM25Retriever(
+        corpus,
+        include_title_in_index=include_title_in_index,
+        include_metadata_window=include_metadata_window,
+    )
+    dense = DenseRetriever(
+        corpus,
+        embedder=embedder,
+        include_title_in_index=include_title_in_index,
+        include_metadata_window=include_metadata_window,
+    )
+    title_retriever = None
+    if title_top_k > 0:
+        title_retriever = BM25Retriever(corpus, include_title_in_index=True, include_metadata_window=include_metadata_window)
+    hybrid = HybridRetriever(
+        bm25,
+        dense,
+        title_retriever=title_retriever,
+        rrf_k=rrf_k,
+        bm25_top_k=bm25_top_k,
+        dense_top_k=dense_top_k,
+        title_top_k=title_top_k,
+        query_expansion_top_k=query_expansion_top_k,
+        final_top_k=max(top_k),
+    )
 
     max_cutoff = max(top_k)
     rankings = {
@@ -127,6 +170,15 @@ def evaluate_retrieval(
         "dense_backend": dense.backend_name,
         "embedding_model": getattr(embedder, "model_name", embedding_model if dense_backend == "sentence-transformers" else "hashing"),
         "top_k": top_k,
+        "retrieval_config": {
+            "bm25_top_k": bm25_top_k,
+            "dense_top_k": dense_top_k,
+            "title_top_k": title_top_k,
+            "query_expansion_top_k": query_expansion_top_k,
+            "rrf_k": rrf_k,
+            "include_title_in_index": include_title_in_index,
+            "include_metadata_window": include_metadata_window,
+        },
         "runtime_seconds": round(perf_counter() - started, 3),
         "metrics": metrics,
         "limitations": _limitations(dense_backend, dense.backend_name, len(records), max_queries),
@@ -145,7 +197,8 @@ def _summarize(
         for cutoff in top_k
     }
     metrics["mrr"] = mean_reciprocal_rank(doc_ids, relevant_sets)
-    metrics[f"ndcg@{max(top_k)}"] = mean(ndcg_at_k(ids, relevant, max(top_k)) for ids, relevant in zip(doc_ids, relevant_sets))
+    for cutoff in top_k:
+        metrics[f"ndcg@{cutoff}"] = mean(ndcg_at_k(ids, relevant, cutoff) for ids, relevant in zip(doc_ids, relevant_sets))
     return metrics
 
 
@@ -195,8 +248,8 @@ def parse_top_k(value: str) -> list[int]:
 def _to_markdown(report: dict[str, object]) -> str:
     metrics = report["metrics"]
     top_k = list(report["top_k"])
-    ndcg_key = f"ndcg@{max(top_k)}"
-    metric_headers = [f"recall@{cutoff}" for cutoff in top_k] + ["mrr", ndcg_key]
+    ndcg_headers = [f"ndcg@{cutoff}" for cutoff in top_k]
+    metric_headers = [f"recall@{cutoff}" for cutoff in top_k] + ["mrr", *ndcg_headers]
     lines = [
         "# Retrieval Evaluation",
         "",
@@ -220,7 +273,7 @@ def _to_markdown(report: dict[str, object]) -> str:
                     retriever_name,
                     *[f"{score[f'recall@{cutoff}']:.3f}" for cutoff in top_k],
                     f"{score['mrr']:.3f}",
-                    f"{score[ndcg_key]:.3f}",
+                    *[f"{score[f'ndcg@{cutoff}']:.3f}" for cutoff in top_k],
                 ]
             )
             + " |"

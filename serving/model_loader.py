@@ -170,16 +170,25 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
     backend = settings.retrieval_backend.strip().lower()
     if backend in {"bm25_only", "bm25"} or not passages:
         return RetrievalRuntime(
-            retriever=BM25Retriever(passages),
+            retriever=BM25Retriever(
+                passages,
+                include_title_in_index=settings.include_title_in_index,
+                include_metadata_window=settings.include_metadata_window,
+            ),
             retrieval_backend="bm25_only",
             embedding_model=None,
             fallback_used=False,
         )
 
     if backend == "bm25_hashing_hybrid":
-        dense_retriever = DenseRetriever(passages, embedder=HashingEmbedder())
+        dense_retriever = DenseRetriever(
+            passages,
+            embedder=HashingEmbedder(),
+            include_title_in_index=settings.include_title_in_index,
+            include_metadata_window=settings.include_metadata_window,
+        )
         return RetrievalRuntime(
-            retriever=HybridRetriever(BM25Retriever(passages), dense_retriever),
+            retriever=_build_hybrid_retriever(passages, dense_retriever, settings),
             retrieval_backend="bm25_hashing_hybrid",
             embedding_model="hashing",
             fallback_used=False,
@@ -198,17 +207,23 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
                 passages,
                 backend="sentence-transformers",
                 model_name=settings.embedding_model,
+                include_title_in_index=settings.include_title_in_index,
+                include_metadata_window=settings.include_metadata_window,
             )
         except Exception as exc:  # pragma: no cover - defensive fallback
             LOGGER.warning("Falling back to BM25 retrieval after neural loader failure: %s", exc)
             return RetrievalRuntime(
-                retriever=BM25Retriever(passages),
+                retriever=BM25Retriever(
+                    passages,
+                    include_title_in_index=settings.include_title_in_index,
+                    include_metadata_window=settings.include_metadata_window,
+                ),
                 retrieval_backend="bm25_only",
                 embedding_model=None,
                 fallback_used=True,
             )
         return RetrievalRuntime(
-            retriever=HybridRetriever(BM25Retriever(passages), dense_retriever),
+            retriever=_build_hybrid_retriever(passages, dense_retriever, settings),
             retrieval_backend="bm25_sentence_transformer_hybrid",
             embedding_model=settings.embedding_model,
             fallback_used=False,
@@ -227,17 +242,23 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
                 passages,
                 backend="sentence-transformers",
                 model_name=settings.optional_research_embedding_model,
+                include_title_in_index=settings.include_title_in_index,
+                include_metadata_window=settings.include_metadata_window,
             )
         except Exception as exc:  # pragma: no cover - defensive fallback
             LOGGER.warning("Falling back to BM25 retrieval after research dense loader failure: %s", exc)
             return RetrievalRuntime(
-                retriever=BM25Retriever(passages),
+                retriever=BM25Retriever(
+                    passages,
+                    include_title_in_index=settings.include_title_in_index,
+                    include_metadata_window=settings.include_metadata_window,
+                ),
                 retrieval_backend="bm25_only",
                 embedding_model=None,
                 fallback_used=True,
             )
         return RetrievalRuntime(
-            retriever=HybridRetriever(BM25Retriever(passages), dense_retriever),
+            retriever=_build_hybrid_retriever(passages, dense_retriever, settings),
             retrieval_backend="bge_m3_hybrid",
             embedding_model=settings.optional_research_embedding_model,
             fallback_used=False,
@@ -245,10 +266,43 @@ def _load_retrieval_runtime(passages: list[EvidenceSpan], settings: ProjectSetti
 
     LOGGER.warning("Unknown retrieval backend %s; defaulting to BM25-only", backend)
     return RetrievalRuntime(
-        retriever=BM25Retriever(passages),
+        retriever=BM25Retriever(
+            passages,
+            include_title_in_index=settings.include_title_in_index,
+            include_metadata_window=settings.include_metadata_window,
+        ),
         retrieval_backend="bm25_only",
         embedding_model=None,
         fallback_used=True,
+    )
+
+
+def _build_hybrid_retriever(
+    passages: list[EvidenceSpan],
+    dense_retriever: DenseRetriever,
+    settings: ProjectSettings,
+) -> HybridRetriever:
+    title_retriever = None
+    if settings.title_top_k > 0:
+        title_retriever = BM25Retriever(
+            passages,
+            include_title_in_index=True,
+            include_metadata_window=settings.include_metadata_window,
+        )
+    return HybridRetriever(
+        BM25Retriever(
+            passages,
+            include_title_in_index=settings.include_title_in_index,
+            include_metadata_window=settings.include_metadata_window,
+        ),
+        dense_retriever,
+        title_retriever=title_retriever,
+        rrf_k=settings.rrf_top_k,
+        bm25_top_k=settings.bm25_top_k,
+        dense_top_k=settings.dense_top_k,
+        title_top_k=settings.title_top_k,
+        query_expansion_top_k=settings.query_expansion_top_k,
+        final_top_k=max(settings.rerank_top_k, settings.final_top_k),
     )
 
 

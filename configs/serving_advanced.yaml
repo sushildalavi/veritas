@@ -20,6 +20,15 @@ retrieval:
   backend: sentence_transformer_hybrid
   use_neural_retrieval: true
   embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  bm25_top_k: 100
+  dense_top_k: 100
+  title_top_k: 50
+  query_expansion_top_k: 50
+  rrf_top_k: 200
+  rerank_top_k: 100
+  final_top_k: 10
+  include_title_in_index: true
+  include_metadata_window: true
 research_embedding_model: BAAI/bge-m3
 ranking:
   reranker_backend: cross_encoder

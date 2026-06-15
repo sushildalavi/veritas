@@ -8,6 +8,7 @@ import math
 import re
 
 from data.schemas import EvidenceSpan
+from retrieval.indexing import build_index_text
 
 
 def tokenize(text: str) -> list[str]:
@@ -59,9 +60,20 @@ class BM25Retriever:
     """A lightweight BM25 retriever over evidence passages."""
 
     passages: list[EvidenceSpan]
+    include_title_in_index: bool = False
+    include_metadata_window: bool = False
 
     def __post_init__(self) -> None:
-        self._tokenized = [tokenize(span.text) for span in self.passages]
+        self._tokenized = [
+            tokenize(
+                build_index_text(
+                    span,
+                    include_title=self.include_title_in_index,
+                    include_metadata_window=self.include_metadata_window,
+                )
+            )
+            for span in self.passages
+        ]
         self._index = _build_index(self._tokenized)
 
     def retrieve(self, query: str, top_k: int = 5) -> list[EvidenceSpan]:

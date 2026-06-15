@@ -6,7 +6,9 @@ from data.schemas import ClaimEvidenceRecord, EvidenceSpan
 from retrieval.bm25 import BM25Retriever, build_passage_corpus
 from retrieval.dense import DenseRetriever, HashingEmbedder, load_embedder
 from retrieval.hybrid import HybridRetriever, reciprocal_rank_fusion
+from retrieval.indexing import build_index_text
 from retrieval.metrics import mean_reciprocal_rank, ndcg_at_k, recall_at_k
+from retrieval.query_expansion import expand_query
 from scripts.run_retrieval_eval import evaluate_retrieval, parse_top_k
 from retrieval.vector_store import LocalVectorStore
 from core.config import ProjectSettings
@@ -64,6 +66,26 @@ def test_dense_and_vector_store_use_deterministic_fallbacks() -> None:
     assert results[0]["metadata"]["doc_id"] == "1"
 
 
+def test_index_text_can_include_title_and_metadata_window() -> None:
+    span = EvidenceSpan(
+        doc_id="1",
+        text="Body text",
+        title="Paper title",
+        metadata={"section": "Abstract", "next_sentence": "Neighbor text"},
+    )
+
+    indexed = build_index_text(span, include_title=True, include_metadata_window=True)
+
+    assert indexed == "Paper title Body text Abstract Neighbor text"
+
+
+def test_query_expansion_extracts_entities_and_keywords() -> None:
+    expansions = expand_query("Barack Obama was born in Honolulu Hawaii")
+
+    assert expansions
+    assert any("Barack Obama" in expansion for expansion in expansions)
+
+
 def test_dense_loader_supports_hashing_and_lazy_sentence_transformers(monkeypatch) -> None:
     hashing = load_embedder("hashing", hashing_dimension=8, allow_fallback=False)
     assert isinstance(hashing, HashingEmbedder)
@@ -100,7 +122,15 @@ def test_live_retrieval_runtime_bm25_only_path() -> None:
 
 def test_live_retrieval_runtime_hashing_hybrid_path() -> None:
     passages = build_passage_corpus(["red apple", "blue sky"])
-    settings = ProjectSettings(retrieval_backend="bm25_hashing_hybrid", use_neural_retrieval=False)
+    settings = ProjectSettings(
+        retrieval_backend="bm25_hashing_hybrid",
+        use_neural_retrieval=False,
+        bm25_top_k=25,
+        dense_top_k=25,
+        title_top_k=10,
+        query_expansion_top_k=5,
+        include_title_in_index=True,
+    )
 
     runtime = _load_retrieval_runtime(passages, settings)
 
@@ -108,6 +138,9 @@ def test_live_retrieval_runtime_hashing_hybrid_path() -> None:
     assert runtime.embedding_model == "hashing"
     assert runtime.fallback_used is False
     assert isinstance(runtime.retriever, HybridRetriever)
+    assert runtime.retriever.bm25_top_k == 25
+    assert runtime.retriever.title_top_k == 10
+    assert runtime.retriever.query_expansion_top_k == 5
 
 
 def test_live_retrieval_runtime_sentence_transformer_hybrid_path(monkeypatch) -> None:
@@ -190,6 +223,13 @@ def test_retrieval_eval_report_schema_uses_requested_backend(monkeypatch) -> Non
         dense_backend="hashing",
         embedding_model="sentence-transformers/all-MiniLM-L6-v2",
         top_k=parse_top_k("1,5,10"),
+        bm25_top_k=20,
+        dense_top_k=20,
+        title_top_k=5,
+        query_expansion_top_k=5,
+        rrf_k=60,
+        include_title_in_index=True,
+        include_metadata_window=False,
     )
 
     assert report["split"] == "val"
@@ -197,3 +237,5 @@ def test_retrieval_eval_report_schema_uses_requested_backend(monkeypatch) -> Non
     assert report["evidence_corpus_size"] == 2
     assert set(report["metrics"]) == {"bm25", "dense", "hybrid"}
     assert "recall@10" in report["metrics"]["hybrid"]
+    assert "ndcg@5" in report["metrics"]["hybrid"]
+    assert report["retrieval_config"]["title_top_k"] == 5
