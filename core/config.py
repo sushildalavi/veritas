@@ -21,6 +21,10 @@ class ProjectSettings:
     deberta_checkpoint: str = "checkpoints/deberta_verifier_clean"
     mlx_lora_model: str = "mlx-community/Qwen2.5-1.5B-Instruct-4bit"
     mlx_lora_adapter: str = "checkpoints/mlx_lora_verifier"
+    vllm_base_url: str = "http://127.0.0.1:8001"
+    vllm_model: str = "Qwen/Qwen2.5-1.5B-Instruct"
+    vllm_api_key: str | None = None
+    vllm_timeout_seconds: float = 30.0
     legacy_verifier_checkpoint: str | None = None
     retrieval_backend: str = "bm25_only"
     use_neural_retrieval: bool = False
@@ -95,6 +99,10 @@ def load_project_settings(
         deberta_checkpoint=str(env_or_yaml("VERITAS_DEBERTA_CHECKPOINT", (("deberta_checkpoint",),), "checkpoints/deberta_verifier_clean")),
         mlx_lora_model=str(env_or_yaml("VERITAS_MLX_LORA_MODEL", (("mlx_lora_model",),), "mlx-community/Qwen2.5-1.5B-Instruct-4bit")),
         mlx_lora_adapter=str(env_or_yaml("VERITAS_MLX_LORA_ADAPTER", (("mlx_lora_adapter",),), "checkpoints/mlx_lora_verifier")),
+        vllm_base_url=str(env_or_yaml("VERITAS_VLLM_BASE_URL", (("vllm_base_url",), ("vllm", "base_url")), "http://127.0.0.1:8001")),
+        vllm_model=str(env_or_yaml("VERITAS_VLLM_MODEL", (("vllm_model",), ("vllm", "model")), "Qwen/Qwen2.5-1.5B-Instruct")),
+        vllm_api_key=_optional_str(env_or_yaml("VERITAS_VLLM_API_KEY", (("vllm_api_key",), ("vllm", "api_key")), None)),
+        vllm_timeout_seconds=float(env_or_yaml("VERITAS_VLLM_TIMEOUT_SECONDS", (("vllm_timeout_seconds",), ("vllm", "timeout_seconds")), 30.0)),
         legacy_verifier_checkpoint=_optional_str(env.get("VERITAS_VERIFIER_CHECKPOINT")),
         retrieval_backend=str(env_or_yaml("VERITAS_RETRIEVAL_BACKEND", (("retrieval_backend",), ("retrieval", "backend")), "bm25_only")),
         use_neural_retrieval=_coerce_bool(env_or_yaml("VERITAS_USE_NEURAL_RETRIEVAL", (("use_neural_retrieval",), ("retrieval", "use_neural_retrieval")), False)),

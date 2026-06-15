@@ -1,0 +1,36 @@
+api:
+  host: 0.0.0.0
+  port: 8000
+demo:
+  top_k: 5
+verifier_backend: auto
+verifier_checkpoint: checkpoints/transformer_verifier_clean
+transformer_clean_checkpoint: checkpoints/transformer_verifier_clean
+challenger_verifier_checkpoint: checkpoints/deberta_verifier_clean
+verifier:
+  aggregation: per_passage_max
+  support_threshold: 0.55
+  refute_threshold: 0.3
+explanation_mode: vllm
+vllm:
+  base_url: http://127.0.0.1:8001
+  model: Qwen/Qwen2.5-1.5B-Instruct
+  timeout_seconds: 30.0
+retrieval:
+  backend: bm25_only
+  use_neural_retrieval: false
+  bm25_top_k: 20
+  dense_top_k: 20
+  title_top_k: 0
+  query_expansion_top_k: 0
+  rrf_top_k: 60
+  rerank_top_k: 20
+  final_top_k: 5
+  include_title_in_index: false
+  include_metadata_window: false
+ranking:
+  reranker_backend: none
+  use_cross_encoder: false
+cache:
+  ttl_seconds: 120
+log_level: INFO
