@@ -90,7 +90,9 @@ def test_build_pairs_for_split_excludes_positive_from_negatives() -> None:
         bm25=bm25,
         dense_sims=None,
         bm25_top_k=3,
-        num_negatives=2,
+        bm25_negatives=1,
+        dense_negatives=0,
+        random_negatives=1,
         seed=0,
     )
 
@@ -105,3 +107,14 @@ def test_build_pairs_for_split_excludes_positive_from_negatives() -> None:
     assert len(positives) == 1
     assert len(negatives) == 2
     assert all(n["negative_type"] in {"bm25_hard_negative", "dense_hard_negative", "random_negative"} for n in negatives)
+
+
+def test_hard_negative_report_tracks_source_counts() -> None:
+    stats_path = REPORTS_DIR / "evidence_pair_data_stats.json"
+    stats = json.loads(stats_path.read_text(encoding="utf-8"))
+
+    for split in SPLITS:
+        split_stats = stats["splits"][split]
+        assert "positive_examples" in split_stats
+        assert "negative_examples" in split_stats
+        assert "reranker_negative_type_counts" in split_stats

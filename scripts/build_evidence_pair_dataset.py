@@ -6,9 +6,9 @@ Reads the verifier train/val/test splits plus the large evidence corpus and prod
 - reranker_{train,val,test}_pairs.jsonl: (claim, evidence, relevance, negative_type, label)
 - evidence_pair_data_stats.{json,md}: counts and label balance for both datasets
 
-Hard negatives come from three sources: BM25 top-k (topically similar), dense top-k
-(semantically similar, via sentence-transformers if available, otherwise skipped), and a
-random passage from the corpus. Gold evidence text is never included in the negative set.
+Hard negatives come from BM25 top-k (topically similar), dense top-k
+(semantically similar, via sentence-transformers if available), and random passages
+from the corpus. Gold evidence text is never included in the negative set.
 """
 
 from __future__ import annotations
@@ -93,41 +93,111 @@ def mine_hard_negatives(
     dense_row: "np.ndarray | None",
     corpus: list[EvidenceSpan],
     rng: random.Random,
-    num_negatives: int,
+    bm25_negatives: int,
+    dense_negatives: int,
+    random_negatives: int,
 ) -> list[tuple[str, str]]:
-    """Return up to ``num_negatives`` (text, negative_type) pairs, excluding the positive."""
+    """Return source-balanced (text, negative_type) pairs, excluding the positive."""
 
     seen: set[str] = {positive_evidence}
     negatives: list[tuple[str, str]] = []
+    negatives.extend(
+        _collect_bm25_negatives(
+            claim=claim,
+            bm25=bm25,
+            top_k=bm25_top_k,
+            limit=bm25_negatives,
+            seen=seen,
+        )
+    )
+    negatives.extend(
+        _collect_dense_negatives(
+            dense_row=dense_row,
+            corpus=corpus,
+            limit=dense_negatives,
+            search_depth=bm25_top_k * 3,
+            seen=seen,
+        )
+    )
+    negatives.extend(
+        _collect_random_negatives(
+            corpus=corpus,
+            rng=rng,
+            limit=random_negatives,
+            seen=seen,
+        )
+    )
+    if len(negatives) < bm25_negatives + dense_negatives + random_negatives:
+        negatives.extend(
+            _collect_random_negatives(
+                corpus=corpus,
+                rng=rng,
+                limit=(bm25_negatives + dense_negatives + random_negatives) - len(negatives),
+                seen=seen,
+            )
+        )
 
-    for span in bm25.retrieve(claim, top_k=bm25_top_k):
+    return negatives
+
+
+def _collect_bm25_negatives(
+    *,
+    claim: str,
+    bm25: BM25Retriever,
+    top_k: int,
+    limit: int,
+    seen: set[str],
+) -> list[tuple[str, str]]:
+    negatives: list[tuple[str, str]] = []
+    for span in bm25.retrieve(claim, top_k=top_k):
         if span.text in seen:
             continue
         seen.add(span.text)
         negatives.append((span.text, "bm25_hard_negative"))
-        if len(negatives) >= num_negatives:
-            return negatives
+        if len(negatives) >= limit:
+            break
+    return negatives
 
-    if dense_row is not None:
-        ranked = sorted(range(len(corpus)), key=lambda i: -float(dense_row[i]))
-        for index in ranked[: bm25_top_k * 2]:
-            text = corpus[index].text
-            if text in seen:
-                continue
-            seen.add(text)
-            negatives.append((text, "dense_hard_negative"))
-            if len(negatives) >= num_negatives:
-                return negatives
 
+def _collect_dense_negatives(
+    *,
+    dense_row: "np.ndarray | None",
+    corpus: list[EvidenceSpan],
+    limit: int,
+    search_depth: int,
+    seen: set[str],
+) -> list[tuple[str, str]]:
+    negatives: list[tuple[str, str]] = []
+    if dense_row is None:
+        return negatives
+    ranked = sorted(range(len(corpus)), key=lambda i: -float(dense_row[i]))
+    for index in ranked[:search_depth]:
+        text = corpus[index].text
+        if text in seen:
+            continue
+        seen.add(text)
+        negatives.append((text, "dense_hard_negative"))
+        if len(negatives) >= limit:
+            break
+    return negatives
+
+
+def _collect_random_negatives(
+    *,
+    corpus: list[EvidenceSpan],
+    rng: random.Random,
+    limit: int,
+    seen: set[str],
+) -> list[tuple[str, str]]:
+    negatives: list[tuple[str, str]] = []
     attempts = 0
-    while len(negatives) < num_negatives and attempts < 20:
+    while len(negatives) < limit and attempts < max(20, limit * 20):
         attempts += 1
         candidate = corpus[rng.randrange(len(corpus))].text
         if candidate in seen:
             continue
         seen.add(candidate)
         negatives.append((candidate, "random_negative"))
-
     return negatives
 
 
@@ -138,7 +208,9 @@ def build_pairs_for_split(
     bm25: BM25Retriever,
     dense_sims: "np.ndarray | None",
     bm25_top_k: int,
-    num_negatives: int,
+    bm25_negatives: int,
+    dense_negatives: int,
+    random_negatives: int,
     seed: int,
 ) -> tuple[list[dict], list[dict]]:
     rng = random.Random(seed)
@@ -160,7 +232,9 @@ def build_pairs_for_split(
             dense_row=dense_row,
             corpus=corpus,
             rng=rng,
-            num_negatives=num_negatives,
+            bm25_negatives=bm25_negatives,
+            dense_negatives=dense_negatives,
+            random_negatives=random_negatives,
         )
 
         retriever_pairs.append(
@@ -226,6 +300,8 @@ def build_stats(
         negative_types = Counter(r["negative_type"] for r in reranker_pairs if r["relevance"] == 0)
         hard_negative_counts = Counter(len(p["hard_negatives"]) for p in retriever_pairs)
         stats["splits"][split_name] = {
+            "positive_examples": positives,
+            "negative_examples": negatives,
             "retriever_pairs": len(retriever_pairs),
             "reranker_pairs": len(reranker_pairs),
             "label_distribution": label_distribution(retriever_pairs),
@@ -243,6 +319,8 @@ def build_markdown(stats: dict) -> str:
     for split_name, split_stats in stats["splits"].items():
         lines.append(f"## {split_name}")
         lines.append("")
+        lines.append(f"- Positive examples: {split_stats['positive_examples']}")
+        lines.append(f"- Negative examples: {split_stats['negative_examples']}")
         lines.append(f"- Retriever pairs: {split_stats['retriever_pairs']}")
         lines.append(f"- Reranker pairs: {split_stats['reranker_pairs']}")
         lines.append(f"- Reranker relevance counts: {split_stats['reranker_relevance_counts']}")
@@ -262,7 +340,9 @@ def main() -> None:
     parser.add_argument("--output-dir", default="data/processed")
     parser.add_argument("--reports-dir", default="reports")
     parser.add_argument("--bm25-top-k", type=int, default=8)
-    parser.add_argument("--num-hard-negatives", type=int, default=3)
+    parser.add_argument("--bm25-hard-negatives", type=int, default=2)
+    parser.add_argument("--dense-hard-negatives", type=int, default=2)
+    parser.add_argument("--random-negatives", type=int, default=1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--no-dense", action="store_true", help="Skip dense hard-negative mining")
     args = parser.parse_args()
@@ -291,7 +371,9 @@ def main() -> None:
             bm25=bm25,
             dense_sims=dense_sims,
             bm25_top_k=args.bm25_top_k,
-            num_negatives=args.num_hard_negatives,
+            bm25_negatives=args.bm25_hard_negatives,
+            dense_negatives=0 if args.no_dense else args.dense_hard_negatives,
+            random_negatives=args.random_negatives,
             seed=args.seed,
         )
         results[split_name] = (retriever_pairs, reranker_pairs)

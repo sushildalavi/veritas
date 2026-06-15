@@ -2,8 +2,10 @@
   "corpus_size": 9804,
   "splits": {
     "train": {
+      "positive_examples": 2393,
+      "negative_examples": 11965,
       "retriever_pairs": 2393,
-      "reranker_pairs": 9572,
+      "reranker_pairs": 14358,
       "label_distribution": {
         "SUPPORTED": 1416,
         "REFUTED": 604,
@@ -11,20 +13,22 @@
       },
       "reranker_relevance_counts": {
         "positive": 2393,
-        "negative": 7179
+        "negative": 11965
       },
       "reranker_negative_type_counts": {
-        "bm25_hard_negative": 6995,
-        "dense_hard_negative": 170,
-        "random_negative": 14
+        "bm25_hard_negative": 4720,
+        "dense_hard_negative": 4786,
+        "random_negative": 2459
       },
       "hard_negative_count_distribution": {
-        "3": 2393
+        "5": 2393
       }
     },
     "val": {
+      "positive_examples": 532,
+      "negative_examples": 2660,
       "retriever_pairs": 532,
-      "reranker_pairs": 2128,
+      "reranker_pairs": 3192,
       "label_distribution": {
         "SUPPORTED": 237,
         "REFUTED": 176,
@@ -32,20 +36,22 @@
       },
       "reranker_relevance_counts": {
         "positive": 532,
-        "negative": 1596
+        "negative": 2660
       },
       "reranker_negative_type_counts": {
-        "bm25_hard_negative": 1563,
-        "dense_hard_negative": 30,
-        "random_negative": 3
+        "bm25_hard_negative": 1055,
+        "dense_hard_negative": 1063,
+        "random_negative": 542
       },
       "hard_negative_count_distribution": {
-        "3": 532
+        "5": 532
       }
     },
     "test": {
+      "positive_examples": 540,
+      "negative_examples": 2700,
       "retriever_pairs": 540,
-      "reranker_pairs": 2160,
+      "reranker_pairs": 3240,
       "label_distribution": {
         "REFUTED": 195,
         "SUPPORTED": 224,
@@ -53,15 +59,15 @@
       },
       "reranker_relevance_counts": {
         "positive": 540,
-        "negative": 1620
+        "negative": 2700
       },
       "reranker_negative_type_counts": {
-        "bm25_hard_negative": 1587,
-        "dense_hard_negative": 31,
-        "random_negative": 2
+        "bm25_hard_negative": 1071,
+        "dense_hard_negative": 1080,
+        "random_negative": 549
       },
       "hard_negative_count_distribution": {
-        "3": 540
+        "5": 540
       }
     }
   },
