@@ -1,0 +1,229 @@
+{
+  "best": {
+    "accuracy": 0.3877,
+    "confusion_matrix": [
+      [
+        70,
+        114,
+        53
+      ],
+      [
+        30,
+        108,
+        38
+      ],
+      [
+        62,
+        101,
+        74
+      ]
+    ],
+    "macro_f1": 0.384,
+    "margin": 0.0,
+    "per_class": {
+      "NOT ENOUGH INFO": {
+        "f1": 0.3682,
+        "precision": 0.4485,
+        "recall": 0.3122
+      },
+      "REFUTED": {
+        "f1": 0.4329,
+        "precision": 0.3344,
+        "recall": 0.6136
+      },
+      "SUPPORTED": {
+        "f1": 0.3509,
+        "precision": 0.4321,
+        "recall": 0.2954
+      }
+    },
+    "refute_threshold": 0.5,
+    "refuted_prediction_rate": 0.4969,
+    "support_threshold": 0.55
+  },
+  "best_on_holdout": {
+    "accuracy": 0.4062,
+    "confusion_matrix": [
+      [
+        57,
+        121,
+        48
+      ],
+      [
+        21,
+        142,
+        37
+      ],
+      [
+        51,
+        108,
+        65
+      ]
+    ],
+    "macro_f1": 0.3887,
+    "margin": 0.0,
+    "per_class": {
+      "NOT ENOUGH INFO": {
+        "f1": 0.3476,
+        "precision": 0.4333,
+        "recall": 0.2902
+      },
+      "REFUTED": {
+        "f1": 0.4974,
+        "precision": 0.3827,
+        "recall": 0.71
+      },
+      "SUPPORTED": {
+        "f1": 0.3211,
+        "precision": 0.4419,
+        "recall": 0.2522
+      }
+    },
+    "refute_threshold": 0.5,
+    "refuted_prediction_rate": 0.5708,
+    "support_threshold": 0.55
+  },
+  "calibration_label_distribution": {
+    "NOT ENOUGH INFO": 237,
+    "REFUTED": 176,
+    "SUPPORTED": 237
+  },
+  "calibration_size": 650,
+  "calibration_source": "structured records from fever_val_large, scifact_val_large",
+  "checkpoint": "checkpoints/transformer_verifier_clean",
+  "config_path": "configs/serving.yaml",
+  "default": {
+    "refute_threshold": 0.5,
+    "support_threshold": 0.55
+  },
+  "default_on_calibration": {
+    "accuracy": 0.3877,
+    "confusion_matrix": [
+      [
+        70,
+        114,
+        53
+      ],
+      [
+        30,
+        108,
+        38
+      ],
+      [
+        62,
+        101,
+        74
+      ]
+    ],
+    "macro_f1": 0.384,
+    "margin": 0.0,
+    "per_class": {
+      "NOT ENOUGH INFO": {
+        "f1": 0.3682,
+        "precision": 0.4485,
+        "recall": 0.3122
+      },
+      "REFUTED": {
+        "f1": 0.4329,
+        "precision": 0.3344,
+        "recall": 0.6136
+      },
+      "SUPPORTED": {
+        "f1": 0.3509,
+        "precision": 0.4321,
+        "recall": 0.2954
+      }
+    },
+    "refute_threshold": 0.5,
+    "refuted_prediction_rate": 0.4969,
+    "support_threshold": 0.55
+  },
+  "default_on_holdout": {
+    "accuracy": 0.4062,
+    "confusion_matrix": [
+      [
+        57,
+        121,
+        48
+      ],
+      [
+        21,
+        142,
+        37
+      ],
+      [
+        51,
+        108,
+        65
+      ]
+    ],
+    "macro_f1": 0.3887,
+    "margin": 0.0,
+    "per_class": {
+      "NOT ENOUGH INFO": {
+        "f1": 0.3476,
+        "precision": 0.4333,
+        "recall": 0.2902
+      },
+      "REFUTED": {
+        "f1": 0.4974,
+        "precision": 0.3827,
+        "recall": 0.71
+      },
+      "SUPPORTED": {
+        "f1": 0.3211,
+        "precision": 0.4419,
+        "recall": 0.2522
+      }
+    },
+    "refute_threshold": 0.5,
+    "refuted_prediction_rate": 0.5708,
+    "support_threshold": 0.55
+  },
+  "git_commit": "c7757641e9da0b5c1c2f6501541b738c9144a57c",
+  "grids": {
+    "margin_grid": [
+      0.0,
+      0.02,
+      0.05,
+      0.1
+    ],
+    "refute_grid": [
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7
+    ],
+    "support_grid": [
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7
+    ]
+  },
+  "headline": "threshold_calibration complete: no change in held-out macro_f1; current thresholds remain best",
+  "holdout_delta": {
+    "accuracy": 0.0,
+    "macro_f1": 0.0,
+    "refuted_prediction_rate": 0.0
+  },
+  "holdout_label_distribution": {
+    "NOT ENOUGH INFO": 224,
+    "REFUTED": 200,
+    "SUPPORTED": 226
+  },
+  "holdout_size": 650,
+  "holdout_source": "structured records from fever_test_large, scifact_test_large",
+  "retrieval_backend": "bm25_only",
+  "runtime_seconds": 128.714,
+  "timestamp_utc": "2026-06-15T20:16:43.484651+00:00",
+  "verdict": "no change in held-out macro_f1; current thresholds remain best"
+}
