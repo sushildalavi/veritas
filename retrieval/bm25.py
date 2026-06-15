@@ -21,20 +21,23 @@ class _FallbackBM25:
         self.k1 = k1
         self.b = b
         self.doc_len = [len(doc) for doc in corpus]
+        self.doc_terms: list[dict[str, int]] = []
         self.avgdl = sum(self.doc_len) / len(self.doc_len) if self.doc_len else 0.0
         self.df: dict[str, int] = {}
         for doc in corpus:
+            doc_terms: dict[str, int] = {}
+            for token in doc:
+                doc_terms[token] = doc_terms.get(token, 0) + 1
+            self.doc_terms.append(doc_terms)
             for term in set(doc):
                 self.df[term] = self.df.get(term, 0) + 1
 
     def get_scores(self, query_tokens: Sequence[str]) -> list[float]:
         scores: list[float] = []
         n_docs = len(self.corpus)
-        for doc_index, doc in enumerate(self.corpus):
+        for doc_index, _doc in enumerate(self.corpus):
             score = 0.0
-            doc_terms: dict[str, int] = {}
-            for token in doc:
-                doc_terms[token] = doc_terms.get(token, 0) + 1
+            doc_terms = self.doc_terms[doc_index]
             for term in query_tokens:
                 freq = doc_terms.get(term, 0)
                 if freq == 0:
