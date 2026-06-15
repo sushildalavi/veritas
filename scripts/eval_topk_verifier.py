@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from core.evidence_formatting import format_verifier_text, render_evidence
 from core.config import ProjectSettings
 from evaluation.reporting import write_report
 from evaluation.sample_benchmarks import load_evidence_corpus, read_jsonl
@@ -224,7 +225,7 @@ def _predict_labels(
 
 
 def _build_input(claim: str, evidence: str) -> str:
-    return f"Claim: {claim}\nEvidence: {evidence}"
+    return format_verifier_text(claim, evidence)
 
 
 def _load_transformer(checkpoint: str):
@@ -236,16 +237,8 @@ def _load_transformer(checkpoint: str):
 
 
 def _join_evidence(passages: list[object]) -> str:
-    parts = []
-    for index, span in enumerate(passages, start=1):
-        text = getattr(span, "text", "")
-        title = getattr(span, "title", None)
-        prefix = f"[E{index}] "
-        if title:
-            parts.append(f"{prefix}{title}: {text}")
-        else:
-            parts.append(f"{prefix}{text}")
-    return "\n".join(parts)
+    typed_passages = [span for span in passages if hasattr(span, "text")]
+    return render_evidence(typed_passages, style="plain", include_title=False, canonicalize=True)
 
 
 def _normalize_label(label: str) -> str:

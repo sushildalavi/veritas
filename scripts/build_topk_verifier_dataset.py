@@ -23,9 +23,11 @@ from __future__ import annotations
 
 import argparse
 import json
+from random import Random
 from pathlib import Path
 from time import perf_counter
 
+from core.evidence_formatting import choose_evidence_style, render_evidence
 from data.schemas import EvidenceSpan
 from evaluation.reporting import write_report
 from evaluation.sample_benchmarks import load_evidence_corpus, read_jsonl
@@ -45,19 +47,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cross-encoder-checkpoint", default="checkpoints/cross_encoder_reranker")
     parser.add_argument("--candidate-k", type=int, default=10)
     parser.add_argument("--max-examples", type=int, default=700)
+    parser.add_argument("--evidence-style", choices=["plain", "passage", "evidence_letter", "bullet", "bracket", "auto"], default="auto")
     parser.add_argument("--report-json", default="reports/topk_verifier_dataset_build.json")
     return parser
 
 
-def _format_evidence(spans: list[EvidenceSpan]) -> str:
-    parts = []
-    for index, span in enumerate(spans, start=1):
-        prefix = f"[E{index}] "
-        if span.title:
-            parts.append(f"{prefix}{span.title}: {span.text}")
-        else:
-            parts.append(f"{prefix}{span.text}")
-    return "\n".join(parts)
+def _format_evidence(spans: list[EvidenceSpan], *, style_name: str, seed_text: str) -> str:
+    style = choose_evidence_style(seed_text) if style_name == "auto" else style_name
+    return render_evidence(
+        spans,
+        style=style,
+        include_title=False,
+        canonicalize=False,
+        shuffle=True,
+        rng=Random(seed_text),
+    )
 
 
 def main() -> None:  # pragma: no cover - script entrypoint
@@ -87,9 +91,9 @@ def main() -> None:  # pragma: no cover - script entrypoint
                 reranked = reranker.rank(claim, candidates)
 
                 gold_evidence = str(row.get("evidence", ""))
-                top1_evidence = _format_evidence(reranked[:1])
-                top3_evidence = _format_evidence(reranked[:3])
-                top5_evidence = _format_evidence(reranked[:5])
+                top1_evidence = _format_evidence(reranked[:1], style_name=args.evidence_style, seed_text=f"{claim}:top1")
+                top3_evidence = _format_evidence(reranked[:3], style_name=args.evidence_style, seed_text=f"{claim}:top3")
+                top5_evidence = _format_evidence(reranked[:5], style_name=args.evidence_style, seed_text=f"{claim}:top5")
                 if index % 2 == 0:
                     mixed_evidence, mixed_source = gold_evidence, "gold"
                 else:
@@ -115,6 +119,7 @@ def main() -> None:  # pragma: no cover - script entrypoint
         "cross_encoder_checkpoint": args.cross_encoder_checkpoint,
         "candidate_k": args.candidate_k,
         "max_examples_per_split": args.max_examples,
+        "evidence_style": args.evidence_style,
         "split_counts": split_counts,
         "runtime_seconds": round(perf_counter() - started, 2),
         "notes": [

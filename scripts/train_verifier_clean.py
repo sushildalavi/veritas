@@ -28,6 +28,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_recall_fscore_support
 from sklearn.pipeline import Pipeline
 
+from core.evidence_formatting import format_verifier_text, sanitize_evidence_text
 from evaluation.reporting import write_report
 from evaluation.sample_benchmarks import read_jsonl
 
@@ -44,7 +45,7 @@ class Example:
 
 
 def format_input(claim: str, evidence: str) -> str:
-    return f"Claim: {claim}\nEvidence: {evidence}"
+    return format_verifier_text(claim, sanitize_evidence_text(evidence))
 
 
 def load_examples(path: Path) -> list[Example]:
@@ -54,7 +55,7 @@ def load_examples(path: Path) -> list[Example]:
             text=format_input(row.get("claim", ""), row.get("evidence", "")),
             label=row.get("label", "NOT_ENOUGH_INFO"),
             claim=row.get("claim", ""),
-            evidence=row.get("evidence", ""),
+            evidence=sanitize_evidence_text(str(row.get("evidence", ""))),
         )
         for row in read_jsonl(path)
     ]

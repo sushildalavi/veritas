@@ -22,6 +22,7 @@ import numpy as np
 import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 
+from core.evidence_formatting import format_verifier_text, sanitize_evidence_text
 from evaluation.reporting import write_report
 from evaluation.sample_benchmarks import load_evidence_corpus, read_jsonl
 from retrieval.bm25 import BM25Retriever
@@ -31,7 +32,7 @@ LABEL_TO_ID = {label: index for index, label in enumerate(LABEL_ORDER)}
 
 
 def format_input(claim: str, evidence: str) -> str:
-    return f"Claim: {claim}\nEvidence: {evidence}"
+    return format_verifier_text(claim, sanitize_evidence_text(evidence))
 
 
 def _normalize_label(label: str) -> str:

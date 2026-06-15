@@ -13,6 +13,7 @@ import joblib
 import sklearn
 from sklearn.exceptions import InconsistentVersionWarning
 
+from core.evidence_formatting import format_verifier_text, sanitize_evidence_text
 from data.schemas import EvidenceSpan
 from models.labels import VALID_LABELS, normalize_label
 
@@ -137,8 +138,21 @@ class DebertaVerifier:
 
 
 def _build_verification_input(claim: str, evidence: list[EvidenceSpan]) -> str:
-    evidence_text = "\n".join(span.text for span in evidence)
-    return f"claim: {claim}\nevidence: {evidence_text}"
+    normalized = []
+    for span in evidence:
+        cleaned = sanitize_evidence_text(span.text)
+        if not cleaned:
+            continue
+        normalized.append(
+            EvidenceSpan(
+                doc_id=span.doc_id,
+                text=cleaned,
+                title=span.title,
+                score=span.score,
+                metadata=dict(span.metadata),
+            )
+        )
+    return format_verifier_text(claim, normalized)
 
 
 def _template_explanation(claim: str, evidence: list[EvidenceSpan], verdict: str) -> str:

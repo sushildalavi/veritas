@@ -26,6 +26,7 @@ import numpy as np
 import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 
+from core.evidence_formatting import sanitize_evidence_text
 from evaluation.reporting import write_report
 from evaluation.sample_benchmarks import read_jsonl
 
@@ -47,7 +48,7 @@ def load_examples(path: Path) -> list[Example]:
         Example(
             claim_id=str(row.get("claim_id", "")),
             claim=str(row.get("claim", "")),
-            evidence=str(row.get("evidence", "")),
+            evidence=sanitize_evidence_text(str(row.get("evidence", ""))),
             label=row.get("label", "NOT_ENOUGH_INFO"),
         )
         for row in read_jsonl(path)
