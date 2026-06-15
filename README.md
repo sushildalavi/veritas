@@ -125,6 +125,13 @@ Optional API server:
 make serve
 ```
 
+vLLM-backed explanation serving:
+
+```bash
+make serve-vllm-explanations
+VERITAS_CONFIG=configs/vllm_serving.yaml python3 -m uvicorn serving.api:app --reload
+```
+
 ## Research Workflow
 
 Veritas is designed around a simple local research loop:
