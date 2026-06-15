@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from data.schemas import EvidenceSpan
 from models.deberta_verifier import VerificationResult
@@ -29,7 +29,6 @@ class ReflectionLoop:
     confidence_threshold: float = 0.6
     max_retries: int = 2
     explanation_generator: object | None = None
-    _retrieval_passes: int = field(default=0, init=False)
 
     def run(self, claim: str, *, top_k: int = 5) -> ReflectionOutcome:
         evidence = retrieve_evidence(self.retriever, claim, top_k=top_k).evidence
