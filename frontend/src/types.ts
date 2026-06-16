@@ -4,6 +4,8 @@ export interface EvidenceItem {
   title?: string;
   score?: number;
   citation_id?: number;
+  relation?: "SUPPORTS" | "REFUTES" | "NEUTRAL";
+  source?: string;
 }
 
 export interface VerifyResponse {
@@ -78,8 +80,9 @@ export interface MetadataResponse {
 }
 
 export type Tab =
-  | "overview"
   | "verify"
   | "evidence"
-  | "training"
-  | "results";
+  | "explanation"
+  | "failure"
+  | "metrics"
+  | "training";
