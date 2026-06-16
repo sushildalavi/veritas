@@ -1,0 +1,44 @@
+{
+  "adapter_path": "adapters/phi3_veritas_qlora",
+  "base_model": "microsoft/Phi-3-mini-4k-instruct",
+  "before_after_examples": [],
+  "colab_commands": [
+    "pip install transformers datasets peft trl accelerate bitsandbytes",
+    "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml"
+  ],
+  "config": {
+    "base_model": "microsoft/Phi-3-mini-4k-instruct",
+    "eval_file": "data/explanations/sft_val.jsonl",
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 0.0002,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "lora_r": 16,
+    "max_seq_length": 2048,
+    "num_train_epochs": 1,
+    "output_dir": "adapters/phi3_veritas_qlora",
+    "per_device_train_batch_size": 2,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "timestamp_utc": "2026-06-16T00:30:18.965925+00:00",
+    "train_file": "data/explanations/sft_train.jsonl"
+  },
+  "eval_file": "data/explanations/sft_val.jsonl",
+  "git_commit": "0a7af7773132d287a4979c967e96d1bbc48524ad",
+  "kaggle_commands": [
+    "pip install transformers datasets peft trl accelerate bitsandbytes",
+    "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml"
+  ],
+  "reason": "CUDA is unavailable on this machine.",
+  "status": "skipped",
+  "timestamp_utc": "2026-06-16T00:30:19.701174+00:00",
+  "train_file": "data/explanations/sft_train.jsonl",
+  "train_metrics": {}
+}
