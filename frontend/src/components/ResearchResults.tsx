@@ -118,10 +118,16 @@ export default function ResearchResults() {
           <p style={{ fontSize: "13px", lineHeight: "1.75", color: "var(--text)" }}>
             Built Veritas, a failure-aware evidence-grounded fact-verification system with BM25
             retrieval, DistilRoBERTa NLI verification, oracle-vs-retrieved ablations,
-            ONNX/MLX inference benchmarking, and SFT/DPO training-data generation; measured a
-            <strong> 0.6728 oracle macro-F1 vs. 0.3887 retrieved macro-F1 gap</strong> and documented
-            retrieval/noisy-evidence bottlenecks through full-set error analysis.
+            ONNX/MLX inference benchmarking, SFT/DPO training-data generation, FastAPI REST APIs,
+            and a React TypeScript research dashboard; measured a{" "}
+            <strong>0.6728 oracle macro-F1 vs. 0.3887 retrieved macro-F1 gap</strong> and documented
+            retrieval/noisy-evidence bottlenecks through full-set error analysis; improved
+            MLX LoRA citation compliance from 0.10 to 0.72.
           </p>
+        </div>
+        <div className="note" style={{ marginTop: "12px" }}>
+          Do not claim: ONNX faster than native on Mac · robust verifier or gate improved macro-F1
+          · Phi-3 QLoRA/DPO adapter trained · MLX explanation adapter is production-grade.
         </div>
       </div>
     </div>

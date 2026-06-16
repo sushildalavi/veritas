@@ -10,6 +10,40 @@ export default function TrainingArtifacts() {
       </div>
 
       <div className="section">
+        <h3>Production Status</h3>
+        <div className="status-grid">
+          <div className="status-item">
+            <div className="dot ok" />
+            <div>
+              <div style={{ fontWeight: 600 }}>Production verifier</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>transformer_verifier_clean</div>
+            </div>
+          </div>
+          <div className="status-item">
+            <div className="dot warn" />
+            <div>
+              <div style={{ fontWeight: 600 }}>Relevance gate</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>disabled by default</div>
+            </div>
+          </div>
+          <div className="status-item">
+            <div className="dot warn" />
+            <div>
+              <div style={{ fontWeight: 600 }}>MLX LoRA explanation</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>trained; partial format compliance</div>
+            </div>
+          </div>
+          <div className="status-item">
+            <div className="dot err" />
+            <div>
+              <div style={{ fontWeight: 600 }}>Phi-3 QLoRA / DPO</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>CUDA path only; not trained locally</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="section">
         <h3>Artifact Status</h3>
         <div className="table-wrap">
           <table>
@@ -50,7 +84,7 @@ export default function TrainingArtifacts() {
                 <td>MLX LoRA — explanation SFT</td>
                 <td><span className="pos-badge">Bug fixed + retrained</span></td>
                 <td><code className="code">adapters/mlx_qwen_veritas_lora</code></td>
-                <td>300 iters; format correctness 0.2 (partial)</td>
+                <td>500 iters; citation_presence 0.72; partial format compliance</td>
               </tr>
               <tr>
                 <td>Phi-3 QLoRA adapter</td>
@@ -102,23 +136,28 @@ export default function TrainingArtifacts() {
       </div>
 
       <div className="section">
-        <h3>MLX LoRA — Explanation SFT (measured at 300 iters)</h3>
+        <h3>MLX LoRA — Explanation SFT (measured at 500 iters)</h3>
+        <p style={{ fontSize: "12px", marginBottom: "8px" }}>
+          Source: <code className="code">reports/mlx_lora_500_eval.json</code> ·
+          Base model: <code className="code">mlx-community/Qwen2.5-1.5B-Instruct-4bit</code>
+        </p>
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Metric</th><th>Base model</th><th>Adapter (300 iters)</th></tr>
+              <tr><th>Metric</th><th>Base model</th><th>Adapter (300 iters)</th><th>Adapter (500 iters)</th></tr>
             </thead>
             <tbody>
-              <tr><td>format_correctness</td><td>0.0</td><td>0.2</td></tr>
-              <tr><td>citation_presence</td><td>0.0</td><td>0.1</td></tr>
-              <tr><td>decision_label_consistency</td><td>0.0</td><td>0.1</td></tr>
-              <tr><td>avg explanation length (words)</td><td>0.0</td><td>34.2</td></tr>
+              <tr><td>format_correctness</td><td>0.0</td><td>0.20</td><td>0.28</td></tr>
+              <tr className="bold-row"><td>citation_presence</td><td>0.0</td><td>0.10</td><td>0.72</td></tr>
+              <tr><td>decision_label_consistency</td><td>0.0</td><td>0.10</td><td>0.24</td></tr>
+              <tr><td>avg explanation length (words)</td><td>0.0</td><td>34.2</td><td>33.2</td></tr>
             </tbody>
           </table>
         </div>
         <div className="note">
-          Partial format compliance at 300 iters. Generation bug (wrong base model) was fixed.
-          Not production-grade; more training would improve compliance.
+          Generation bug (base_model key mismatch) was fixed and adapter retrained.
+          Citation presence improved from 0.10 → 0.72. Partial format compliance.
+          <strong> Not production-grade</strong> — small-sample training (256 examples, 500 iters).
         </div>
       </div>
 

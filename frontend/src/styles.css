@@ -365,6 +365,17 @@ p { color: var(--text-muted); line-height: 1.65; }
   border: 1px solid rgba(251,191,36,0.25);
 }
 
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  letter-spacing: 0.02em;
+}
+
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .main { padding: 16px; }

@@ -64,6 +64,12 @@ export default function App() {
         {tab === "training" && <TrainingArtifacts />}
         {tab === "results" && <ResearchResults />}
       </main>
+
+      <footer className="footer">
+        Veritas — research prototype · not production-deployed ·
+        retrieved macro-F1 0.3887 · retrieval is the primary bottleneck ·
+        all metrics measured, not estimated
+      </footer>
     </div>
   );
 }
