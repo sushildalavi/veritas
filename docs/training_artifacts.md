@@ -18,7 +18,7 @@ This repository now separates verdict classification from explanation training.
 | Relevance gate | negative result | `reports/oracle_vs_retrieved_v2_full_gated.json` | Disabled by default |
 | SFT explanation dataset | built | `data/explanations/sft_{train,val,test}.jsonl` | Grounded explanation tuning data |
 | MLX LoRA verdict-prediction adapter | trained | `checkpoints/mlx_lora_verifier` | Qwen2.5-1.5B-Instruct-4bit; 0.695 acc, 0.4632 macro-F1 on 200-example eval |
-| MLX LoRA explanation adapter | generation bug fixed | `adapters/mlx_qwen_veritas_lora/` | Was trained on wrong base model (Qwen/Qwen3-0.6b); retrained on Qwen2.5-1.5B-Instruct-4bit after script fix; see `reports/mlx_lora_generation_fix.md` |
+| MLX LoRA explanation adapter | bug fixed + retrained (500 iters) | `adapters/mlx_qwen_veritas_lora/` | Bug fixed; retrained 500 iters; citation_presence 0.10→0.72; format_correctness 0.28; partial compliance; see `reports/mlx_lora_500_eval.json` |
 | Phi-3 QLoRA | skipped | `reports/phi3_qlora_skipped_or_training_metrics.json` | CUDA path only |
 | DPO preferences | built | `data/explanations/dpo_{train,val}.jsonl` | Synthetic rejection pairs documented |
 | Phi-3 DPO | skipped | `reports/phi3_dpo_skipped_or_training_metrics.json` | Depends on CUDA and the QLoRA path |
