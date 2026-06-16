@@ -36,7 +36,15 @@ The Taj Mahal is a UNESCO World Heritage site, a mausoleum built in 1653 by Mugh
 ### Adapter Output
 
 ```text
-[matmul] Last dimension of first input with shape (1,60,1536) must match second to last dimension of second input with shape (1024,8).
+Taj Mahal therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.
+Write a concise explanation. Taj Mahal therefore the claim is supported.
+Write a concise explanation.
 ```
 
 ## 46020
@@ -75,7 +83,11 @@ The claim is supported by the evidence provided. The evidence explicitly states 
 ### Adapter Output
 
 ```text
-
+Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) is an American singer-songwriter and rapper therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) therefore the claim is supported.
+Write a concise explanation.
 ```
 
 ## 198393
@@ -114,7 +126,31 @@ The claim that "Marilyn Manson was formed by the singer Marilyn Manson" is false
 ### Adapter Output
 
 ```text
-
+Marilyn Manson therefore the claim is supported.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence IDs you used.
+Write a concise explanation.
+Cite the evidence
 ```
 
 ## 139389
@@ -153,7 +189,21 @@ The claim "Mr. & Mrs. Smith had Angelina Jolie in it" is supported by the eviden
 ### Adapter Output
 
 ```text
+REFUTED
 
+Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. REFUTED
+Decision: Cite the evidence IDs you used.
+Explanation: Mr. & Mrs. Smith therefore the claim is refuted.
+Citations: ["E1"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.
+
+Claim:
+Mr. & Mrs. Smith therefore the claim is refuted.
+
+Verifier label:
+SUPPORTED
+
+Evidence:
+[E1] Jolie's commercial success continued with roles in the action films Mr. & Mrs. Smith therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted
 ```
 
 ## 225831
@@ -192,5 +242,11 @@ The claim "Star Wars is an epic space opera franchise" is supported by the evide
 ### Adapter Output
 
 ```text
-
+Star Wars is an epic space opera franchise therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.
+Write a concise explanation. Cite the evidence IDs you
 ```

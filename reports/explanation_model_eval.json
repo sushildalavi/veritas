@@ -80,7 +80,7 @@
         }
       ],
       "format_correctness": 0.0,
-      "mean_generation_time_seconds": 2.7509,
+      "mean_generation_time_seconds": 5.8507,
       "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
       "sample_size": 5,
       "status": "measured",
@@ -88,7 +88,7 @@
     },
     {
       "adapter_path": "adapters/mlx_qwen_veritas_lora",
-      "average_explanation_length": 23.0,
+      "average_explanation_length": 9.4,
       "backend": "mlx_adapter",
       "citation_precision": 0.0,
       "citation_presence": 0.0,
@@ -97,40 +97,40 @@
         {
           "citation_precision": 0.0,
           "claim_id": "204557",
-          "format_correct": true,
-          "output": "Decision: NOT_ENOUGH_INFO\nExplanation: generation failed: [matmul] Last dimension of first input with shape (1,77,1536) must match second to last dimension of second input with shape (1024,8).\nCitations: []",
+          "format_correct": false,
+          "output": "Commodore is a rank in the Royal Navy, the Royal Australian Navy, and the Royal Canadian Navy. Therefore, the claim is refuted.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Royal Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Royal Australian Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Royal Canadian Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Therefore, the claim is refuted.\n\n",
           "parsed": {
             "citations": [],
-            "decision": "NOT_ENOUGH_INFO",
-            "explanation": "generation failed: [matmul] Last dimension of first input with shape (1,77,1536) must match second to last dimension of second input with shape (1024,8)."
+            "decision": "",
+            "explanation": ""
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nCommodore is only a land rank.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Commodore -LRB-rank-RRB- Commodore -LRB-rank-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
-          "unsupported_sentence_rate": 1.0,
+          "unsupported_sentence_rate": 0.0,
           "verifier_label": "REFUTED"
         },
         {
           "citation_precision": 0.0,
           "claim_id": "35882",
-          "format_correct": true,
-          "output": "Decision: NOT_ENOUGH_INFO\nExplanation: generation failed: [matmul] Last dimension of first input with shape (1,86,1536) must match second to last dimension of second input with shape (1024,8).\nCitations: []",
+          "format_correct": false,
+          "output": "Pearl (Steven Universe) is a fictional Gem alien being from the animated television series Steven Universe. Steven Universe therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore",
           "parsed": {
             "citations": [],
-            "decision": "NOT_ENOUGH_INFO",
-            "explanation": "generation failed: [matmul] Last dimension of first input with shape (1,86,1536) must match second to last dimension of second input with shape (1024,8)."
+            "decision": "",
+            "explanation": ""
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nPearl (Steven Universe) exists as a magical dog.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
-          "unsupported_sentence_rate": 1.0,
+          "unsupported_sentence_rate": 0.0,
           "verifier_label": "REFUTED"
         },
         {
           "citation_precision": 0.0,
           "claim_id": "127777",
-          "format_correct": true,
-          "output": "Decision: NOT_ENOUGH_INFO\nExplanation: generation failed: [matmul] Last dimension of first input with shape (1,58,1536) must match second to last dimension of second input with shape (1024,8).\nCitations: []",
+          "format_correct": false,
+          "output": "Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted.\n\nExplanation: Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted.\n\nCitations: [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Ex",
           "parsed": {
             "citations": [],
-            "decision": "NOT_ENOUGH_INFO",
-            "explanation": "generation failed: [matmul] Last dimension of first input with shape (1,58,1536) must match second to last dimension of second input with shape (1024,8)."
+            "decision": "",
+            "explanation": "Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted."
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nExotic Birds achieved mostly local failure.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Exotic Birds\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
           "unsupported_sentence_rate": 1.0,
@@ -139,38 +139,38 @@
         {
           "citation_precision": 0.0,
           "claim_id": "88346",
-          "format_correct": true,
-          "output": "Decision: NOT_ENOUGH_INFO\nExplanation: generation failed: [matmul] Last dimension of first input with shape (1,72,1536) must match second to last dimension of second input with shape (1024,8).\nCitations: []",
+          "format_correct": false,
+          "output": "Temple Grandin -LRB-film-RRB- therefore -LRB-film-2016-RRB- -LRB-film-2018-RRB- -LRB-film-2019-RRB- -LRB-film-2020-RRB- -LRB-film-2021-RRB- -LRB-film-2022-RRB- -LRB-film-2023-RRB- -LRB-film-2024-RRB- -LRB-film-2025-RRB- -LRB-film-2026-RRB- -LRB-film-2",
           "parsed": {
             "citations": [],
-            "decision": "NOT_ENOUGH_INFO",
-            "explanation": "generation failed: [matmul] Last dimension of first input with shape (1,72,1536) must match second to last dimension of second input with shape (1024,8)."
+            "decision": "",
+            "explanation": ""
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nTemple Grandin features Claire Danes playing a cartoon penguin.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
-          "unsupported_sentence_rate": 1.0,
+          "unsupported_sentence_rate": 0.0,
           "verifier_label": "REFUTED"
         },
         {
           "citation_precision": 0.0,
           "claim_id": "14610",
-          "format_correct": true,
-          "output": "Decision: NOT_ENOUGH_INFO\nExplanation: generation failed: [matmul] Last dimension of first input with shape (1,86,1536) must match second to last dimension of second input with shape (1024,8).\nCitations: []",
+          "format_correct": false,
+          "output": "CLAIM: James Brolin is an actor.\n\nExplanation: Cite the evidence IDs you used.\n\nCitations: [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"",
           "parsed": {
             "citations": [],
-            "decision": "NOT_ENOUGH_INFO",
-            "explanation": "generation failed: [matmul] Last dimension of first input with shape (1,86,1536) must match second to last dimension of second input with shape (1024,8)."
+            "decision": "",
+            "explanation": "Cite the evidence IDs you used."
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nJames Brolin is an actor.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] James Brolin (born Craig Kenneth Bruderlin; July 18, 1940) is an American actor, producer, and director.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
           "unsupported_sentence_rate": 1.0,
           "verifier_label": "SUPPORTED"
         }
       ],
-      "format_correctness": 1.0,
-      "mean_generation_time_seconds": 0.0,
+      "format_correctness": 0.0,
+      "mean_generation_time_seconds": 4.6348,
       "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
       "sample_size": 5,
       "status": "trained",
-      "unsupported_claim_rate": 1.0
+      "unsupported_claim_rate": 0.4
     }
   ],
   "input_file": "data/explanations/sft_test.jsonl",

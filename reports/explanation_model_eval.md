@@ -65,62 +65,64 @@ Evidence:
 
 Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. The claim "James Brolin is an actor" is supported
 ```
-| mlx_adapter | trained | mlx-community/Qwen2.5-1.5B-Instruct-4bit | adapters/mlx_qwen_veritas_lora | 1.0 | 0.0 | 0.0 | 0.0 | 1.0 | 23.0 |
+| mlx_adapter | trained | mlx-community/Qwen2.5-1.5B-Instruct-4bit | adapters/mlx_qwen_veritas_lora | 0.0 | 0.0 | 0.0 | 0.0 | 0.4 | 9.4 |
 
 ## mlx_adapter Sample Outputs
 
 - claim_id: 204557
   - verifier_label: REFUTED
-  - format_correct: True
+  - format_correct: False
   - citation_precision: 0.0
-  - unsupported_sentence_rate: 1.0
+  - unsupported_sentence_rate: 0.0
   - output:
 ```text
-Decision: NOT_ENOUGH_INFO
-Explanation: generation failed: [matmul] Last dimension of first input with shape (1,77,1536) must match second to last dimension of second input with shape (1024,8).
-Citations: []
+Commodore is a rank in the Royal Navy, the Royal Australian Navy, and the Royal Canadian Navy. Therefore, the claim is refuted.
+
+Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Royal Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Royal Australian Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Royal Canadian Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Therefore, the claim is refuted.
+
+
 ```
 - claim_id: 35882
   - verifier_label: REFUTED
-  - format_correct: True
+  - format_correct: False
   - citation_precision: 0.0
-  - unsupported_sentence_rate: 1.0
+  - unsupported_sentence_rate: 0.0
   - output:
 ```text
-Decision: NOT_ENOUGH_INFO
-Explanation: generation failed: [matmul] Last dimension of first input with shape (1,86,1536) must match second to last dimension of second input with shape (1024,8).
-Citations: []
+Pearl (Steven Universe) is a fictional Gem alien being from the animated television series Steven Universe. Steven Universe therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore
 ```
 - claim_id: 127777
   - verifier_label: REFUTED
-  - format_correct: True
+  - format_correct: False
   - citation_precision: 0.0
   - unsupported_sentence_rate: 1.0
   - output:
 ```text
-Decision: NOT_ENOUGH_INFO
-Explanation: generation failed: [matmul] Last dimension of first input with shape (1,58,1536) must match second to last dimension of second input with shape (1024,8).
-Citations: []
+Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted.
+
+Explanation: Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted.
+
+Citations: ["E1"] Exotic Birds therefore the claim is refuted. ["E1"] Exotic Birds therefore the claim is refuted. ["E1"] Exotic Birds therefore the claim is refuted. ["E1"] Exotic Birds therefore the claim is refuted. ["E1"] Ex
 ```
 - claim_id: 88346
   - verifier_label: REFUTED
-  - format_correct: True
+  - format_correct: False
   - citation_precision: 0.0
-  - unsupported_sentence_rate: 1.0
+  - unsupported_sentence_rate: 0.0
   - output:
 ```text
-Decision: NOT_ENOUGH_INFO
-Explanation: generation failed: [matmul] Last dimension of first input with shape (1,72,1536) must match second to last dimension of second input with shape (1024,8).
-Citations: []
+Temple Grandin -LRB-film-RRB- therefore -LRB-film-2016-RRB- -LRB-film-2018-RRB- -LRB-film-2019-RRB- -LRB-film-2020-RRB- -LRB-film-2021-RRB- -LRB-film-2022-RRB- -LRB-film-2023-RRB- -LRB-film-2024-RRB- -LRB-film-2025-RRB- -LRB-film-2026-RRB- -LRB-film-2
 ```
 - claim_id: 14610
   - verifier_label: SUPPORTED
-  - format_correct: True
+  - format_correct: False
   - citation_precision: 0.0
   - unsupported_sentence_rate: 1.0
   - output:
 ```text
-Decision: NOT_ENOUGH_INFO
-Explanation: generation failed: [matmul] Last dimension of first input with shape (1,86,1536) must match second to last dimension of second input with shape (1024,8).
-Citations: []
+CLAIM: James Brolin is an actor.
+
+Explanation: Cite the evidence IDs you used.
+
+Citations: ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["E1"] ["
 ```

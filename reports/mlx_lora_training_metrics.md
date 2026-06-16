@@ -2,8 +2,8 @@
 
 - status: trained
 - reason: 
-- timestamp_utc: 2026-06-16T00:36:35.246246+00:00
-- git_commit: 0a7af7773132d287a4979c967e96d1bbc48524ad
+- timestamp_utc: 2026-06-16T05:43:32.615249+00:00
+- git_commit: ba756914acdeedd7ba7e28ab79e32893e25e0058
 - base_model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
 - dataset_path: /Users/sushildalavi/Desktop/Github/Veritas/data/explanations
 - adapter_path: /Users/sushildalavi/Desktop/Github/Veritas/adapters/mlx_qwen_veritas_lora

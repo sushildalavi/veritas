@@ -1,0 +1,192 @@
+{
+  "generated_at": "2026-06-15",
+  "note": "All numbers verified against actual report files. Sources listed per metric.",
+  "verifier": {
+    "checkpoint": "checkpoints/transformer_verifier_clean",
+    "base_model": "distilroberta-base",
+    "dataset": "2808 train / 649 val / 642 test (cross-split deduped)",
+    "source_file": "reports/oracle_vs_retrieved_v2_full.json",
+    "oracle_bundle": {
+      "accuracy": 0.7354,
+      "macro_f1": 0.7246,
+      "nei_false_positive_rate": 0.0
+    },
+    "oracle_per_passage_max": {
+      "accuracy": 0.6985,
+      "macro_f1": 0.6728,
+      "nei_false_positive_rate": 0.0
+    },
+    "retrieved_bundle": {
+      "accuracy": 0.36,
+      "macro_f1": 0.3332,
+      "nei_false_positive_rate": 0.8839
+    },
+    "retrieved_per_passage_max": {
+      "accuracy": 0.4062,
+      "macro_f1": 0.3887,
+      "nei_false_positive_rate": 0.7098
+    },
+    "oracle_vs_retrieved_gap_per_passage_max": {
+      "accuracy": 0.2923,
+      "macro_f1": 0.2841
+    }
+  },
+  "retrieval": {
+    "default_profile": "bm25_only",
+    "source_file": "reports/retrieval_profile_comparison_650.json",
+    "sample_size": 650,
+    "bm25_only": {
+      "recall_at_1": 0.3559,
+      "recall_at_3": 0.4586,
+      "recall_at_5": 0.4979,
+      "recall_at_10": 0.5334,
+      "recall_at_50": 0.5706,
+      "ndcg_at_5": 0.4708,
+      "ndcg_at_10": 0.4816,
+      "retrieved_per_passage_max_macro_f1": 0.3887
+    },
+    "hybrid_bm25_dense": {
+      "recall_at_10": 0.5113,
+      "ndcg_at_10": 0.4288,
+      "retrieved_per_passage_max_macro_f1": 0.3864,
+      "note": "worse retrieval AND worse verifier F1 than bm25_only"
+    },
+    "hybrid_bm25_sentence_transformer": {
+      "recall_at_10": 0.5714,
+      "ndcg_at_10": 0.5234,
+      "retrieved_per_passage_max_macro_f1": 0.3776,
+      "note": "better retrieval recall@10 but worse verifier macro_F1 than bm25_only"
+    },
+    "profile_comparison_conclusion": "bm25_only is the default. Better retrieval ranking does not monotonically improve end-to-end verifier macro-F1 in this evaluation."
+  },
+  "robust_verifier_retrain": {
+    "checkpoint": "checkpoints/transformer_verifier_robust",
+    "source_file": "reports/verifier_robustness_training_result.md",
+    "status": "negative result — production checkpoint unchanged",
+    "baseline_oracle_per_passage_max_macro_f1": 0.6728,
+    "baseline_retrieved_per_passage_max_macro_f1": 0.3887,
+    "robust_oracle_per_passage_max_macro_f1": 0.4376,
+    "robust_retrieved_per_passage_max_macro_f1": 0.2829,
+    "oracle_delta": -0.2352,
+    "retrieved_delta": -0.1058,
+    "root_cause": "Combined training set was 55% NEI due to 76% NEI in retrieved-evidence calibration set. Without class reweighting, model collapsed toward NEI predictions.",
+    "what_not_tried": ["class weights", "weighted sampler", "NEI-capping", "positive-only retrieved augmentation"]
+  },
+  "relevance_gate": {
+    "source_file": "reports/oracle_vs_retrieved_v2_full_gated.json",
+    "threshold_tested": 0.5,
+    "status": "disabled by default (relevance_gate_threshold: null in configs/serving.yaml)",
+    "baseline_retrieved_per_passage_max_macro_f1": 0.3887,
+    "gated_retrieved_per_passage_max_macro_f1": 0.3557,
+    "macro_f1_delta": -0.0330,
+    "baseline_nei_false_positive_rate": 0.7098,
+    "gated_nei_false_positive_rate": 0.2857,
+    "nei_fpr_delta": -0.4241,
+    "conclusion": "Gate reduces NEI FPR substantially but regresses macro_F1. Threshold was calibrated on per-passage pair data, not claim-level aggregation. Gate stays disabled until calibrated at claim level."
+  },
+  "onnx_benchmark": {
+    "source_file": "reports/onnx_verifier_benchmark.json",
+    "status": "measured",
+    "checkpoint": "checkpoints/transformer_verifier_clean_onnx/model.onnx",
+    "hardware": "CPU only (no CUDA, no MPS path in onnxruntime)",
+    "onnx_batch1_mean_latency_ms": 18.167,
+    "onnx_batch1_throughput_examples_per_sec": 55.05,
+    "onnx_batch8_mean_latency_ms": 133.931,
+    "onnx_batch8_throughput_examples_per_sec": 59.73,
+    "transformers_baseline": {
+      "source_file": "reports/verifier_inference_benchmark.json",
+      "cpu_batch1_mean_latency_ms": 16.02,
+      "cpu_batch1_throughput_examples_per_sec": 62.42,
+      "cpu_batch8_throughput_examples_per_sec": 135.78,
+      "mps_batch1_throughput_examples_per_sec": 153.79,
+      "mps_batch8_throughput_examples_per_sec": 340.9
+    },
+    "conclusion": "ONNX CPU is slower than native transformers on this Mac (55 vs 62 ex/s at batch=1). MPS via transformers (153 ex/s) is 3x faster than ONNX CPU. ONNX export is validated and functional; the speedup benefit applies on CUDA hardware, not on this Mac.",
+    "claim_allowed": "ONNX export validated, model functional",
+    "claim_forbidden": "ONNX is faster on this hardware"
+  },
+  "mlx_lora": {
+    "verdict_prediction_adapter": {
+      "path": "checkpoints/mlx_lora_verifier",
+      "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+      "source_file": "reports/mlx_lora_eval_200.json",
+      "training_iters": 100,
+      "sample_size": 200,
+      "verdict_accuracy": 0.695,
+      "macro_f1": 0.4632,
+      "citation_valid_rate": 0.6,
+      "parseable_rate": 1.0,
+      "per_class_f1": {
+        "SUPPORTED": 0.7024,
+        "REFUTED": 0.6872,
+        "NOT ENOUGH INFO": 0.0
+      },
+      "note": "Trained on verifier-format oracle data. NEI F1=0.0 because the base model defaults to SUPPORTED/REFUTED, rarely generating NEI."
+    },
+    "explanation_adapter": {
+      "path": "adapters/mlx_qwen_veritas_lora",
+      "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+      "source_file": "reports/mlx_lora_training_metrics.json",
+      "training_iters": 80,
+      "training_examples": 256,
+      "generation_bug_status": "fixed (see reports/mlx_lora_generation_fix.md)",
+      "generation_succeeds": true,
+      "format_compliance_note": "Low at 80 iters / 256 examples. Structured output compliance needs more training.",
+      "previous_bug": "Adapter was trained against Qwen/Qwen3-0.6b (hidden_dim=1024) instead of Qwen2.5-1.5B (hidden_dim=1536) due to base_model/model key mismatch in training script."
+    },
+    "throughput": {
+      "source_file": "reports/mac_local_inference_benchmark.json",
+      "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+      "backend": "mlx-lm",
+      "tokens_per_sec": 53.7,
+      "hardware": "Apple Silicon (MPS)"
+    }
+  },
+  "phi3_qlora_dpo": {
+    "status": "blocked — CUDA unavailable on this Mac",
+    "source_files": [
+      "reports/phi3_qlora_skipped_or_training_metrics.json",
+      "reports/phi3_dpo_skipped_or_training_metrics.json"
+    ],
+    "qlora_dry_run_status": "all 4 preflight checks pass",
+    "dpo_dry_run_status": "4/5 checks pass; adapter_exists=false (correct, needs QLoRA first)",
+    "adapter_exists": false,
+    "no_fabricated_checkpoints": true,
+    "colab_notebook": "notebooks/phi3_colab_training.ipynb"
+  },
+  "production_defaults": {
+    "verifier": "checkpoints/transformer_verifier_clean",
+    "retrieval_profile": "bm25_only",
+    "aggregation_mode": "per_passage_max",
+    "relevance_gate": "disabled (null)",
+    "support_threshold": 0.55,
+    "refute_threshold": 0.5
+  },
+  "disabled_or_skipped": {
+    "robust_verifier": "checkpoints/transformer_verifier_robust — trained, regression documented, not in production",
+    "relevance_gate": "implemented, disabled by default, gate threshold not calibrated at claim level",
+    "phi3_qlora": "scripts and datasets ready, blocked on CUDA",
+    "phi3_dpo": "scripts and datasets ready, blocked on CUDA and QLoRA adapter",
+    "ollama": "skipped (server not running)",
+    "llama_cpp": "skipped (binary not configured)",
+    "vllm": "skipped (endpoint unavailable, no CUDA)"
+  },
+  "resume_safe_claims": [
+    "Built end-to-end fact verification pipeline with BM25 retrieval, DistilRoBERTa NLI verifier, and grounded explanation generation",
+    "Measured oracle macro-F1 0.6728 vs retrieved macro-F1 0.3887 (gap 0.2841) on 650-example full test set",
+    "Ablated 3 retrieval profiles (bm25_only, hybrid_bm25_dense, hybrid_bm25_sentence_transformer) at full 650-example scale",
+    "Documented two negative results: verifier robustness retrain regressed (-0.1058 macro_F1), relevance gate improved NEI FPR but regressed macro_F1",
+    "Exported DistilRoBERTa verifier to ONNX; benchmarked at 55 ex/s CPU",
+    "Trained MLX LoRA adapter on Apple Silicon (Qwen2.5-1.5B-Instruct-4bit, 53.7 tok/s); verdict_accuracy 0.695, macro_F1 0.4632 on 200-example eval",
+    "Generated SFT and DPO preference datasets for Phi-3 fine-tuning; created Colab training notebook",
+    "136 passing tests across verifier, retrieval, inference, and gate components"
+  ],
+  "must_not_claim": [
+    "ONNX is faster than transformers on this Mac (it is not at batch=1 or batch=8)",
+    "Robust verifier improved retrieved performance (it regressed)",
+    "Relevance gate improved macro-F1 (it did not; only improved NEI FPR)",
+    "Phi-3 QLoRA or DPO adapter trained (CUDA not available, no adapter exists)",
+    "MLX LoRA adapter achieves production-ready explanation quality (format compliance was low)",
+    "MLX explanation adapter improved over base model in structured evaluation (not yet measured at sufficient scale)"
+  ]
+}

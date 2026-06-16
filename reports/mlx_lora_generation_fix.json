@@ -1,0 +1,35 @@
+{
+  "status": "fixed",
+  "timestamp_utc": "2026-06-15T22:45:00+00:00",
+  "root_cause": "base_model key in configs/mlx_lora_explanations.yaml was never passed to mlx_lm's 'model' parameter. The training script mapped config keys to lora_args only when the key names matched. 'base_model' != 'model', so model defaulted to mlx_lm.lora.CONFIG_DEFAULTS['model'] = 'Qwen/Qwen3-0.6b'. The adapter was trained against Qwen3-0.6b (hidden_dim=1024) but evaluated against Qwen2.5-1.5B-Instruct-4bit (hidden_dim=1536), causing a matmul shape mismatch on every generation call.",
+  "error_observed": "[matmul] Last dimension of first input with shape (1,N,1536) must match second to last dimension of second input with shape (1024,8).",
+  "fix_applied": "Added one line to scripts/train_mlx_lora_explanations.py before the CONFIG_DEFAULTS loop: lora_args['model'] = config['base_model']",
+  "fix_file": "scripts/train_mlx_lora_explanations.py",
+  "retrain_required": true,
+  "retrain_note": "Adapter was retrained with correct base model (mlx-community/Qwen2.5-1.5B-Instruct-4bit), 80 iters, same config.",
+  "adapter_path": "adapters/mlx_qwen_veritas_lora",
+  "correct_base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "wrong_base_model": "Qwen/Qwen3-0.6b",
+  "generation_status": "succeeds after fix",
+  "format_compliance_note": "Format compliance (Decision:/Explanation:/Citations: structure) is low at 80 iters / 256 examples. More training iterations are needed for reliable structured output.",
+  "verdict_prediction_adapter": {
+    "path": "checkpoints/mlx_lora_verifier",
+    "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+    "training_iters": 100,
+    "verdict_accuracy": 0.695,
+    "macro_f1": 0.4632,
+    "citation_valid_rate": 0.6,
+    "sample_size": 200,
+    "report": "reports/mlx_lora_eval_200.json",
+    "note": "This adapter was trained on verifier-format data (verdict prediction), not explanation SFT data. It has proper measured metrics."
+  },
+  "explanation_adapter_status": {
+    "path": "adapters/mlx_qwen_veritas_lora",
+    "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+    "training_iters": 80,
+    "training_examples": 256,
+    "generation_succeeds": true,
+    "format_compliance": "low (0.0 at 5-example eval)",
+    "note": "Generation works after fix but more training is needed for structured output compliance."
+  }
+}

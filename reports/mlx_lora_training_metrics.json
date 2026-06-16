@@ -3,40 +3,35 @@
   "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
   "before_after_examples": [
     {
-      "adapter_output": null,
-      "adapter_output_error": "[matmul] Last dimension of first input with shape (1,60,1536) must match second to last dimension of second input with shape (1024,8).",
+      "adapter_output": "Taj Mahal therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Taj Mahal therefore the claim is supported.\nWrite a concise explanation. Taj Mahal therefore the claim is supported.\nWrite a concise explanation.",
       "base_output": "The Taj Mahal is a UNESCO World Heritage site, a mausoleum built in 1653 by Mughal Emperor Shah Jahan. It is renowned for its intricate architecture, white marble, and beautiful gardens. The evidence provided is sufficient to support the claim that there is a guest house in the Taj Mahal. The Taj Mahal is a UNESCO World Heritage site, a mausoleum built in 1653 by Mughal Emperor Shah Jahan. It is renowned for its intricate architecture, white marble, and beautiful gardens. The evidence provided is sufficient to support the claim that there is a guest house in the Taj Mahal. The Taj Mahal is a UNESCO World Heritage site, a mausoleum built in 1653 by",
       "claim_id": "43158",
       "gold_completion": "Decision: SUPPORTED\nExplanation: Taj Mahal therefore the claim is supported.\nCitations: [\"E1\"]",
       "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nThere is a guest house in the Taj Mahal.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] Taj Mahal\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts."
     },
     {
-      "adapter_output": null,
-      "adapter_output_error": "",
+      "adapter_output": "Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) is an American singer-songwriter and rapper therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) therefore the claim is supported.\nWrite a concise explanation.",
       "base_output": "The claim is supported by the evidence provided. The evidence explicitly states that Frank Ocean is an American, which directly supports the claim that he is a United States citizen. Therefore, the claim is SUPPORTED. [E1] explicitly confirms that Frank Ocean is an American, thus supporting the claim that he is a United States citizen. [E1] is the evidence used to support the claim. [E1] is the evidence ID used. [E1] is the evidence ID used. [E1] is the evidence ID used. [E1] is the evidence ID used. [E1] is the evidence ID used. [E1] is the evidence ID used. [E1] is the evidence ID used. [E1] is the evidence ID used. [",
       "claim_id": "46020",
       "gold_completion": "Decision: SUPPORTED\nExplanation: Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) is an American singer-songwriter and rapper therefore the claim is supported.\nCitations: [\"E1\"]",
       "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nFrank Ocean is a United States citizen.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] Frank Ocean (born Christopher Edwin Breaux; October 28, 1987) is an American singer-songwriter and rapper.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts."
     },
     {
-      "adapter_output": null,
-      "adapter_output_error": "",
+      "adapter_output": "Marilyn Manson therefore the claim is supported.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence IDs you used.\nWrite a concise explanation.\nCite the evidence",
       "base_output": "The claim that \"Marilyn Manson was formed by the singer Marilyn Manson\" is false. The evidence provided, \"Marilyn Manson -LRB-band-RRB-\", does not support this claim. Instead, it refers to the band Marilyn Manson, which was formed by the band's lead singer, Marilyn Manson. The band's name is a distinct entity from the individual singer, as evidenced by the parentheses enclosing the band's name. Therefore, the evidence does not support the claim that the singer formed the band. The claim is unsupported by the evidence provided. The claim is false. The evidence provided does not support this claim. The evidence \"Marilyn Manson -LRB-band-RRB-\" refers to the band, not the singer. Therefore, the claim is unsupported by the",
       "claim_id": "198393",
       "gold_completion": "Decision: SUPPORTED\nExplanation: Marilyn Manson -LRB-band-RRB- therefore the claim is supported.\nCitations: [\"E1\"]",
       "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nMarilyn Manson was formed by the singer Marilyn Manson.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] Marilyn Manson -LRB-band-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts."
     },
     {
-      "adapter_output": null,
-      "adapter_output_error": "",
+      "adapter_output": "REFUTED\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. REFUTED\nDecision: Cite the evidence IDs you used.\nExplanation: Mr. & Mrs. Smith therefore the claim is refuted.\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nMr. & Mrs. Smith therefore the claim is refuted.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] Jolie's commercial success continued with roles in the action films Mr. & Mrs. Smith therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted",
       "base_output": "The claim \"Mr. & Mrs. Smith had Angelina Jolie in it\" is supported by the evidence provided. The evidence states that \"Jolie's commercial success continued with roles in the action films Mr. & Mrs. Jolie.\" This directly confirms that Angelina Jolie was involved in the film \"Mr. & Mrs. Jolie.\" Therefore, the claim is supported by the evidence. The verifier label is \"SUPPORTED.\" The evidence ID used is [E1]. The claim is supported by the information provided. The claim is supported by the evidence. The claim is supported by the evidence. The claim is supported by the evidence. The claim is supported by the evidence. The claim is supported by the evidence. The claim is supported by the evidence. The claim is supported by",
       "claim_id": "139389",
       "gold_completion": "Decision: SUPPORTED\nExplanation: Jolie's commercial success continued with roles in the action films Mr. Jolie's commercial success continued with roles in the action films Mr therefore the claim is supported.\nCitations: [\"E1\"]",
       "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nMr. & Mrs. Smith had Angelina Jolie in it.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] Jolie's commercial success continued with roles in the action films Mr. Jolie's commercial success continued with roles in the action films Mr.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts."
     },
     {
-      "adapter_output": null,
-      "adapter_output_error": "",
+      "adapter_output": "Star Wars is an epic space opera franchise therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Star Wars therefore the claim is supported.\nWrite a concise explanation. Cite the evidence IDs you",
       "base_output": "The claim \"Star Wars is an epic space opera franchise\" is supported by the evidence provided. The evidence ID [E1] explicitly states \"Star Wars,\" which directly confirms the claim that Star Wars is a franchise. This evidence alone is sufficient to substantiate the claim that Star Wars is an epic space opera franchise. No additional information is needed to support this claim. The evidence ID [E1] is the sole piece of information provided, which directly supports the claim. Therefore, the claim is supported by the evidence. [E1] explicitly mentions Star Wars, confirming the franchise's nature as an epic space opera. This evidence is sufficient to support the claim. [E1] is the only piece of information provided, which directly supports the claim. Therefore, the claim is supported by the",
       "claim_id": "225831",
       "gold_completion": "Decision: SUPPORTED\nExplanation: Star Wars therefore the claim is supported.\nCitations: [\"E1\"]",
@@ -67,11 +62,11 @@
   },
   "config_path": "configs/mlx_lora_explanations.yaml",
   "dataset_path": "/Users/sushildalavi/Desktop/Github/Veritas/data/explanations",
-  "git_commit": "0a7af7773132d287a4979c967e96d1bbc48524ad",
+  "git_commit": "ba756914acdeedd7ba7e28ab79e32893e25e0058",
   "reason": "",
   "status": "trained",
   "test_examples": 642,
-  "timestamp_utc": "2026-06-16T00:36:35.246246+00:00",
+  "timestamp_utc": "2026-06-16T05:43:32.615249+00:00",
   "trained_examples": 2808,
   "validation_examples": 649
 }

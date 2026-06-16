@@ -131,6 +131,7 @@ def _run_training(config: dict[str, Any]) -> dict[str, Any]:
         _write_chat_split(temp_data_dir / "test.jsonl", test_rows, config["system_prompt"], config.get("max_examples"))
 
         lora_args = vars(build_lora_parser().parse_args([]))
+        lora_args["model"] = config["base_model"]  # config uses base_model; mlx_lm uses model
         for key, value in config.items():
             if key in lora_args:
                 lora_args[key] = value
