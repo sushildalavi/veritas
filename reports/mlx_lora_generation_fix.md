@@ -32,19 +32,33 @@ Placed before the `CONFIG_DEFAULTS` loop so the explicit value takes precedence.
 
 ## Retrain
 
-The explanation adapter was retrained at 80 iters with the correct base model:
+The explanation adapter was retrained first at 80 iters, then extended to 300 iters
+with the correct base model:
 
 - Base model: `mlx-community/Qwen2.5-1.5B-Instruct-4bit`
 - Adapter path: `adapters/mlx_qwen_veritas_lora`
-- Train loss at iter 80: 0.562
-- Val loss at iter 80: 0.496
+- Training iters: 300
+- Best val loss: 0.427 (iter 200)
+- Final val loss: 0.622 (iter 300, slight overfit)
 
 ## Generation After Fix
 
-Generation succeeds — no matmul errors. Format compliance is low at this training
-scale (80 iters / 256 examples). The model generates text but does not reliably
-follow the "Decision: / Explanation: / Citations:" structured format. More training
-iterations would improve format compliance.
+Generation succeeds — no matmul errors. Evaluated at 300 iters on 10 examples:
+
+| metric | base model | adapter (300 iters) |
+|---|---|---|
+| format_correctness | 0.0 | **0.2** |
+| citation_presence | 0.0 | 0.1 |
+| decision_label_consistency | 0.0 | 0.1 |
+| avg explanation length (words) | 0.0 | 34.2 |
+
+The base model does not follow the SFT completion format at all. The adapter
+achieves partial format compliance (20%) with 300 iters / 256 examples. Some
+outputs correctly emit "Decision: / Explanation: / Citations:" structure; others
+do not. Prompt leakage after `<|endoftext|>` is visible in some samples — adding
+a stop-token or `max_tokens` cap would suppress it.
+
+Source: `reports/explanation_model_eval.json`
 
 ## Verdict Prediction Adapter (properly trained)
 

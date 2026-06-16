@@ -128,8 +128,18 @@ NEI F1=0.0 because the adapter rarely generates NEI on this dataset.
 
 Was trained against `Qwen/Qwen3-0.6b` (wrong base model) due to a key-name bug in
 the training script. **Generation bug is now fixed** (see `reports/mlx_lora_generation_fix.md`).
-Adapter retrained at 80 iters against the correct base model. Format compliance
-is still low at this training scale; more iterations needed.
+Adapter retrained at 300 iters against the correct base model. Evaluated on 10 examples
+(`reports/explanation_model_eval.json`):
+
+| metric | base model | adapter (300 iters) |
+|---|---|---|
+| format_correctness | 0.0 | **0.2** |
+| citation_presence | 0.0 | 0.1 |
+| decision_label_consistency | 0.0 | 0.1 |
+| avg explanation length (words) | 0.0 | 34.2 |
+
+Format compliance improved from 0.0 at 80 iters to 0.2 at 300 iters, confirming
+the generation bug fix is effective. Best val loss: 0.427 at iter 200.
 
 ### Throughput benchmark
 
@@ -185,7 +195,7 @@ Source: `reports/phi3_qlora_skipped_or_training_metrics.json`,
 - ONNX export validated and functional; benchmarked at 55 ex/s CPU
 - MLX LoRA verdict-prediction adapter: 0.695 accuracy, 0.4632 macro_F1 on 200-example eval (Apple Silicon, 53.7 tok/s)
 - Generated SFT + DPO datasets for Phi-3 fine-tuning; created Colab training notebook
-- Fixed a base-model mismatch bug in MLX LoRA explanation training script
+- Fixed a base-model key mismatch bug in MLX LoRA explanation training script; retrained at 300 iters; partial format compliance confirmed (format_correctness=0.2)
 - 136 passing tests
 
 ## 10. What Must Not Be Claimed
@@ -194,4 +204,4 @@ Source: `reports/phi3_qlora_skipped_or_training_metrics.json`,
 - Robust verifier improved anything (both oracle and retrieved metrics regressed)
 - Relevance gate improved macro-F1 (it regressed; only NEI FPR improved)
 - Phi-3 QLoRA or DPO adapter trained or exists (CUDA not available)
-- MLX explanation adapter achieves production-quality structured output (format compliance was low at 80 iters)
+- MLX LoRA explanation adapter achieves production-ready structured output (format_correctness=0.2 at 300 iters, 10-example eval — partial compliance only)

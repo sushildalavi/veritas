@@ -6,12 +6,12 @@
   "fix_applied": "Added one line to scripts/train_mlx_lora_explanations.py before the CONFIG_DEFAULTS loop: lora_args['model'] = config['base_model']",
   "fix_file": "scripts/train_mlx_lora_explanations.py",
   "retrain_required": true,
-  "retrain_note": "Adapter was retrained with correct base model (mlx-community/Qwen2.5-1.5B-Instruct-4bit), 80 iters, same config.",
+  "retrain_note": "Adapter was retrained with correct base model (mlx-community/Qwen2.5-1.5B-Instruct-4bit), first 80 iters then extended to 300 iters.",
   "adapter_path": "adapters/mlx_qwen_veritas_lora",
   "correct_base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
   "wrong_base_model": "Qwen/Qwen3-0.6b",
   "generation_status": "succeeds after fix",
-  "format_compliance_note": "Format compliance (Decision:/Explanation:/Citations: structure) is low at 80 iters / 256 examples. More training iterations are needed for reliable structured output.",
+  "format_compliance_note": "Format compliance improved from 0.0 (80 iters) to 0.2 (300 iters, 10-example eval). Partial structured output compliance achieved. Some outputs show prompt leakage after <|endoftext|> token.",
   "verdict_prediction_adapter": {
     "path": "checkpoints/mlx_lora_verifier",
     "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
@@ -26,10 +26,18 @@
   "explanation_adapter_status": {
     "path": "adapters/mlx_qwen_veritas_lora",
     "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
-    "training_iters": 80,
+    "training_iters": 300,
     "training_examples": 256,
+    "best_val_loss": 0.427,
+    "best_val_loss_iter": 200,
+    "final_val_loss": 0.622,
     "generation_succeeds": true,
-    "format_compliance": "low (0.0 at 5-example eval)",
-    "note": "Generation works after fix but more training is needed for structured output compliance."
+    "format_correctness": 0.2,
+    "citation_presence": 0.1,
+    "decision_label_consistency": 0.1,
+    "average_explanation_length": 34.2,
+    "sample_size": 10,
+    "report": "reports/explanation_model_eval.json",
+    "note": "Generation works after fix. Format compliance is partial (0.2) at 300 iters. Some outputs echo the system prompt after <|endoftext|> — max_tokens or stop-token tuning would suppress this. Not production-grade but demonstrates the fix is effective."
   }
 }
