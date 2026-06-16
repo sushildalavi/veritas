@@ -259,6 +259,18 @@ Research mode:
 - preference-guided reranking
 - deeper evaluation and ablation coverage
 
+## Training Status
+
+| Component | Status | Artifact | Notes |
+| --- | --- | --- | --- |
+| Retrieved verifier robustness retrain | negative result | `reports/transformer_verifier_robust_eval.json` | Regressed full-set macro-F1; production verifier unchanged |
+| Relevance gate | negative result | `reports/oracle_vs_retrieved_v2_full_gated.json` | Disabled by default |
+| SFT explanation dataset | built | `data/explanations/sft_{train,val,test}.jsonl` | Grounded explanation tuning data |
+| MLX LoRA | trained | `adapters/mlx_qwen_veritas_lora/` | Mac-local adapter on Qwen2.5 |
+| Phi-3 QLoRA | skipped | `reports/phi3_qlora_skipped_or_training_metrics.json` | CUDA-only path |
+| DPO preferences | built | `data/explanations/dpo_{train,val}.jsonl` | Synthetic rejected responses are documented |
+| Phi-3 DPO | skipped | `reports/phi3_dpo_skipped_or_training_metrics.json` | Depends on CUDA and the QLoRA path |
+
 ## Limitations
 
 - The evaluation sets are sample-scale (650-example test set), not the full FEVER benchmark.
@@ -271,7 +283,7 @@ Research mode:
 - Citation faithfulness is measured, not assumed.
 - The MLX LoRA explanation adapter is a small-sample result, not a benchmark claim.
 - Preference-guided reranking is a deterministic Mac-compatible replacement for DPO, not DPO itself.
-- Phi-3 QLoRA and DPO training paths are scaffolded, but no real Phi-3 checkpoint is claimed in this repo unless the adapter directories exist.
+- Phi-3 QLoRA and DPO require CUDA, and no real Phi-3 checkpoint is claimed in this repo unless the adapter directories exist.
 - The vLLM path is explanation-serving only. The verifier model still decides the label, and the checked-in vLLM benchmark is currently a skipped report because no live endpoint was available in this environment.
 
 ## Repository Guides
@@ -280,6 +292,7 @@ Research mode:
 - `docs/retrieval_ceiling.md`
 - `docs/vllm_serving.md`
 - `docs/phi3_gpu_training.md`
+- `docs/training_artifacts.md`
 - `docs/inference_performance.md`
 - `docs/inference_runtime_landscape.md`
 

@@ -1,0 +1,39 @@
+# Training Artifacts
+
+This repository now separates verdict classification from explanation training.
+
+## Boundaries
+
+- The production verifier remains unchanged.
+- The relevance gate stays disabled by default.
+- Explanation tuning is for faithfulness and formatting, not automatic verifier improvement.
+- Mac-local MLX LoRA is not the same as Phi-3 QLoRA.
+- Phi-3 QLoRA and Phi-3 DPO require CUDA.
+
+## Artifacts
+
+| Component | Status | Artifact | Notes |
+| --- | --- | --- | --- |
+| Retrieved verifier robustness retrain | negative result | `reports/transformer_verifier_robust_eval.json` | Regression documented; production verifier unchanged |
+| Relevance gate | negative result | `reports/oracle_vs_retrieved_v2_full_gated.json` | Disabled by default |
+| SFT explanation dataset | built | `data/explanations/sft_{train,val,test}.jsonl` | Grounded explanation tuning data |
+| MLX LoRA | trained | `adapters/mlx_qwen_veritas_lora/` | Mac-local adapter on Qwen2.5 |
+| Phi-3 QLoRA | skipped | `reports/phi3_qlora_skipped_or_training_metrics.json` | CUDA path only |
+| DPO preferences | built | `data/explanations/dpo_{train,val}.jsonl` | Synthetic rejection pairs documented |
+| Phi-3 DPO | skipped | `reports/phi3_dpo_skipped_or_training_metrics.json` | Depends on CUDA and the QLoRA path |
+
+## Usage Notes
+
+- Use `scripts/build_explanation_sft_dataset.py` to regenerate the SFT explanation corpus.
+- Use `scripts/build_dpo_preferences.py` to regenerate preference pairs.
+- Use `scripts/train_mlx_lora_explanations.py` for a local Mac MLX LoRA run.
+- Use `scripts/train_phi3_qlora.py` and `scripts/train_phi3_dpo.py` only on CUDA hardware.
+- Use `scripts/eval_explanation_model.py` to compare explanation quality across backends.
+
+## What Not To Claim
+
+- Do not claim verifier classification improvement from explanation tuning unless a verifier evaluation measures it.
+- Do not call the MLX adapter Phi-3 QLoRA.
+- Do not describe preference reranking as DPO.
+- Do not claim a real Phi-3 checkpoint unless the adapter directory exists.
+
