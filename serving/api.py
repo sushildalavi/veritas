@@ -90,7 +90,7 @@ def _startup() -> None:
 # GET /health
 # ---------------------------------------------------------------------------
 
-@app.get("/health")
+@app.get("/health", summary="Service liveness and pipeline metadata")
 def health() -> dict:
     return {
         "status": "ok",
@@ -113,7 +113,7 @@ def health() -> dict:
 # GET /metadata
 # ---------------------------------------------------------------------------
 
-@app.get("/metadata", response_model=MetadataResponse)
+@app.get("/metadata", response_model=MetadataResponse, summary="Project info, measured metrics, artifact availability")
 def metadata() -> MetadataResponse:
     available_backends: list[str] = [_pipeline.verifier_backend]
     if _pipeline.explanation_generator is not None:
@@ -153,7 +153,7 @@ def metadata() -> MetadataResponse:
 # GET /metrics/summary
 # ---------------------------------------------------------------------------
 
-@app.get("/metrics/summary", response_model=MetricsSummaryResponse)
+@app.get("/metrics/summary", response_model=MetricsSummaryResponse, summary="Runtime stats snapshot (requests, latency, cache)")
 def metrics_summary() -> MetricsSummaryResponse:
     snap = _metrics.snapshot()
     return MetricsSummaryResponse(
@@ -191,7 +191,7 @@ def metrics() -> dict:
 # POST /verify
 # ---------------------------------------------------------------------------
 
-@app.post("/verify", response_model=VerifyResponse)
+@app.post("/verify", response_model=VerifyResponse, summary="BM25 retrieval + NLI verification with response cache")
 def verify(request: VerifyRequest) -> VerifyResponse:
     if len(request.claim) > _settings.max_claim_length:
         raise claim_too_long(_settings.max_claim_length)
@@ -222,7 +222,7 @@ def verify(request: VerifyRequest) -> VerifyResponse:
 # POST /retrieve
 # ---------------------------------------------------------------------------
 
-@app.post("/retrieve", response_model=RetrieveResponse)
+@app.post("/retrieve", response_model=RetrieveResponse, summary="BM25 evidence retrieval only (no verification)")
 def retrieve(request: RetrieveRequest) -> RetrieveResponse:
     if len(request.claim) > _settings.max_claim_length:
         raise claim_too_long(_settings.max_claim_length)
@@ -268,7 +268,7 @@ def retrieve(request: RetrieveRequest) -> RetrieveResponse:
 # POST /explain
 # ---------------------------------------------------------------------------
 
-@app.post("/explain", response_model=ExplainResponse)
+@app.post("/explain", response_model=ExplainResponse, summary="Citation-grounded explanation generation (template or MLX LoRA)")
 def explain(request: ExplainRequest) -> ExplainResponse:
     from agent.tools import build_grounded_context, explain_claim
     from data.schemas import EvidenceSpan
@@ -318,7 +318,7 @@ def explain(request: ExplainRequest) -> ExplainResponse:
 # POST /pipeline
 # ---------------------------------------------------------------------------
 
-@app.post("/pipeline", response_model=PipelineResponse)
+@app.post("/pipeline", response_model=PipelineResponse, summary="Full pipeline: retrieval → verification → explanation + latency breakdown")
 def pipeline(request: PipelineRequest) -> PipelineResponse:
     if len(request.claim) > _settings.max_claim_length:
         raise claim_too_long(_settings.max_claim_length)
@@ -398,7 +398,7 @@ def pipeline(request: PipelineRequest) -> PipelineResponse:
 # GET /reports/{name}
 # ---------------------------------------------------------------------------
 
-@app.get("/reports/{name}")
+@app.get("/reports/{name}", summary="Serve allowlisted research report files (final-results, error-analysis, etc.)")
 def get_report(name: str) -> dict:
     if name not in _ALLOWED_REPORTS:
         raise report_not_found(name)
