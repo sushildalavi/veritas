@@ -32,7 +32,7 @@ export default function Overview({ metadata, apiError }: Props) {
 
       <div className="section">
         <h2>Key Measured Results</h2>
-        <p style={{ marginBottom: "4px" }}>Full 650-example test set (FEVER + SciFact). Source: <code className="code">reports/oracle_vs_retrieved_v2_full.json</code></p>
+        <p style={{ marginBottom: "4px" }}>Full 650-example test set (FEVER + SciFact).</p>
         <div className="card-grid">
           <div className="metric-card highlight">
             <div className="label">Oracle macro-F1</div>

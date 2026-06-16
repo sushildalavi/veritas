@@ -138,8 +138,7 @@ export default function TrainingArtifacts() {
       <div className="section">
         <h3>MLX LoRA — Explanation SFT (measured at 500 iters)</h3>
         <p style={{ fontSize: "12px", marginBottom: "8px" }}>
-          Source: <code className="code">reports/mlx_lora_500_eval.json</code> ·
-          Base model: <code className="code">mlx-community/Qwen2.5-1.5B-Instruct-4bit</code>
+          Base model: Qwen2.5-1.5B-Instruct-4bit · 256 training examples · Apple Silicon
         </p>
         <div className="table-wrap">
           <table>

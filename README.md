@@ -13,23 +13,67 @@ license: apache-2.0
 
 **Evidence-Grounded Fact Verification Platform**
 
-A failure-aware fact-verification system with BM25 retrieval, DistilRoBERTa NLI verification, oracle-vs-retrieved ablations, training artifacts, inference benchmarks, FastAPI REST APIs, and a React research dashboard.
+Veritas is a local-first research system that runs BM25 retrieval, DistilRoBERTa NLI verification, grounded explanation generation, and full ablation reporting entirely on a Mac — no CUDA required. The design goal was to build an honest, measurable stack rather than a tuned demo: every result shown here was measured, and the two experiments that regressed are documented alongside the ones that worked.
 
-> **Research prototype.** Not a production-deployed fact checker. Veritas is failure-aware: it reports both successful and negative results, including retrieval bottlenecks and verifier robustness regressions.
+> **Research prototype** — not a production fact checker. Retrieved macro-F1 is 0.3887; retrieval is the primary bottleneck.
 
 ---
 
-## Key Metrics
+## Dashboard
 
-| Metric | Value |
-|--------|-------|
-| Oracle macro-F1 (per_passage_max) | **0.6728** |
-| Retrieved macro-F1 (per_passage_max) | **0.3887** |
-| Oracle → Retrieved gap | **0.2841** |
-| Retrieval recall@10 (BM25) | **0.5334** |
-| MLX LoRA citation presence (500 iters) | **0.72** |
+![Veritas Overview](docs/assets/veritas_overview.png)
 
-*Full 650-example test set (FEVER + SciFact). All numbers are measured — no fabrication.*
+![Veritas Verify Claim](docs/assets/veritas_verify_claim.png)
+
+![Veritas Research Results](docs/assets/veritas_research_results.png)
+
+---
+
+## Results
+
+The headline finding is the gap between what the verifier can do with perfect evidence versus what it achieves on BM25-retrieved evidence.
+
+```
+Oracle macro-F1   ████████████████████████████████████  0.6728
+Retrieved macro-F1  ███████████████████                0.3887
+Gap                                                    −0.2841
+```
+
+```mermaid
+xychart-beta horizontal
+  title "Verifier macro-F1 by evidence source (650-example test set)"
+  x-axis ["Oracle (gold)", "Retrieved (BM25)", "Gap"]
+  y-axis "macro-F1" 0 --> 0.75
+  bar [0.6728, 0.3887, 0.2841]
+```
+
+**Retrieval profiles** — better recall doesn't guarantee better end-to-end F1:
+
+| Profile | recall@10 | verifier macro-F1 |
+|---------|-----------|-------------------|
+| BM25 only (default) | **0.5334** | **0.3887** |
+| Hybrid BM25 + dense | 0.5113 | 0.3864 |
+| Hybrid BM25 + sentence-transformer | 0.5714 | 0.3776 |
+
+The sentence-transformer hybrid improves recall by +0.038 but reduces verifier F1 by −0.011 at more than 2× the runtime.
+
+**MLX LoRA on Apple Silicon** — explanation adapter trained locally:
+
+| | base model | 300 iters | 500 iters |
+|-|-----------|-----------|-----------|
+| citation presence | 0.0 | 0.10 | **0.72** |
+| format correctness | 0.0 | 0.20 | 0.28 |
+
+---
+
+## Negative Results
+
+Two experiments were run that did not improve the primary metric. Both are fully documented.
+
+| Experiment | What happened |
+|------------|---------------|
+| Robust verifier retrain | Retrieved macro-F1 dropped 0.3887 → 0.2829. Training set was 76% NEI without class reweighting — model collapsed toward always predicting NEI. Production checkpoint unchanged. |
+| Relevance gate | Macro-F1 dropped 0.3887 → 0.3557. NEI false-positive rate improved substantially (0.71 → 0.29), but end-to-end F1 regressed. Gate disabled by default. |
 
 ---
 
@@ -43,23 +87,7 @@ make api
 make frontend
 ```
 
----
-
-## Research Reports
-
-| Report | Path |
-|--------|------|
-| Final results (all metrics) | [`docs/final_results.md`](docs/final_results.md) |
-| Metrics summary | [`reports/final_veritas_metrics_summary.md`](reports/final_veritas_metrics_summary.md) |
-| Training artifacts | [`docs/training_artifacts.md`](docs/training_artifacts.md) |
-| Inference benchmarks | [`docs/inference_performance.md`](docs/inference_performance.md) |
-| Retrieval ceiling analysis | [`docs/retrieval_ceiling.md`](docs/retrieval_ceiling.md) |
-
----
-
-## Resume-Safe Summary
-
-> Built Veritas, a failure-aware evidence-grounded fact-verification system with BM25 retrieval, DistilRoBERTa NLI verification, oracle-vs-retrieved ablations, ONNX/MLX inference benchmarking, SFT/DPO training-data generation, FastAPI REST APIs, and a React TypeScript research dashboard; measured a 0.6728 oracle macro-F1 vs. 0.3887 retrieved macro-F1 gap and documented retrieval/noisy-evidence bottlenecks through full-set error analysis; improved MLX LoRA citation compliance from 0.10 to 0.72.
+Open `http://localhost:5173`. The dashboard has five tabs: Overview, Verify Claim, Evidence Explorer, Training Artifacts, and Research Results.
 
 ---
 
@@ -98,7 +126,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 
 | Component | Result |
 | --- | --- |
-| Verifier dataset | 2808 train / 649 val / 642 test (cross-split duplicate claim/evidence/label triples removed; see `reports/verifier_data_audit.md`) |
+| Verifier dataset | 2808 train / 649 val / 642 test (cross-split duplicate-triple dedup applied) |
 | Sklearn verifier | 0.484 accuracy, 0.482 macro-F1 |
 | DistilRoBERTa verifier* | 0.718 accuracy, 0.711 macro-F1 |
 | DistilRoBERTa REFUTED recall* | 0.745 |
@@ -115,8 +143,8 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Hybrid retrieval | 0.535 recall@10 |
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
 | Template faithfulness | 0.560 citation validity, 0.755 verdict consistency |
-| MLX LoRA verdict-prediction adapter (Qwen2.5-1.5B, Apple Silicon) | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity (200-example eval, `checkpoints/mlx_lora_verifier`) |
-| MLX LoRA explanation adapter (500 iters) | format_correctness 0.28, citation_presence **0.72**, decision_label_consistency 0.24; generation bug fixed and retrained; see `reports/mlx_lora_500_eval.json` |
+| MLX LoRA verdict-prediction adapter (Qwen2.5-1.5B, Apple Silicon) | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity (200-example eval) |
+| MLX LoRA explanation adapter (500 iters) | format_correctness 0.28, citation_presence **0.72**, decision_label_consistency 0.24; base-model key bug fixed and retrained |
 | Robust verifier retrain | negative result: retrieved macro-F1 0.3887 → 0.2829 (oracle also regressed); production checkpoint unchanged |
 | Relevance gate | NEI false-positive rate 0.7098 → 0.2857 (improved); retrieved macro-F1 0.3887 → 0.3557 (regressed); gate disabled by default |
 | ONNX verifier export | Functional; CPU throughput 55 ex/s — slower than native transformers (62 ex/s CPU, 154 ex/s MPS); no ONNX speedup on this Mac |
@@ -127,17 +155,13 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 
 The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance. Each successive enlargement of the evaluation set (20 -> 100 -> 200 -> 650 examples) made the absolute numbers less flattering -- the full 650-example test set is the most representative result and should be treated as the project's primary headline number.
 
-\* These rows were measured on the verifier dataset before the cross-split dedup above (2809/650/650). They are stale pending a retrain on the deduped 2808/649/642 split; the sklearn and DeBERTa rows have already been re-measured on the deduped split. The earlier DeBERTa run was also degenerate due to a separate bug: `microsoft/deberta-v3-xsmall` loads in fp16 by default on this transformers version, and training fp16 on CPU produced NaN gradients (`grad_norm: nan`, all predictions collapsed to SUPPORTED). Fixed by passing `dtype=torch.float32` in `_load_transformer()` in `scripts/train_transformer_verifier_clean.py`.
+\* These rows were measured before a cross-split dedup was applied; the sklearn and DeBERTa rows have since been re-measured on the cleaned split. The DeBERTa run also had a separate fp16-on-CPU training bug (NaN gradients) that has since been fixed.
 
 ## Retrieval Profile Comparison
 
-Two scales were measured. The 50-example slice is an early comparison across many profiles.
-The 650-example full-scale comparison (`reports/retrieval_profile_comparison_650.md`) is the
-primary result and should be used for any headline reporting.
+Two scales were measured. The 650-example full-scale comparison is the primary result.
 
 ### Full 650-example comparison (primary)
-
-Source: `reports/retrieval_profile_comparison_650.json`
 
 | Profile | recall@10 | nDCG@10 | Retrieved per-passage macro-F1 |
 | --- | --- | --- | --- |
@@ -151,8 +175,7 @@ performance at full scale. `bm25_only` is the default profile.
 
 ### 50-example slice (early comparison, more profiles)
 
-Source: `reports/retrieval_profile_comparison.md`. These numbers are from an earlier, smaller run
-and should not be used as headline results; the full-scale comparison above supersedes them.
+These numbers are from an earlier, smaller run and should not be used as headline results; the full-scale comparison above supersedes them.
 
 | Profile | recall@10 | nDCG@10 | Retrieved per-passage macro-F1 |
 | --- | --- | --- | --- |
@@ -188,12 +211,12 @@ Result: **regression on both metrics.**
 
 Root cause: the retrieved-evidence training set was 76% NOT_ENOUGH_INFO. Without class
 reweighting, the model collapsed toward predicting NEI on everything. Production checkpoint
-unchanged. Details: `reports/verifier_robustness_training_result.md`.
+unchanged.
 
 ### Relevance gate
 
 Implemented a lexical token overlap gate that filters low-relevance passages to NEI before
-verifier scoring (config-driven, `relevance_gate_threshold` in `configs/serving.yaml`).
+verifier scoring (config-driven, disabled by default).
 
 Result: NEI false-positive rate improved substantially; macro_F1 regressed.
 
@@ -204,7 +227,6 @@ Result: NEI false-positive rate improved substantially; macro_F1 regressed.
 
 Gate stays disabled by default. Threshold was calibrated on per-passage pair data, not
 claim-level aggregation; recalibrating at claim level may recover the loss.
-Details: `reports/oracle_vs_retrieved_v2_full_gated.md`.
 
 ---
 
@@ -240,46 +262,19 @@ flowchart LR
 - FastAPI service with response caching, fallback metadata, and health/metrics endpoints
 - Gradio demo with a polished research-facing layout
 
-## LLM Inference and Runtime Benchmarking
+## Inference Benchmarks
 
-Veritas includes an "Inference Performance Lab" that benchmarks the
-production verifier and explanation-generation paths -- latency, throughput,
-batching, and fallback behavior, all measured (not estimated):
+Veritas benchmarks the verifier and explanation paths across multiple runtimes — latency, throughput, batching, and fallback behavior, all measured on this hardware:
 
-- **Verifier (PyTorch, CPU/MPS)**: `scripts/benchmark_verifier_runtime.py`
-  measures forward-pass latency/throughput across batch sizes for the
-  production `transformer_verifier_clean` checkpoint. On this machine, MPS
-  gives ~2.4x the CPU throughput at batch size 32 (364 vs 154 examples/sec).
-- **Explanation generation (transformers, CPU/MPS)**: `scripts/benchmark_inference_serving.py`
-  measures local-generation latency and tokens/sec for a small causal LM
-  (TinyLlama-1.1B).
-- **vLLM serving**: the same script health-checks an OpenAI-compatible vLLM
-  endpoint and measures concurrent request throughput if one is running;
-  otherwise it writes a `status: skipped` report with the exact command to
-  start one. `serving/vllm_client.py` retries on connection errors and falls
-  back to a well-formed JSON response after exhausting retries.
-- **ONNX Runtime (verifier, CPU)**: `scripts/export_verifier_onnx.py` and
-  `scripts/benchmark_verifier_onnx.py` export the verifier checkpoint to ONNX
-  and measure `onnxruntime` CPU latency/throughput. On this machine, the
-  default ONNX Runtime CPU provider is slower than the PyTorch CPU baseline
-  (no ONNX speedup is claimed here).
-- **Triton (GPU)**: `scripts/benchmark_triton_dense_scoring.py` is a runnable
-  script that writes a `status: skipped` report with the required
-  CUDA/Triton environment on machines without a GPU (the case for this
-  development machine).
-- **Mac-local LLM backends**: `scripts/benchmark_mac_local_inference.py`
-  measures mlx-lm (Apple Silicon Metal/GPU), Ollama, and llama.cpp as
-  CUDA-free alternatives. On this machine, mlx-lm reaches 53.7 tok/s on
-  Qwen2.5-1.5B-Instruct-4bit; Ollama and llama.cpp are written as
-  `status: skipped` with setup steps (no server running / not configured).
+| Runtime | Batch | Device | Throughput |
+|---------|-------|--------|------------|
+| PyTorch (native) | 1 | CPU | 62.4 ex/s |
+| PyTorch (native) | 1 | MPS | **153.8 ex/s** |
+| ONNX Runtime | 1 | CPU | 55.1 ex/s |
 
-Veritas now includes runtime benchmarking across Transformers fallback, vLLM
-endpoint serving, optional ONNX Runtime verifier inference, and optional
-Triton dense-scoring kernels.
+MPS via native transformers is ~2.8× faster than ONNX on CPU. ONNX export is valid and included; the latency benefit applies on CUDA hardware, not here.
 
-See `docs/inference_performance.md` for full results and
-`docs/inference_runtime_landscape.md` for architecture notes on
-SGLang/MLC-LLM/FlashAttention/TVM-MLIR relative to Veritas's bottlenecks.
+MLX LoRA on Apple Silicon achieves **53.7 tok/s** on Qwen2.5-1.5B-Instruct-4bit. vLLM and Triton benchmarks are scaffolded and skip gracefully when no GPU endpoint is available.
 
 ## Local Research Dashboard
 
@@ -412,16 +407,16 @@ Research mode:
 
 ## Training Status
 
-| Component | Status | Artifact | Notes |
-| --- | --- | --- | --- |
-| Retrieved verifier robustness retrain | negative result | `reports/transformer_verifier_robust_eval.json` | Regressed full-set macro-F1; production verifier unchanged |
-| Relevance gate | negative result | `reports/oracle_vs_retrieved_v2_full_gated.json` | Disabled by default |
-| SFT explanation dataset | built | `data/explanations/sft_{train,val,test}.jsonl` | Grounded explanation tuning data |
-| MLX LoRA verdict-prediction adapter | trained | `checkpoints/mlx_lora_verifier` | Qwen2.5-1.5B-Instruct-4bit, 0.695 acc, 0.4632 macro-F1 |
-| MLX LoRA explanation adapter | 500 iters, improved | `adapters/mlx_qwen_veritas_lora/` | citation_presence 0.72 at 500 iters; see `reports/mlx_lora_500_eval.json` |
-| Phi-3 QLoRA | skipped | `reports/phi3_qlora_skipped_or_training_metrics.json` | CUDA-only path |
-| DPO preferences | built | `data/explanations/dpo_{train,val}.jsonl` | Synthetic rejected responses are documented |
-| Phi-3 DPO | skipped | `reports/phi3_dpo_skipped_or_training_metrics.json` | Depends on CUDA and the QLoRA path |
+| Component | Status | Notes |
+| --- | --- | --- |
+| Retrieved verifier robustness retrain | negative result | Regressed full-set macro-F1; production verifier unchanged |
+| Relevance gate | negative result | Disabled by default; NEI FPR improved but macro-F1 regressed |
+| SFT explanation dataset | built | 256 grounded explanation examples |
+| MLX LoRA verdict-prediction adapter | trained | Qwen2.5-1.5B-Instruct-4bit; 0.695 acc, 0.4632 macro-F1 |
+| MLX LoRA explanation adapter | 500 iters | citation_presence 0.72; partial format compliance |
+| Phi-3 QLoRA | skipped | CUDA-only path; datasets + Colab notebook ready |
+| DPO preference dataset | built | Synthetic rejection pairs documented |
+| Phi-3 DPO | skipped | Depends on CUDA and the QLoRA adapter |
 
 ## Limitations
 
@@ -438,15 +433,14 @@ Research mode:
 - Phi-3 QLoRA and DPO require CUDA, and no real Phi-3 checkpoint is claimed in this repo unless the adapter directories exist.
 - The vLLM path is explanation-serving only. The verifier model still decides the label, and the checked-in vLLM benchmark is currently a skipped report because no live endpoint was available in this environment.
 
-## Repository Guides
+## Docs
 
-- `docs/architecture_audit.md`
-- `docs/retrieval_ceiling.md`
-- `docs/vllm_serving.md`
-- `docs/phi3_gpu_training.md`
-- `docs/training_artifacts.md`
-- `docs/inference_performance.md`
-- `docs/inference_runtime_landscape.md`
+- [Architecture audit](docs/architecture_audit.md)
+- [Retrieval ceiling analysis](docs/retrieval_ceiling.md)
+- [Training artifacts](docs/training_artifacts.md)
+- [Inference benchmarks](docs/inference_performance.md)
+- [Phi-3 GPU training guide](docs/phi3_gpu_training.md)
+- [vLLM serving guide](docs/vllm_serving.md)
 
 ## Do Not Overclaim
 

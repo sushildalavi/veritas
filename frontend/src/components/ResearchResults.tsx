@@ -4,17 +4,12 @@ export default function ResearchResults() {
       <div className="section">
         <h2>Research Results</h2>
         <p>
-          All numbers measured on this hardware. Source files in <code className="code">reports/</code>.
-          No results are fabricated.
+          All numbers measured locally. No results are fabricated or estimated.
         </p>
       </div>
 
       <div className="section">
         <h3>Verifier — Oracle vs Retrieved (650-example test set)</h3>
-        <p style={{ marginBottom: "8px", fontSize: "12px" }}>
-          Source: <code className="code">reports/oracle_vs_retrieved_v2_full.json</code> ·
-          Checkpoint: <code className="code">checkpoints/transformer_verifier_clean</code>
-        </p>
         <div className="table-wrap">
           <table>
             <thead>
@@ -35,9 +30,6 @@ export default function ResearchResults() {
 
       <div className="section">
         <h3>Retrieval Profile Comparison (650 examples)</h3>
-        <p style={{ marginBottom: "8px", fontSize: "12px" }}>
-          Source: <code className="code">reports/retrieval_profile_comparison_650.json</code>
-        </p>
         <div className="table-wrap">
           <table>
             <thead>
@@ -64,9 +56,6 @@ export default function ResearchResults() {
 
       <div className="section">
         <h3>Error Analysis (650 examples)</h3>
-        <p style={{ marginBottom: "8px", fontSize: "12px" }}>
-          Source: <code className="code">reports/error_analysis_650.json</code>
-        </p>
         <div className="table-wrap">
           <table>
             <thead>
@@ -87,10 +76,6 @@ export default function ResearchResults() {
 
       <div className="section">
         <h3>Inference Benchmark</h3>
-        <p style={{ marginBottom: "8px", fontSize: "12px" }}>
-          Source: <code className="code">reports/verifier_inference_benchmark.json</code>,
-          <code className="code">reports/onnx_verifier_benchmark.json</code>
-        </p>
         <div className="table-wrap">
           <table>
             <thead>
