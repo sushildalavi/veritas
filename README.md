@@ -11,13 +11,55 @@ license: apache-2.0
 
 # Veritas
 
-**Evidence-Grounded Fact Verification & Training Platform**
+**Evidence-Grounded Fact Verification Platform**
 
-A failure-aware fact-verification system with BM25 retrieval, DistilRoBERTa NLI verification, oracle-vs-retrieved evaluation, training artifacts, inference benchmarks, and a local research dashboard.
+A failure-aware fact-verification system with BM25 retrieval, DistilRoBERTa NLI verification, oracle-vs-retrieved ablations, training artifacts, inference benchmarks, FastAPI REST APIs, and a React research dashboard.
+
+> **Research prototype.** Not a production-deployed fact checker. Veritas is failure-aware: it reports both successful and negative results, including retrieval bottlenecks and verifier robustness regressions.
 
 ---
 
-> **Research prototype.** Not a production-deployed fact checker. Retrieved macro-F1 is 0.3887; retrieval is the primary bottleneck. See [Limitations](#limitations).
+## Key Metrics
+
+| Metric | Value |
+|--------|-------|
+| Oracle macro-F1 (per_passage_max) | **0.6728** |
+| Retrieved macro-F1 (per_passage_max) | **0.3887** |
+| Oracle → Retrieved gap | **0.2841** |
+| Retrieval recall@10 (BM25) | **0.5334** |
+| MLX LoRA citation presence (500 iters) | **0.72** |
+
+*Full 650-example test set (FEVER + SciFact). All numbers are measured — no fabrication.*
+
+---
+
+## Quick Start
+
+```bash
+# Terminal 1 — backend (http://localhost:8000)
+make api
+
+# Terminal 2 — frontend (http://localhost:5173)
+make frontend
+```
+
+---
+
+## Research Reports
+
+| Report | Path |
+|--------|------|
+| Final results (all metrics) | [`docs/final_results.md`](docs/final_results.md) |
+| Metrics summary | [`reports/final_veritas_metrics_summary.md`](reports/final_veritas_metrics_summary.md) |
+| Training artifacts | [`docs/training_artifacts.md`](docs/training_artifacts.md) |
+| Inference benchmarks | [`docs/inference_performance.md`](docs/inference_performance.md) |
+| Retrieval ceiling analysis | [`docs/retrieval_ceiling.md`](docs/retrieval_ceiling.md) |
+
+---
+
+## Resume-Safe Summary
+
+> Built Veritas, a failure-aware evidence-grounded fact-verification system with BM25 retrieval, DistilRoBERTa NLI verification, oracle-vs-retrieved ablations, ONNX/MLX inference benchmarking, SFT/DPO training-data generation, FastAPI REST APIs, and a React TypeScript research dashboard; measured a 0.6728 oracle macro-F1 vs. 0.3887 retrieved macro-F1 gap and documented retrieval/noisy-evidence bottlenecks through full-set error analysis; improved MLX LoRA citation compliance from 0.10 to 0.72.
 
 ---
 
@@ -81,7 +123,7 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Phi-3 QLoRA + DPO | blocked (CUDA unavailable); datasets and Colab notebook ready; no adapters fabricated |
 | DeBERTa challenger (xsmall) | 0.636 accuracy, 0.537 macro-F1, 0.036 refuted recall (macro-F1 below 0.55 threshold; REFUTED recall still low) |
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
-| Tests | 137 passed, 1 skipped |
+| Tests | 151 passed, 1 skipped |
 
 The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance. Each successive enlargement of the evaluation set (20 -> 100 -> 200 -> 650 examples) made the absolute numbers less flattering -- the full 650-example test set is the most representative result and should be treated as the project's primary headline number.
 
@@ -434,8 +476,8 @@ macro-F1 gap and documented retrieval/noisy-evidence bottlenecks through full-se
 - MLX LoRA verdict-prediction adapter: 0.695 accuracy, 0.4632 macro-F1 (200-example eval, 53.7 tok/s Apple Silicon)
 - Fixed a base-model key mismatch bug in MLX LoRA explanation script; retrained at 500 iters; citation_presence improved 0.10→0.72
 - Generated SFT + DPO preference datasets for Phi-3 fine-tuning; Colab notebook included
-- FastAPI backend (8 endpoints) + React Vite TypeScript research dashboard
-- 137 passing tests
+- FastAPI backend (8 endpoints) + React Vite TypeScript research dashboard (5 tabs, dark-theme design system)
+- 151 passing tests
 
 **What must not be claimed:**
 - ONNX is faster than transformers on this Mac (it is not)
