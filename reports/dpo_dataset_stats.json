@@ -1,0 +1,27 @@
+{
+  "label_distribution": {
+    "NOT_ENOUGH_INFO": 1024,
+    "REFUTED": 780,
+    "SUPPORTED": 1653
+  },
+  "output_train": "data/explanations/dpo_train.jsonl",
+  "output_val": "data/explanations/dpo_val.jsonl",
+  "prompt_source": "data/explanations/sft_{train,val}.jsonl",
+  "rejection_type_distribution": {
+    "hallucinated_fact": 494,
+    "insufficient_claim": 493,
+    "missing_citation": 494,
+    "overclaiming": 493,
+    "vague_answer": 494,
+    "wrong_citation": 494,
+    "wrong_label": 495
+  },
+  "source_distribution": {
+    "fever": 2500,
+    "scifact": 957
+  },
+  "synthetic_rejection": true,
+  "total_examples": 3457,
+  "train_examples": 2808,
+  "val_examples": 649
+}
