@@ -26,12 +26,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--report-json", default="reports/phi3_qlora_skipped_or_training_metrics.json")
     parser.add_argument("--report-md", default="reports/phi3_qlora_skipped_or_training_metrics.md")
     parser.add_argument("--before-after-md", default="reports/phi3_qlora_before_after_examples.md")
+    parser.add_argument("--dry-run", action="store_true", help="Validate inputs and write a non-training readiness report.")
     return parser
 
 
 def main() -> None:  # pragma: no cover - CLI entrypoint
     args = build_parser().parse_args()
     cfg = _load_config(Path(args.config))
+    if args.dry_run:
+        payload = _dry_run_payload(cfg)
+        _write_reports(payload, Path(args.report_json), Path(args.report_md), Path(args.before_after_md))
+        return
     if not _cuda_training_ready():
         payload = _skipped_payload(cfg, reason=_skip_reason())
         _write_reports(payload, Path(args.report_json), Path(args.report_md), Path(args.before_after_md))
@@ -162,6 +167,25 @@ def _run_training(cfg: dict[str, Any]) -> dict[str, Any]:  # pragma: no cover - 
     }
 
 
+def _dry_run_payload(cfg: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "status": "dry_run",
+        "reason": "",
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "git_commit": _git_commit(),
+        "base_model": cfg["base_model"],
+        "train_file": cfg["train_file"],
+        "eval_file": cfg["eval_file"],
+        "adapter_path": cfg["output_dir"],
+        "config": cfg,
+        "train_metrics": {},
+        "before_after_examples": [],
+        "preflight_checks": _preflight_checks(cfg, require_adapter=False),
+        "colab_commands": _colab_commands("train_phi3_qlora.py", "configs/phi3_qlora.yaml"),
+        "kaggle_commands": _colab_commands("train_phi3_qlora.py", "configs/phi3_qlora.yaml"),
+    }
+
+
 def _sample_generations(cfg: dict[str, Any], *, max_examples: int = 5) -> list[dict[str, Any]]:
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
@@ -220,15 +244,29 @@ def _skipped_payload(cfg: dict[str, Any], *, reason: str) -> dict[str, Any]:
         "config": cfg,
         "train_metrics": {},
         "before_after_examples": [],
-        "colab_commands": [
-            "pip install transformers datasets peft trl accelerate bitsandbytes",
-            "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml",
-        ],
-        "kaggle_commands": [
-            "pip install transformers datasets peft trl accelerate bitsandbytes",
-            "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml",
-        ],
+        "preflight_checks": _preflight_checks(cfg, require_adapter=False),
+        "colab_commands": _colab_commands("train_phi3_qlora.py", "configs/phi3_qlora.yaml"),
+        "kaggle_commands": _colab_commands("train_phi3_qlora.py", "configs/phi3_qlora.yaml"),
     }
+
+
+def _preflight_checks(cfg: dict[str, Any], *, require_adapter: bool) -> list[dict[str, Any]]:
+    checks = [
+        {"name": "train_file_exists", "path": cfg["train_file"], "exists": Path(cfg["train_file"]).exists()},
+        {"name": "eval_file_exists", "path": cfg["eval_file"], "exists": Path(cfg["eval_file"]).exists()},
+        {"name": "output_parent_exists", "path": str(Path(cfg["output_dir"]).parent), "exists": Path(cfg["output_dir"]).parent.exists()},
+        {"name": "base_model", "path": cfg["base_model"], "exists": True},
+    ]
+    if require_adapter:
+        checks.append({"name": "adapter_exists", "path": cfg["output_dir"], "exists": Path(cfg["output_dir"]).exists()})
+    return checks
+
+
+def _colab_commands(script_name: str, config_name: str) -> list[str]:
+    return [
+        "pip install transformers datasets peft trl accelerate bitsandbytes",
+        f"python3 scripts/{script_name} --config {config_name}",
+    ]
 
 
 def _write_reports(payload: dict[str, Any], report_json: Path, report_md: Path, before_after_md: Path) -> None:
@@ -251,6 +289,16 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         f"- adapter_path: {payload['adapter_path']}",
         "",
     ]
+    if payload.get("preflight_checks"):
+        lines += [
+            "## Preflight Checks",
+            "",
+            "| Check | Path | Exists |",
+            "| --- | --- | ---: |",
+        ]
+        for check in payload["preflight_checks"]:
+            lines.append(f"| {check['name']} | {check['path']} | {str(check['exists']).lower()} |")
+        lines.append("")
     if payload["status"] == "trained":
         lines += [
             "## Training Metrics",
@@ -258,6 +306,21 @@ def _to_markdown(payload: dict[str, Any]) -> str:
             "```json",
             json.dumps(payload["train_metrics"], indent=2, sort_keys=True),
             "```",
+            "",
+        ]
+    elif payload["status"] == "dry_run":
+        lines += [
+            "## Colab / Kaggle Commands",
+            "",
+            "```bash",
+            "\n".join(payload["colab_commands"]),
+            "```",
+            "",
+            "## Run Notes",
+            "",
+            "- This is a readiness check only.",
+            "- No training was executed.",
+            "- The report confirms local file paths and command syntax.",
             "",
         ]
     else:

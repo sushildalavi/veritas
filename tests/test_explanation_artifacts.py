@@ -119,3 +119,44 @@ def test_phi3_scripts_emit_skipped_reports_on_no_cuda(tmp_path: Path, monkeypatc
     assert "CUDA is unavailable" in payload["reason"]
     assert report_md.exists()
     assert before_after_md.exists()
+
+
+@pytest.mark.parametrize(
+    "module_path, report_prefix",
+    [
+        ("scripts.train_phi3_qlora", "qlora"),
+        ("scripts.train_phi3_dpo", "dpo"),
+    ],
+)
+def test_phi3_scripts_support_dry_run(tmp_path: Path, monkeypatch, module_path: str, report_prefix: str) -> None:
+    module = __import__(module_path, fromlist=["main"])
+    config_path = tmp_path / f"{report_prefix}.yaml"
+    config_path.write_text("base_model: fake-model\n", encoding="utf-8")
+    report_json = tmp_path / f"{report_prefix}.json"
+    report_md = tmp_path / f"{report_prefix}.md"
+    before_after_md = tmp_path / f"{report_prefix}_before_after.md"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            module.__file__,
+            "--dry-run",
+            "--config",
+            str(config_path),
+            "--report-json",
+            str(report_json),
+            "--report-md",
+            str(report_md),
+            "--before-after-md",
+            str(before_after_md),
+        ],
+    )
+
+    module.main()
+
+    payload = json.loads(report_json.read_text(encoding="utf-8"))
+    assert payload["status"] == "dry_run"
+    assert "preflight_checks" in payload
+    assert report_md.exists()
+    assert before_after_md.exists()
