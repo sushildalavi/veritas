@@ -4,7 +4,7 @@ api:
 demo:
   top_k: 5
 verifier_backend: auto
-verifier_checkpoint: checkpoints/transformer_verifier_clean
+verifier_checkpoint: checkpoints/deberta_verifier_clean
 sklearn_checkpoint: checkpoints/verifier_clean
 transformer_checkpoint: checkpoints/transformer_verifier
 transformer_clean_checkpoint: checkpoints/transformer_verifier_clean
@@ -21,6 +21,7 @@ strict_json_output: true
 max_candidates_for_reranking: 3
 num_explanation_candidates: 3
 max_claim_length: 1000
+evidence_corpus_path: data/demo_corpus.jsonl
 retrieval:
   backend: bm25_only
   use_neural_retrieval: false

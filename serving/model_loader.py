@@ -125,6 +125,7 @@ def load_pipeline(
 
 
 _VERIFIER_EVAL_REPORTS = {
+    "checkpoints/deberta_verifier_clean": "reports/deberta_verifier_clean_eval.json",
     "checkpoints/transformer_verifier_clean": "reports/transformer_verifier_clean_eval.json",
     "checkpoints/verifier_clean": "reports/verifier_clean_baseline.json",
 }

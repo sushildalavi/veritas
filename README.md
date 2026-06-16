@@ -67,7 +67,7 @@ Open [http://localhost:5173](http://localhost:5173) and enter a claim to verify.
 |-------|-----------|
 | Frontend | React, TypeScript, Vite |
 | Backend | Python, FastAPI |
-| Verification | DistilRoBERTa NLI checkpoint with a DeBERTa challenger path available |
+| Verification | DeBERTa challenger checkpoint by default, with the DistilRoBERTa baseline preserved in reports |
 | Evidence retrieval | BM25 full-text search by default, with optional neural/hybrid modes in config |
 | Explanation | Template fallback or MLX LoRA adapter, depending on backend availability |
 | Infrastructure | Local-first with artifact checks, caching, and explicit runtime metadata |

@@ -3,10 +3,10 @@ import { checkClaim } from "../api";
 import type { HealthResponse, MetadataResponse, PipelineResponse } from "../types";
 
 const EXAMPLES = [
-  "The Apollo 11 mission landed humans on the Moon in 1969.",
-  "The Great Wall of China is visible from space with the naked eye.",
-  "Albert Einstein failed mathematics in school.",
-  "Bananas are technically berries.",
+  "The Pacific Ocean is the largest ocean.",
+  "The Pacific Ocean is the largest ocean on Earth.",
+  "Water freezes at 0 degrees Celsius at sea level.",
+  "Paris is the capital city of France.",
 ];
 
 const EVIDENCE_DEPTHS = [3, 5, 8] as const;
@@ -93,6 +93,27 @@ export default function VerifyClaim({ service }: Props) {
   const remaining = maxClaimLength - claim.length;
   const overLimit = remaining < 0;
   const canSubmit = claim.trim().length > 0 && !loading && !overLimit && service.ready;
+  const topEvidenceScore = result?.evidence[0]?.score ?? null;
+  const groundingState =
+    topEvidenceScore === null
+      ? null
+      : topEvidenceScore >= 3
+        ? {
+            label: "Strong grounding",
+            tone: "grounding-strong",
+            note: "Top evidence closely matches the claim.",
+          }
+        : topEvidenceScore >= 1.5
+          ? {
+              label: "Moderate grounding",
+              tone: "grounding-moderate",
+              note: "The answer is usable, but still worth skimming.",
+            }
+          : {
+              label: "Weak grounding",
+              tone: "grounding-weak",
+              note: "The retrieved evidence is thin or off-target.",
+            };
 
   const serviceBadges = useMemo(() => {
     const badges = [
@@ -222,7 +243,7 @@ export default function VerifyClaim({ service }: Props) {
           <textarea
             id="claim-input"
             className="claim-input"
-            placeholder="Example: The Apollo 11 mission landed humans on the Moon in 1969."
+            placeholder="Example: The Pacific Ocean is the largest ocean."
             value={claim}
             rows={6}
             onChange={(event) => setClaim(event.target.value)}
@@ -331,8 +352,18 @@ export default function VerifyClaim({ service }: Props) {
                 <span className="result-pill">Citation check: {result.citation_valid ? "valid" : "needs review"}</span>
                 <span className="result-pill">Verifier: {result.backend_used}</span>
                 <span className="result-pill">Retrieval: {result.retrieval_backend}</span>
+                <span className="result-pill">
+                  Top evidence: {topEvidenceScore === null ? "n/a" : topEvidenceScore.toFixed(2)}
+                </span>
                 <span className="result-pill">Request {result.request_id.slice(0, 8)}</span>
               </div>
+
+              {groundingState && (
+                <div className={`grounding-callout ${groundingState.tone}`}>
+                  <div className="grounding-title">{groundingState.label}</div>
+                  <div className="grounding-note">{groundingState.note}</div>
+                </div>
+              )}
 
               <div className="explanation-block">
                 <div className="section-label">Explanation</div>
@@ -377,6 +408,12 @@ export default function VerifyClaim({ service }: Props) {
                     </div>
                     {item.title && <div className="evidence-title">{item.title}</div>}
                     <p className="evidence-text">{item.text}</p>
+                    {typeof item.score === "number" && (
+                      <div className="evidence-score">
+                        <span>Match score</span>
+                        <strong>{item.score.toFixed(2)}</strong>
+                      </div>
+                    )}
                   </article>
                 ))}
               </div>

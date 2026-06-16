@@ -23,8 +23,8 @@ flowchart LR
 
 The verifier is the source of truth for the final label.
 
-- Default checkpoint: `checkpoints/transformer_verifier_clean/`
-- Challenger checkpoint: `checkpoints/deberta_verifier_clean/`
+- Default checkpoint: `checkpoints/deberta_verifier_clean/`
+- Baseline checkpoint: `checkpoints/transformer_verifier_clean/`
 - Lightweight fallback: `checkpoints/verifier_clean/`
 - Last-resort fallback: deterministic mock verifier
 
@@ -68,7 +68,7 @@ Veritas does not claim:
 Important runtime keys:
 
 - `retrieval_backend`: `bm25_only`, `sentence_transformer_hybrid`, or `bge_m3_hybrid`
-- `verifier_checkpoint`: `checkpoints/transformer_verifier_clean`
+- `verifier_checkpoint`: `checkpoints/deberta_verifier_clean`
 - `verifier_aggregation`: `per_passage_max` or `bundle`
 - `support_threshold`: verifier support threshold
 - `refute_threshold`: verifier refute threshold

@@ -29,7 +29,7 @@ Open `http://localhost:5173` in your browser. Confirm the backend status chip is
 
 - Enter:
   ```
-  The Apollo 11 mission landed humans on the Moon in 1969.
+  The Pacific Ocean is the largest ocean.
   ```
 - Leave the evidence depth at the default value.
 - Click **Verify claim** and wait for the result.

@@ -6,7 +6,7 @@ Run Veritas end to end locally: FastAPI backend plus the React claim-verificatio
 
 - Python 3.11+
 - Node.js 18+ and npm 9+
-- Verifier checkpoint at `checkpoints/transformer_verifier_clean`
+- Verifier checkpoint at `checkpoints/deberta_verifier_clean`
 
 ## Quick Start
 
@@ -88,6 +88,6 @@ cp .env.example .env
 
 Key variables:
 
-- `VERITAS_VERIFIER_CHECKPOINT` - path to the verifier checkpoint
+- `VERITAS_VERIFIER_CHECKPOINT` - path to the verifier checkpoint if you want to override the default
 - `VITE_API_BASE_URL` - backend URL for the frontend
 - `VERITAS_CORS_ORIGINS` - allowed browser origins if you use a custom frontend port
