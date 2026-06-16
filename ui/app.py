@@ -1,4 +1,4 @@
-"""Polished Gradio UI for the Veritas demo."""
+"""Polished Gradio UI for the Veritas workspace."""
 
 from __future__ import annotations
 
@@ -755,7 +755,7 @@ def build_demo() -> gr.Blocks:
                             gr.HTML(
                                 """
                                 <div class="veritas-card">
-                                  <h4>What this demo does not claim</h4>
+                                  <h4>What this workspace does not claim</h4>
                                   <ul>
                                     <li>SOTA benchmark performance.</li>
                                     <li>Perfect citation faithfulness.</li>
@@ -769,7 +769,7 @@ def build_demo() -> gr.Blocks:
             gr.Markdown(
                 """
                 <div class="veritas-footer">
-                  Built for research review and product-grade demo use. The measured gap between oracle evidence and retrieved evidence is intentionally surfaced instead of hidden.
+                  Built for research review and product-grade browser use. The measured gap between oracle evidence and retrieved evidence is intentionally surfaced instead of hidden.
                 </div>
                 """
             )

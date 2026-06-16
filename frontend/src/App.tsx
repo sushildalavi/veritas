@@ -1,104 +1,98 @@
 import { useEffect, useState } from "react";
-import { fetchMetadata } from "./api";
-import type { MetadataResponse, Tab } from "./types";
+import { getHealth, getMetadata } from "./api";
 import VerifyClaim from "./components/VerifyClaim";
-import EvidenceExplorer from "./components/EvidenceExplorer";
-import Explanation from "./components/Explanation";
-import FailureAnalysis from "./components/FailureAnalysis";
-import ResearchMetrics from "./components/ResearchMetrics";
-import TrainingArtifacts from "./components/TrainingArtifacts";
+import type { HealthResponse, MetadataResponse } from "./types";
 
-type NavItem = { id: Tab; label: string; group: "workspace" | "research"; icon: JSX.Element };
+type ServiceState = {
+  ready: boolean;
+  loading: boolean;
+  health: HealthResponse | null;
+  metadata: MetadataResponse | null;
+  error: string | null;
+};
 
-const NAV: NavItem[] = [
-  {
-    id: "verify", label: "Verify Claim", group: "workspace",
-    icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 1.5L2.5 4v4.5C2.5 11.5 5 13.5 8 14.5c3-1 5.5-3 5.5-6V4L8 1.5z"/><path d="M5.5 8.5l1.8 1.8 3-3.6"/></svg>,
-  },
-  {
-    id: "evidence", label: "Evidence", group: "workspace",
-    icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M14.5 14.5l-3.2-3.2"/></svg>,
-  },
-  {
-    id: "explanation", label: "Explanation", group: "workspace",
-    icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 10.5a2 2 0 01-2 2H5l-3 3V3a2 2 0 012-2h8a2 2 0 012 2v7.5z"/></svg>,
-  },
-  {
-    id: "failure", label: "Failure Analysis", group: "research",
-    icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 1.5L1.5 13.5h13L8 1.5z"/><path d="M8 6v4M8 11.5v.5"/></svg>,
-  },
-  {
-    id: "metrics", label: "Research Metrics", group: "research",
-    icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M2.5 13.5V9m3.5 4.5V5.5m3.5 8V3m3.5 10.5V7"/></svg>,
-  },
-  {
-    id: "training", label: "Training", group: "research",
-    icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 1.5L1.5 5v6L8 14.5l6.5-3.5V5L8 1.5z"/><path d="M8 1.5v13M1.5 5l6.5 3.5L14.5 5"/></svg>,
-  },
-];
+const INITIAL_STATE: ServiceState = {
+  ready: false,
+  loading: true,
+  health: null,
+  metadata: null,
+  error: null,
+};
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>("verify");
-  const [metadata, setMetadata] = useState<MetadataResponse | null>(null);
-  const [apiStatus, setApiStatus] = useState<"loading" | "ok" | "err">("loading");
+  const [service, setService] = useState<ServiceState>(INITIAL_STATE);
 
   useEffect(() => {
-    fetchMetadata()
-      .then((m) => { setMetadata(m); setApiStatus("ok"); })
-      .catch(() => setApiStatus("err"));
+    let cancelled = false;
+
+    async function load() {
+      const [healthResult, metadataResult] = await Promise.allSettled([
+        getHealth(),
+        getMetadata(),
+      ]);
+
+      if (cancelled) return;
+
+      const health = healthResult.status === "fulfilled" ? healthResult.value : null;
+      const metadata = metadataResult.status === "fulfilled" ? metadataResult.value : null;
+
+      setService({
+        ready: Boolean(health),
+        loading: false,
+        health,
+        metadata,
+        error:
+          healthResult.status === "rejected"
+            ? healthResult.reason instanceof Error
+              ? healthResult.reason.message
+              : String(healthResult.reason)
+            : metadataResult.status === "rejected"
+              ? metadataResult.reason instanceof Error
+                ? metadataResult.reason.message
+                : String(metadataResult.reason)
+              : null,
+      });
+    }
+
+    load().catch((error: unknown) => {
+      if (cancelled) return;
+      setService({
+        ready: false,
+        loading: false,
+        health: null,
+        metadata: null,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const workspace = NAV.filter((n) => n.group === "workspace");
-  const research  = NAV.filter((n) => n.group === "research");
-
   return (
-    <div className="layout">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-mark">
+    <div className="app-shell">
+      <header className="topbar">
+        <div className="brand">
+          <div className="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 8l3.5 3.5L13 4"/>
+              <path d="M3 8.5l3.5 3.5L13 4" />
             </svg>
           </div>
-          <span className="brand-name">Veritas</span>
-        </div>
-
-        <nav className="sidebar-nav">
-          <div className="nav-group-label">Workspace</div>
-          {workspace.map((item) => (
-            <button key={item.id} className={`nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
-              {item.icon}{item.label}
-            </button>
-          ))}
-
-          <div className="nav-group-label">Research</div>
-          {research.map((item) => (
-            <button key={item.id} className={`nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
-              {item.icon}{item.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="api-status">
-            <div className={`status-dot ${apiStatus === "ok" ? "green" : apiStatus === "err" ? "red" : "pulse"}`} />
-            <span>
-              {apiStatus === "loading" ? "Connecting…" : apiStatus === "ok" ? "API online" : "API offline — demo mode"}
-            </span>
+          <div>
+            <div className="brand-name">Veritas</div>
+            <div className="brand-subtitle">Evidence-backed claim verification</div>
           </div>
         </div>
-      </aside>
+        <div className={`status-chip ${service.ready ? "status-ready" : service.loading ? "status-loading" : "status-offline"}`}>
+          <span className="status-dot" />
+          {service.loading ? "Checking backend" : service.ready ? "Backend ready" : "Backend offline"}
+        </div>
+      </header>
 
-      <div className="content-area">
-        <main key={tab} className="page">
-          {tab === "verify"      && <VerifyClaim apiStatus={apiStatus} />}
-          {tab === "evidence"    && <EvidenceExplorer />}
-          {tab === "explanation" && <Explanation />}
-          {tab === "failure"     && <FailureAnalysis />}
-          {tab === "metrics"     && <ResearchMetrics />}
-          {tab === "training"    && <TrainingArtifacts />}
-        </main>
-      </div>
+      <main className="page">
+        <VerifyClaim service={service} />
+      </main>
     </div>
   );
 }

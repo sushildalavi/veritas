@@ -1,68 +1,36 @@
-import type {
-  EvidenceItem,
-  ExplainResponse,
-  MetadataResponse,
-  PipelineResponse,
-  RetrieveResponse,
-  VerifyResponse,
-} from "./types";
+import type { HealthResponse, MetadataResponse, PipelineResponse } from "./types";
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
-async function post<T>(path: string, body: unknown): Promise<T> {
+async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    ...init,
   });
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(
       typeof err.detail === "string"
         ? err.detail
-        : JSON.stringify(err.detail) ?? "Request failed"
+        : JSON.stringify(err.detail) || "Request failed"
     );
   }
-  return res.json();
+
+  return res.json() as Promise<T>;
 }
 
-async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(
-      typeof err.detail === "string"
-        ? err.detail
-        : JSON.stringify(err.detail) ?? "Request failed"
-    );
-  }
-  return res.json();
+export function getHealth(): Promise<HealthResponse> {
+  return requestJson("/health");
 }
 
-export function runPipeline(claim: string, topK = 5): Promise<PipelineResponse> {
-  return post("/pipeline", { claim, top_k: topK });
+export function getMetadata(): Promise<MetadataResponse> {
+  return requestJson("/metadata");
 }
 
-export function runVerify(claim: string, topK = 5): Promise<VerifyResponse> {
-  return post("/verify", { claim, top_k: topK });
-}
-
-export function runRetrieve(claim: string, topK = 5): Promise<RetrieveResponse> {
-  return post("/retrieve", { claim, top_k: topK });
-}
-
-export function runExplain(
-  claim: string,
-  label: string,
-  evidence: EvidenceItem[]
-): Promise<ExplainResponse> {
-  return post("/explain", { claim, label, evidence });
-}
-
-export function fetchMetadata(): Promise<MetadataResponse> {
-  return get("/metadata");
-}
-
-export function fetchHealth(): Promise<{ status: string }> {
-  return get("/health");
+export function checkClaim(claim: string, topK = 5): Promise<PipelineResponse> {
+  return requestJson("/pipeline", {
+    method: "POST",
+    body: JSON.stringify({ claim, top_k: topK }),
+  });
 }

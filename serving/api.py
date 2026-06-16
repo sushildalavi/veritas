@@ -1,4 +1,4 @@
-"""FastAPI application for the Veritas demo."""
+"""FastAPI application for the Veritas workspace."""
 
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ _ALLOWED_REPORTS: dict[str, Path] = {
 app = FastAPI(
     title="Veritas",
     version="1.0.0",
-    description="Evidence-Grounded Fact Verification & Training Platform",
+    description="AI-powered fact verification — submit a claim, get an evidence-backed verdict.",
 )
 
 app.add_middleware(

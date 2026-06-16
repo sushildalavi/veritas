@@ -1,4 +1,4 @@
-"""Hugging Face Spaces entrypoint for the Veritas demo."""
+"""Hugging Face Spaces entrypoint for the Veritas workspace."""
 
 from __future__ import annotations
 

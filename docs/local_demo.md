@@ -1,55 +1,45 @@
 # Local Demo Guide
 
-Run Veritas end-to-end locally: FastAPI backend + React research dashboard.
+Run Veritas end to end locally: FastAPI backend plus the React claim-verification workspace.
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.11+
 - Node.js 18+ and npm 9+
 - Verifier checkpoint at `checkpoints/transformer_verifier_clean`
-  (train with `python3 scripts/train_transformer_verifier_clean.py` if missing)
 
 ## Quick Start
 
-### Terminal 1 — Backend
+### Terminal 1 - Backend
 
 ```bash
 make api
 ```
 
 This starts the FastAPI server at `http://localhost:8000`.
-Equivalent to:
-```bash
-VERITAS_VERIFIER_CHECKPOINT=checkpoints/transformer_verifier_clean \
-  python3 -m uvicorn serving.api:app --reload --port 8000
-```
 
-### Terminal 2 — Frontend
+### Terminal 2 - Frontend
 
 ```bash
 make frontend
 ```
 
 This starts the Vite dev server at `http://localhost:5173`.
-Equivalent to:
-```bash
-cd frontend && npm install && npm run dev
-```
 
-Open `http://localhost:5173` in your browser.
+Open `http://localhost:5173` and submit a claim.
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/health` | Service health check |
-| GET | `/metadata` | Project metadata and measured metrics |
-| GET | `/metrics/summary` | Runtime metrics snapshot |
-| POST | `/verify` | Run NLI verifier on claim + evidence |
-| POST | `/retrieve` | BM25 evidence retrieval only |
-| POST | `/explain` | Generate explanation for a claim |
-| POST | `/pipeline` | Full pipeline with latency breakdown |
-| GET | `/reports/{name}` | Serve allowlisted research reports |
+| `GET` | `/health` | Service status and active backend metadata |
+| `GET` | `/metadata` | Project metadata and measured validation metrics |
+| `GET` | `/metrics/summary` | Runtime metrics snapshot |
+| `POST` | `/verify` | Run retrieval + verifier + explanation |
+| `POST` | `/retrieve` | BM25 evidence retrieval only |
+| `POST` | `/explain` | Generate a citation-grounded explanation |
+| `POST` | `/pipeline` | Full pipeline with latency breakdown |
+| `GET` | `/reports/{name}` | Allowlisted research reports |
 
 Interactive docs: `http://localhost:8000/docs`
 
@@ -73,13 +63,12 @@ curl -X POST http://localhost:8000/retrieve \
 curl http://localhost:8000/reports/final-results
 ```
 
-## Frontend Tabs
+## Browser Workflow
 
-1. **Overview** — measured metrics cards, architecture diagram, negative results
-2. **Verify Claim** — full pipeline with verdict, explanation, evidence, latency
-3. **Evidence Explorer** — retrieval-only with score ranking
-4. **Training Artifacts** — all artifact statuses, MLX LoRA results, what not to claim
-5. **Research Results** — full evaluation tables, error analysis, inference benchmarks
+1. Enter or paste a claim
+2. Select an evidence depth
+3. Verify the claim
+4. Review the verdict, confidence, explanation, evidence, and latency
 
 ## Production Build
 
@@ -87,7 +76,7 @@ curl http://localhost:8000/reports/final-results
 cd frontend && npm run build
 ```
 
-Output in `frontend/dist/`. Serve with any static file server.
+The output lands in `frontend/dist/`.
 
 ## Configuration
 
@@ -98,6 +87,7 @@ cp .env.example .env
 ```
 
 Key variables:
-- `VERITAS_VERIFIER_CHECKPOINT` — path to verifier checkpoint
-- `VITE_API_BASE_URL` — backend URL for frontend (default: `http://localhost:8000`)
-- `VERITAS_CORS_ORIGINS` — allowed CORS origins (default: localhost:5173, localhost:3000)
+
+- `VERITAS_VERIFIER_CHECKPOINT` - path to the verifier checkpoint
+- `VITE_API_BASE_URL` - backend URL for the frontend
+- `VERITAS_CORS_ORIGINS` - allowed browser origins if you use a custom frontend port
