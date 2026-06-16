@@ -2,23 +2,32 @@
 
 The verifier is no longer the only bottleneck in Veritas. The structured v2 evaluation makes the gap visible directly.
 
-## Sampled v2 measurements
+## Primary result — full 650-example test set (use this for headline reporting)
 
-Measured from `reports/oracle_vs_retrieved_v2.json` after threshold calibration on the BM25 serving profile with `20` sampled held-out records:
+Source: `reports/oracle_vs_retrieved_v2_full.json`, `reports/retrieval_profile_comparison_650.json`
+(bm25_only profile, per_passage_max aggregation)
 
-- Retrieval recall@1: `0.5167`
-- Retrieval recall@5: `0.6417`
-- Retrieval recall@10: `0.6667`
-- Retrieval nDCG@10: `0.6344`
-- Oracle verifier macro-F1 (per-passage): `0.7086`
-- Retrieved verifier macro-F1 (per-passage): `0.5000`
-- Retrieved verifier macro-F1 (bundled evidence): `0.4205`
+- Retrieval recall@1: 0.3559 / recall@5: 0.4979 / recall@10: **0.5334** / nDCG@10: 0.4816
+- Oracle verifier macro-F1 (per-passage): **0.6728**
+- Retrieved verifier macro-F1 (per-passage): **0.3887**
+- Oracle→retrieved gap: **0.2841**
+- NEI false-positive rate on retrieved: 0.7098
+
+## Early diagnostic slice (20 examples — do not use as headline)
+
+Source: `reports/oracle_vs_retrieved_v2.json`. An early 20-example slice; more favorable due to
+sample variance. Not representative of full-scale performance.
+
+- Retrieval recall@10: 0.6667 (vs 0.5334 full-scale)
+- Oracle verifier macro-F1 (per-passage): 0.7086 (vs 0.6728 full-scale)
+- Retrieved verifier macro-F1 (per-passage): 0.5000 (vs 0.3887 full-scale)
 
 ## Interpretation
 
 - Per-passage scoring helps, but it does not close the retrieval gap by itself.
 - Even with deeper candidate pools and calibrated thresholds, missing gold evidence still caps end-to-end quality.
-- Retrieval recall@10 around `0.67` means roughly one-third of relevant evidence remains outside the candidate set on this slice.
+- Retrieval recall@10 of 0.5334 at full scale means roughly half of relevant evidence is outside the top-10 candidate set.
+- The 20-example slice was more favorable due to sample variance; the 650-example result is the primary reference.
 
 ## Practical next steps
 

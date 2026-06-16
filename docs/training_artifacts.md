@@ -17,7 +17,8 @@ This repository now separates verdict classification from explanation training.
 | Retrieved verifier robustness retrain | negative result | `reports/transformer_verifier_robust_eval.json` | Regression documented; production verifier unchanged |
 | Relevance gate | negative result | `reports/oracle_vs_retrieved_v2_full_gated.json` | Disabled by default |
 | SFT explanation dataset | built | `data/explanations/sft_{train,val,test}.jsonl` | Grounded explanation tuning data |
-| MLX LoRA | trained | `adapters/mlx_qwen_veritas_lora/` | Mac-local adapter on Qwen2.5 |
+| MLX LoRA verdict-prediction adapter | trained | `checkpoints/mlx_lora_verifier` | Qwen2.5-1.5B-Instruct-4bit; 0.695 acc, 0.4632 macro-F1 on 200-example eval |
+| MLX LoRA explanation adapter | generation bug fixed | `adapters/mlx_qwen_veritas_lora/` | Was trained on wrong base model (Qwen/Qwen3-0.6b); retrained on Qwen2.5-1.5B-Instruct-4bit after script fix; see `reports/mlx_lora_generation_fix.md` |
 | Phi-3 QLoRA | skipped | `reports/phi3_qlora_skipped_or_training_metrics.json` | CUDA path only |
 | DPO preferences | built | `data/explanations/dpo_{train,val}.jsonl` | Synthetic rejection pairs documented |
 | Phi-3 DPO | skipped | `reports/phi3_dpo_skipped_or_training_metrics.json` | Depends on CUDA and the QLoRA path |
@@ -38,3 +39,6 @@ This repository now separates verdict classification from explanation training.
 - Do not call the MLX adapter Phi-3 QLoRA.
 - Do not describe preference reranking as DPO.
 - Do not claim a real Phi-3 checkpoint unless the adapter directory exists.
+- Do not claim the robust verifier improved anything — it regressed on both oracle and retrieved metrics.
+- Do not claim the relevance gate improved macro-F1 — it improved NEI FPR but regressed macro-F1.
+- Do not claim ONNX is faster than native transformers on this Mac — it is not (55 vs 62 ex/s at batch=1).

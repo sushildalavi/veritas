@@ -63,10 +63,15 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Hybrid retrieval | 0.535 recall@10 |
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
 | Template faithfulness | 0.560 citation validity, 0.755 verdict consistency |
-| MLX LoRA explanation adapter | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity |
+| MLX LoRA verdict-prediction adapter (Qwen2.5-1.5B, Apple Silicon) | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity (200-example eval, `checkpoints/mlx_lora_verifier`) |
+| MLX LoRA explanation adapter — generation bug fixed | Training script base-model key mismatch resolved; explanation adapter retrained on correct model; see `reports/mlx_lora_generation_fix.md` |
+| Robust verifier retrain | negative result: retrieved macro-F1 0.3887 → 0.2829 (oracle also regressed); production checkpoint unchanged |
+| Relevance gate | NEI false-positive rate 0.7098 → 0.2857 (improved); retrieved macro-F1 0.3887 → 0.3557 (regressed); gate disabled by default |
+| ONNX verifier export | Functional; CPU throughput 55 ex/s — slower than native transformers (62 ex/s CPU, 154 ex/s MPS); no ONNX speedup on this Mac |
+| Phi-3 QLoRA + DPO | blocked (CUDA unavailable); datasets and Colab notebook ready; no adapters fabricated |
 | DeBERTa challenger (xsmall) | 0.636 accuracy, 0.537 macro-F1, 0.036 refuted recall (macro-F1 below 0.55 threshold; REFUTED recall still low) |
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
-| Tests | 107 passed |
+| Tests | 136 passed |
 
 The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance. Each successive enlargement of the evaluation set (20 -> 100 -> 200 -> 650 examples) made the absolute numbers less flattering -- the full 650-example test set is the most representative result and should be treated as the project's primary headline number.
 
@@ -74,9 +79,28 @@ The most important signal is the oracle-vs-retrieved gap: retrieval quality stil
 
 ## Retrieval Profile Comparison
 
-Measured on a 50-example slice of `fever_test_large` + `scifact_test_large` (see
-`reports/retrieval_profile_comparison.md`). All profiles below ran end-to-end on CPU; none were
-skipped or faked.
+Two scales were measured. The 50-example slice is an early comparison across many profiles.
+The 650-example full-scale comparison (`reports/retrieval_profile_comparison_650.md`) is the
+primary result and should be used for any headline reporting.
+
+### Full 650-example comparison (primary)
+
+Source: `reports/retrieval_profile_comparison_650.json`
+
+| Profile | recall@10 | nDCG@10 | Retrieved per-passage macro-F1 |
+| --- | --- | --- | --- |
+| **bm25_only (default)** | **0.5334** | **0.4816** | **0.3887** |
+| hybrid_bm25_dense | 0.5113 | 0.4288 | 0.3864 |
+| hybrid_bm25_sentence_transformer | 0.5714 | 0.5234 | 0.3776 |
+
+`hybrid_bm25_sentence_transformer` has better retrieval recall but lower verifier macro-F1.
+Better retrieval ranking does not monotonically translate to better end-to-end verifier
+performance at full scale. `bm25_only` is the default profile.
+
+### 50-example slice (early comparison, more profiles)
+
+Source: `reports/retrieval_profile_comparison.md`. These numbers are from an earlier, smaller run
+and should not be used as headline results; the full-scale comparison above supersedes them.
 
 | Profile | recall@10 | nDCG@10 | Retrieved per-passage macro-F1 |
 | --- | --- | --- | --- |
@@ -87,17 +111,50 @@ skipped or faked.
 | hybrid_with_reranker (hashing + cross-encoder) | 0.621 | 0.6083 | 0.3976 |
 | hybrid_bm25_sentence_transformer (real MiniLM dense) | 0.6377 | 0.6106 | 0.4595 |
 
-Notes:
+Note: the 50-example slice showed more favorable absolute numbers due to sample variance,
+especially for bm25_only (recall@10 0.601 vs 0.5334 full-scale). The oracle-vs-retrieved gap
+is consistent across slice sizes (0.25–0.39).
 
-- `dense_only` with hashing embeddings is intentionally weak; it exists as a baseline, not a
-  recommended configuration.
-- The real MiniLM-based hybrid (`hybrid_bm25_sentence_transformer`) gives the best retrieval
-  metrics (recall@10, nDCG@10) of any profile measured here, but the hashing-based
-  `hybrid_bm25_dense` still has the best per-passage verifier macro-F1 at this 50-example sample
-  size. Better retrieval ranking metrics do not monotonically translate into better verifier
-  macro-F1 in this slice -- both numbers are reported rather than picking one as "the" winner.
-- The cross-encoder reranker profile (`hybrid_with_reranker`) improves recall@10 and nDCG@10 over
-  the unreranked hashing hybrid but does not improve per-passage macro-F1 on this slice.
+## Negative Results (documented honestly)
+
+A key feature of Veritas is rigorous documentation of what was tried and what did not improve
+the primary metric. Both experiments below are committed to the repo with full reports.
+
+### Robust verifier retrain
+
+Combined 2808 oracle training examples with 3663 retrieved-evidence pairs to create a 6471-row
+training set. Retrained from scratch on the same distilroberta-base model.
+
+Result: **regression on both metrics.**
+
+| checkpoint | evidence | macro_F1 |
+|---|---|---|
+| transformer_verifier_clean (baseline) | oracle | 0.6728 |
+| transformer_verifier_clean (baseline) | retrieved | 0.3887 |
+| transformer_verifier_robust (retrained) | oracle | 0.4376 (−0.2352) |
+| transformer_verifier_robust (retrained) | retrieved | 0.2829 (−0.1058) |
+
+Root cause: the retrieved-evidence training set was 76% NOT_ENOUGH_INFO. Without class
+reweighting, the model collapsed toward predicting NEI on everything. Production checkpoint
+unchanged. Details: `reports/verifier_robustness_training_result.md`.
+
+### Relevance gate
+
+Implemented a lexical token overlap gate that filters low-relevance passages to NEI before
+verifier scoring (config-driven, `relevance_gate_threshold` in `configs/serving.yaml`).
+
+Result: NEI false-positive rate improved substantially; macro_F1 regressed.
+
+| condition | retrieved macro_F1 | NEI FPR |
+|---|---|---|
+| no gate (baseline) | 0.3887 | 0.7098 |
+| gate=0.5 | 0.3557 (−0.0330) | 0.2857 (−0.4241) |
+
+Gate stays disabled by default. Threshold was calibrated on per-passage pair data, not
+claim-level aggregation; recalibrating at claim level may recover the loss.
+Details: `reports/oracle_vs_retrieved_v2_full_gated.md`.
+
+---
 
 ## Architecture
 
@@ -266,7 +323,8 @@ Research mode:
 | Retrieved verifier robustness retrain | negative result | `reports/transformer_verifier_robust_eval.json` | Regressed full-set macro-F1; production verifier unchanged |
 | Relevance gate | negative result | `reports/oracle_vs_retrieved_v2_full_gated.json` | Disabled by default |
 | SFT explanation dataset | built | `data/explanations/sft_{train,val,test}.jsonl` | Grounded explanation tuning data |
-| MLX LoRA | trained | `adapters/mlx_qwen_veritas_lora/` | Mac-local adapter on Qwen2.5 |
+| MLX LoRA verdict-prediction adapter | trained | `checkpoints/mlx_lora_verifier` | Qwen2.5-1.5B-Instruct-4bit, 0.695 acc, 0.4632 macro-F1 |
+| MLX LoRA explanation adapter | generation bug fixed | `adapters/mlx_qwen_veritas_lora/` | Retrained on correct base model; see `reports/mlx_lora_generation_fix.md` |
 | Phi-3 QLoRA | skipped | `reports/phi3_qlora_skipped_or_training_metrics.json` | CUDA-only path |
 | DPO preferences | built | `data/explanations/dpo_{train,val}.jsonl` | Synthetic rejected responses are documented |
 | Phi-3 DPO | skipped | `reports/phi3_dpo_skipped_or_training_metrics.json` | Depends on CUDA and the QLoRA path |
@@ -305,12 +363,29 @@ Research mode:
 - Do not describe the MLX adapter as QLoRA.
 - Do not hide the oracle-vs-retrieved gap.
 
-## Resume-Safe Summary
+## Resume-Safe Project Summary
 
-Veritas is a Mac-compatible research and production ML project for evidence-grounded fact verification, with hybrid retrieval, transformer verdict classification, MLX LoRA explanation generation, and preference-guided explanation reranking.
+**Long form:**
+Built Veritas, a failure-aware evidence-grounded fact-verification system with BM25 retrieval,
+DistilRoBERTa NLI verification, oracle-vs-retrieved ablations, ONNX/MLX inference benchmarking,
+and SFT/DPO training-data generation; measured a 0.6728 oracle macro-F1 vs. 0.3887 retrieved
+macro-F1 gap and documented retrieval/noisy-evidence bottlenecks through full-set error analysis.
 
-**Resume bullet (inference performance):** Built an inference benchmarking
-suite measuring PyTorch verifier latency/throughput across batch sizes and
-devices (CPU/MPS), local and vLLM-served LLM explanation generation with
-retry/fallback handling, and added ONNX Runtime and Triton GPU benchmark
-scaffolds that run and report cleanly on hardware without those dependencies.
+**Short form:** Veritas — Evidence-Grounded Fact Verification System
+
+**What can be claimed:**
+- End-to-end fact verification pipeline: BM25 retrieval → DistilRoBERTa NLI verifier → grounded explanation generation
+- Measured oracle macro-F1 0.6728 vs retrieved macro-F1 0.3887 (gap 0.2841) on full 650-example test set
+- Ablated 3 retrieval profiles at 650-example scale; characterized oracle-vs-retrieved bottleneck
+- Documented two negative results rigorously (verifier robustness retrain, relevance gate)
+- ONNX export functional; benchmarked at 55 ex/s CPU
+- MLX LoRA verdict-prediction adapter: 0.695 accuracy, 0.4632 macro-F1 (200-example eval, 53.7 tok/s Apple Silicon)
+- Fixed a base-model key mismatch bug in MLX LoRA explanation training script
+- Generated SFT + DPO preference datasets for Phi-3 fine-tuning; Colab notebook included
+- 136 passing tests
+
+**What must not be claimed:**
+- ONNX is faster than transformers on this Mac (it is not)
+- Robust verifier or relevance gate improved macro-F1 (both regressed on that metric)
+- Phi-3 QLoRA or DPO adapter trained (CUDA unavailable; no adapter exists)
+- MLX explanation adapter achieves production-quality structured output (training scale was small)
