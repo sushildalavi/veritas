@@ -5,7 +5,6 @@
   "colab_commands": [
     "pip install transformers datasets peft trl accelerate bitsandbytes",
     "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml",
-    "pip install transformers datasets peft trl accelerate bitsandbytes",
     "python3 scripts/train_phi3_dpo.py --config configs/phi3_dpo.yaml"
   ],
   "config": {
@@ -20,14 +19,13 @@
     "output_dir": "adapters/phi3_veritas_dpo",
     "per_device_train_batch_size": 1,
     "preference_file": "data/explanations/dpo_train.jsonl",
-    "timestamp_utc": "2026-06-16T01:40:25.933498+00:00"
+    "timestamp_utc": "2026-06-16T01:46:47.237920+00:00"
   },
   "eval_file": "data/explanations/dpo_val.jsonl",
-  "git_commit": "512c986b79b707b785901283dc6842f3a65f378f",
+  "git_commit": "3f9bd11514c3b04d132d95db2f7d8a98f05e136e",
   "kaggle_commands": [
     "pip install transformers datasets peft trl accelerate bitsandbytes",
     "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml",
-    "pip install transformers datasets peft trl accelerate bitsandbytes",
     "python3 scripts/train_phi3_dpo.py --config configs/phi3_dpo.yaml"
   ],
   "output_dir": "adapters/phi3_veritas_dpo",
@@ -59,8 +57,8 @@
       "path": "adapters/phi3_veritas_qlora"
     }
   ],
-  "reason": "CUDA is unavailable on this machine.",
-  "status": "skipped",
-  "timestamp_utc": "2026-06-16T01:40:26.736390+00:00",
+  "reason": "",
+  "status": "dry_run",
+  "timestamp_utc": "2026-06-16T01:46:47.237929+00:00",
   "train_metrics": {}
 }
