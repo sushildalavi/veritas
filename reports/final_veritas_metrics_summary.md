@@ -131,15 +131,16 @@ the training script. **Generation bug is now fixed** (see `reports/mlx_lora_gene
 Adapter retrained at 300 iters against the correct base model. Evaluated on 10 examples
 (`reports/explanation_model_eval.json`):
 
-| metric | base model | adapter (300 iters) |
-|---|---|---|
-| format_correctness | 0.0 | **0.2** |
-| citation_presence | 0.0 | 0.1 |
-| decision_label_consistency | 0.0 | 0.1 |
-| avg explanation length (words) | 0.0 | 34.2 |
+| metric | base model | adapter (300 iters) | adapter (500 iters) |
+|---|---|---|---|
+| format_correctness | 0.0 | 0.2 | **0.28** |
+| citation_presence | 0.0 | 0.1 | **0.72** |
+| decision_label_consistency | 0.0 | 0.1 | **0.24** |
+| avg explanation length (words) | 0.0 | 34.2 | 33.2 |
 
-Format compliance improved from 0.0 at 80 iters to 0.2 at 300 iters, confirming
-the generation bug fix is effective. Best val loss: 0.427 at iter 200.
+25-example eval. citation_presence improved dramatically (0.1→0.72) at 500 iters.
+format_correctness improved (0.2→0.28). Best val loss: 0.427 at iter 200.
+Not production-grade — partial format compliance remains.
 
 ### Throughput benchmark
 

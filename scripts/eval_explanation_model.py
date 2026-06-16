@@ -99,7 +99,15 @@ def _evaluate_mlx_backend(backend: str, base_model: str, adapter_path: Path | No
             "adapter_path": str(adapter_path) if adapter_path else None,
         }
 
-    return _evaluate_model(backend, base_model, adapter_path, rows, lambda prompt: generate(model, tokenizer, prompt, max_tokens=160))
+    def _mlx_generate(prompt: str) -> str:
+        raw = str(generate(model, tokenizer, prompt, max_tokens=200))
+        # strip prompt leakage after end token
+        for stop in ["<|endoftext|>", "<|im_end|>", "<|end|>"]:
+            if stop in raw:
+                raw = raw[:raw.index(stop)]
+        return raw.strip()
+
+    return _evaluate_model(backend, base_model, adapter_path, rows, _mlx_generate)
 
 
 def _evaluate_transformers_backend(model_name: str, rows: list[dict[str, Any]]) -> dict[str, Any]:

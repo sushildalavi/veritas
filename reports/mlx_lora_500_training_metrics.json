@@ -1,0 +1,38 @@
+{
+  "training_iters": 500,
+  "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "adapter_path": "adapters/mlx_qwen_veritas_lora",
+  "config_file": "configs/mlx_lora_explanations.yaml",
+  "training_examples": 256,
+  "batch_size": 1,
+  "learning_rate": 1e-5,
+  "num_lora_layers": 8,
+  "training_loss_curve": [
+    {"iter": 20, "train_loss": 1.939},
+    {"iter": 40, "train_loss": 0.830},
+    {"iter": 60, "train_loss": 0.711},
+    {"iter": 80, "train_loss": 0.562},
+    {"iter": 100, "train_loss": 0.636},
+    {"iter": 120, "train_loss": 0.584},
+    {"iter": 140, "train_loss": 0.498},
+    {"iter": 160, "train_loss": 0.599},
+    {"iter": 180, "train_loss": 0.548},
+    {"iter": 200, "train_loss": 0.559}
+  ],
+  "val_loss_curve": [
+    {"iter": 1, "val_loss": 2.958},
+    {"iter": 20, "val_loss": 0.820},
+    {"iter": 40, "val_loss": 0.510},
+    {"iter": 60, "val_loss": 0.636},
+    {"iter": 80, "val_loss": 0.496},
+    {"iter": 100, "val_loss": 0.673},
+    {"iter": 120, "val_loss": 0.518},
+    {"iter": 140, "val_loss": 0.588},
+    {"iter": 160, "val_loss": 0.641},
+    {"iter": 180, "val_loss": 0.543},
+    {"iter": 200, "val_loss": 0.427}
+  ],
+  "best_val_loss": 0.427,
+  "best_val_loss_iter": 200,
+  "note": "Val loss is noisy on this small dataset (256 examples). Best val loss at iter 200 (0.427) is also the same as the 300-iter run — training extended from the 300-iter checkpoint."
+}
