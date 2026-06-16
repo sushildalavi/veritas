@@ -27,7 +27,7 @@ export default function EvidenceExplorer() {
   return (
     <div>
       <div className="page-header">
-        <div className="page-title">Evidence Explorer</div>
+        <div className="hero-title">Evidence Explorer</div>
         <div className="page-desc">
           Retrieve evidence passages for a claim without running the verifier.
         </div>

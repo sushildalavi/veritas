@@ -21,10 +21,16 @@ Veritas is a local-first research system that runs BM25 retrieval, DistilRoBERTa
 
 ## Dashboard
 
+**Overview** — animated metric cards, F1 bar chart, pipeline visualization
 ![Veritas Overview](docs/assets/veritas_overview.png)
 
+**Verify Claim** — full pipeline: BM25 retrieval → NLI → explanation
 ![Veritas Verify Claim](docs/assets/veritas_verify_claim.png)
 
+**Training Artifacts** — production status, adapter metrics, honest negative results
+![Veritas Training Artifacts](docs/assets/veritas_training_artifacts.png)
+
+**Research Results** — oracle vs retrieved tables, retrieval profile bar charts, inference benchmark
 ![Veritas Research Results](docs/assets/veritas_research_results.png)
 
 ---

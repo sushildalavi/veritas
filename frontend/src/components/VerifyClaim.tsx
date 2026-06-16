@@ -33,7 +33,7 @@ export default function VerifyClaim() {
   return (
     <div>
       <div className="page-header">
-        <div className="page-title">Verify Claim</div>
+        <div className="hero-title">Verify Claim</div>
         <div className="page-desc">
           Runs the full pipeline: BM25 retrieval → NLI verification → explanation generation.
           Press <code className="code">⌘ Enter</code> to submit.

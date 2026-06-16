@@ -110,7 +110,7 @@ export default function App() {
       </aside>
 
       <div className="content-area">
-        <main className="page">
+        <main key={tab} className="page">
           {tab === "overview" && <Overview metadata={metadata} apiError={apiStatus === "err" ? apiError : null} />}
           {tab === "verify" && <VerifyClaim />}
           {tab === "evidence" && <EvidenceExplorer />}

@@ -1,10 +1,25 @@
+const RETRIEVAL_BARS = [
+  { label: "bm25_only (default)",            value: 0.3887, color: "#3b82f6", delay: "0.1s" },
+  { label: "hybrid_bm25_dense",              value: 0.3864, color: "#8b5cf6", delay: "0.2s" },
+  { label: "hybrid_bm25_sent_transformer",   value: 0.3776, color: "#6366f1", delay: "0.3s" },
+];
+
+const INFERENCE_BARS = [
+  { label: "MPS batch=8",  value: 340.9, max: 360, color: "#3b82f6", delay: "0.1s" },
+  { label: "MPS batch=1",  value: 153.8, max: 360, color: "#22c55e", delay: "0.2s" },
+  { label: "CPU batch=8",  value: 135.8, max: 360, color: "#8b5cf6", delay: "0.3s" },
+  { label: "CPU batch=1",  value: 62.4,  max: 360, color: "#f59e0b", delay: "0.4s" },
+  { label: "ONNX batch=8", value: 59.7,  max: 360, color: "#6b7280", delay: "0.5s" },
+  { label: "ONNX batch=1", value: 55.1,  max: 360, color: "#6b7280", delay: "0.6s" },
+];
+
 export default function ResearchResults() {
   return (
     <div>
       <div className="page-header">
-        <div className="page-title">Research Results</div>
+        <div className="hero-title">Research Results</div>
         <div className="page-desc">
-          All numbers measured locally on a 650-example test set. No results are fabricated or estimated.
+          All numbers measured locally on a 650-example test set (FEVER + SciFact). Nothing fabricated.
         </div>
       </div>
 
@@ -29,7 +44,27 @@ export default function ResearchResults() {
       </div>
 
       <div className="section">
-        <div className="section-label">Retrieval Profile Comparison</div>
+        <div className="section-label">Retrieval Profile Comparison — Verifier macro-F1</div>
+        <div className="card" style={{ marginBottom: "12px" }}>
+          <div className="bar-chart">
+            {RETRIEVAL_BARS.map((b) => (
+              <div key={b.label} className="bar-row">
+                <div className="bar-label">{b.label}</div>
+                <div className="bar-track">
+                  <div
+                    className="bar-fill"
+                    style={{
+                      "--w": `${b.value * 100}%`,
+                      "--delay": b.delay,
+                      background: b.color,
+                    } as React.CSSProperties}
+                  />
+                </div>
+                <div className="bar-value">{b.value.toFixed(4)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="table-wrap">
           <table>
             <thead>
@@ -50,7 +85,7 @@ export default function ResearchResults() {
         </div>
         <div className="notice notice-neutral" style={{ marginTop: "10px" }}>
           Better retrieval recall does not monotonically improve verifier macro-F1.
-          The sentence-transformer hybrid has higher recall@10 but lower end-to-end F1.
+          Sentence-transformer hybrid has higher recall@10 but lower end-to-end F1.
         </div>
       </div>
 
@@ -75,7 +110,27 @@ export default function ResearchResults() {
       </div>
 
       <div className="section">
-        <div className="section-label">Inference Benchmark</div>
+        <div className="section-label">Inference Throughput — ex/s (higher is better)</div>
+        <div className="card" style={{ marginBottom: "12px" }}>
+          <div className="bar-chart">
+            {INFERENCE_BARS.map((b) => (
+              <div key={b.label} className="bar-row">
+                <div className="bar-label">{b.label}</div>
+                <div className="bar-track">
+                  <div
+                    className="bar-fill"
+                    style={{
+                      "--w": `${(b.value / b.max) * 100}%`,
+                      "--delay": b.delay,
+                      background: b.color,
+                    } as React.CSSProperties}
+                  />
+                </div>
+                <div className="bar-value">{b.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="table-wrap">
           <table>
             <thead>
@@ -92,15 +147,15 @@ export default function ResearchResults() {
           </table>
         </div>
         <div className="notice notice-neutral" style={{ marginTop: "10px" }}>
-          ONNX is slower than native transformers on this Mac. MPS via transformers (153 ex/s) is 3× faster
-          than ONNX CPU. ONNX export is valid — speedup applies on CUDA.
+          ONNX is slower than native transformers on this Mac. MPS (153 ex/s) is 3× faster than ONNX CPU.
+          ONNX export is valid — speedup applies on CUDA.
         </div>
       </div>
 
       <div className="section">
         <div className="section-label">Resume-Safe Summary</div>
         <div className="card">
-          <p style={{ fontSize: "14px", lineHeight: "1.75", color: "var(--text-muted)" }}>
+          <p style={{ fontSize: "14px", lineHeight: "1.8", color: "var(--text-muted)" }}>
             Built Veritas, a failure-aware evidence-grounded fact-verification system with BM25 retrieval,
             DistilRoBERTa NLI verification, oracle-vs-retrieved ablations, ONNX/MLX inference benchmarking,
             SFT/DPO training-data generation, FastAPI REST APIs, and a React TypeScript research dashboard;
@@ -111,7 +166,7 @@ export default function ResearchResults() {
           </p>
         </div>
         <div className="notice notice-warn" style={{ marginTop: "12px" }}>
-          Do not claim: ONNX faster than native on Mac · robust verifier or gate improved macro-F1 · Phi-3 QLoRA/DPO adapter trained · MLX explanation adapter is production-grade.
+          Do not claim: ONNX faster than native on Mac · robust verifier improved macro-F1 · Phi-3 QLoRA/DPO trained · MLX explanation adapter is production-grade.
         </div>
       </div>
     </div>

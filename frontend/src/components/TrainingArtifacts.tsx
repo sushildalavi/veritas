@@ -2,7 +2,7 @@ export default function TrainingArtifacts() {
   return (
     <div>
       <div className="page-header">
-        <div className="page-title">Training Artifacts</div>
+        <div className="hero-title">Training Artifacts</div>
         <div className="page-desc">
           Veritas separates verdict classification from explanation generation.
           The production verifier is unchanged. All metrics below are measured.
