@@ -27,18 +27,40 @@
       "up_proj",
       "down_proj"
     ],
-    "timestamp_utc": "2026-06-16T00:30:18.965925+00:00",
+    "timestamp_utc": "2026-06-16T01:40:25.933624+00:00",
     "train_file": "data/explanations/sft_train.jsonl"
   },
   "eval_file": "data/explanations/sft_val.jsonl",
-  "git_commit": "0a7af7773132d287a4979c967e96d1bbc48524ad",
+  "git_commit": "512c986b79b707b785901283dc6842f3a65f378f",
   "kaggle_commands": [
     "pip install transformers datasets peft trl accelerate bitsandbytes",
     "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml"
   ],
+  "preflight_checks": [
+    {
+      "exists": true,
+      "name": "train_file_exists",
+      "path": "data/explanations/sft_train.jsonl"
+    },
+    {
+      "exists": true,
+      "name": "eval_file_exists",
+      "path": "data/explanations/sft_val.jsonl"
+    },
+    {
+      "exists": true,
+      "name": "output_parent_exists",
+      "path": "adapters"
+    },
+    {
+      "exists": true,
+      "name": "base_model",
+      "path": "microsoft/Phi-3-mini-4k-instruct"
+    }
+  ],
   "reason": "CUDA is unavailable on this machine.",
   "status": "skipped",
-  "timestamp_utc": "2026-06-16T00:30:19.701174+00:00",
+  "timestamp_utc": "2026-06-16T01:40:26.735171+00:00",
   "train_file": "data/explanations/sft_train.jsonl",
   "train_metrics": {}
 }

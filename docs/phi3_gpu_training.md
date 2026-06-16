@@ -11,6 +11,12 @@ Build the explanation SFT dataset first:
 python3 scripts/build_explanation_sft_dataset.py
 ```
 
+Run a local readiness check before opening Colab:
+
+```bash
+python3 scripts/train_phi3_qlora.py --dry-run --config configs/phi3_qlora.yaml
+```
+
 Train on Colab or Kaggle T4:
 
 ```bash
@@ -33,6 +39,12 @@ Build preference pairs:
 python3 scripts/build_dpo_preferences.py
 ```
 
+Run a local readiness check before opening Colab:
+
+```bash
+python3 scripts/train_phi3_dpo.py --dry-run --config configs/phi3_dpo.yaml
+```
+
 Train after the QLoRA adapter exists:
 
 ```bash
@@ -52,4 +64,3 @@ Expected outputs if training succeeds:
 - These scripts intentionally emit skipped reports instead of fake checkpoints when CUDA or dependencies are missing.
 - QLoRA and DPO are explanation-focused paths and should not be described as verdict classifier improvements unless a verifier evaluation proves that separately.
 - The verifier still decides the label; these training runs only affect explanation generation.
-

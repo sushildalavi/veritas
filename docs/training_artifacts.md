@@ -26,6 +26,8 @@ This repository now separates verdict classification from explanation training.
 
 - Use `scripts/build_explanation_sft_dataset.py` to regenerate the SFT explanation corpus.
 - Use `scripts/build_dpo_preferences.py` to regenerate preference pairs.
+- Use `scripts/train_phi3_qlora.py --dry-run --config configs/phi3_qlora.yaml` to validate the QLoRA path before Colab.
+- Use `scripts/train_phi3_dpo.py --dry-run --config configs/phi3_dpo.yaml` to validate the DPO path before Colab.
 - Use `scripts/train_mlx_lora_explanations.py` for a local Mac MLX LoRA run.
 - Use `scripts/train_phi3_qlora.py` and `scripts/train_phi3_dpo.py` only on CUDA hardware.
 - Use `scripts/eval_explanation_model.py` to compare explanation quality across backends.
@@ -36,4 +38,3 @@ This repository now separates verdict classification from explanation training.
 - Do not call the MLX adapter Phi-3 QLoRA.
 - Do not describe preference reranking as DPO.
 - Do not claim a real Phi-3 checkpoint unless the adapter directory exists.
-
