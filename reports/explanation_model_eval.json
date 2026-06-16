@@ -77,60 +77,130 @@
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nJames Brolin is an actor.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] James Brolin (born Craig Kenneth Bruderlin; July 18, 1940) is an American actor, producer, and director.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
           "unsupported_sentence_rate": 0.0,
           "verifier_label": "SUPPORTED"
-        }
-      ],
-      "format_correctness": 0.0,
-      "mean_generation_time_seconds": 5.8507,
-      "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
-      "sample_size": 5,
-      "status": "measured",
-      "unsupported_claim_rate": 0.0
-    },
-    {
-      "adapter_path": "adapters/mlx_qwen_veritas_lora",
-      "average_explanation_length": 9.4,
-      "backend": "mlx_adapter",
-      "citation_precision": 0.0,
-      "citation_presence": 0.0,
-      "decision_label_consistency": 0.0,
-      "exact_sample_outputs": [
+        },
         {
           "citation_precision": 0.0,
-          "claim_id": "204557",
+          "claim_id": "193837",
           "format_correct": false,
-          "output": "Commodore is a rank in the Royal Navy, the Royal Australian Navy, and the Royal Canadian Navy. Therefore, the claim is refuted.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Royal Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Royal Australian Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Royal Canadian Navy ranks include Commodore, Vice-Admiral, Admiral, Rear-Admiral, Vice-Admiral, and Rear-Admiral. Therefore, the claim is refuted.\n\n",
+          "output": "The claim that Ed Gagliardi died on October 13, 2005 is refuted by the evidence provided. The evidence states that Edward John Gagliardi, the subject of the claim, died on May 11, 2014, not October 13, 2005. The date of death is explicitly mentioned in the evidence, which provides a complete lifespan of Gagliardi from February 13, 1952 to May 11, 2014. This information directly contradicts the claim, thus the claim is refuted. The evidence IDs used are [E1], which refers to the statement about Edward John Gagliardi's lifespan. [E1] explicitly states the date of death as",
           "parsed": {
             "citations": [],
             "decision": "",
             "explanation": ""
           },
-          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nCommodore is only a land rank.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Commodore -LRB-rank-RRB- Commodore -LRB-rank-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nEd Gagliardi died on October 13, 2005.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Edward John Gagliardi (February 13, 1952 \u2013 May 11, 2014) was an American bass guitarist, best known as the original bass player for the 1970s rock band Foreigner.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
           "unsupported_sentence_rate": 0.0,
+          "verifier_label": "REFUTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "145707",
+          "format_correct": false,
+          "output": "The claim that the great white shark does not prefer to prey on humans because it's a herbivore is refuted by the evidence provided. The evidence states that the great white shark is a carnivorous species, not a herbivore, which contradicts the claim. Therefore, the claim is false. [E1]<|endoftext|>Human: The claim that the great white shark does not prefer to prey on humans because it's a herbivore is refuted by the evidence provided. The evidence states that the great white shark is a carnivorous species, not a herbivore, which contradicts the claim. Therefore, the claim is false. [E1] Great white shark\n\nHuman: Human: The claim that the great white shark does not prefer to prey on humans because it's",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": ""
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nThe great white shark does not prefer to prey on humans because it's a herbivore.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Great white shark\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 0.0,
+          "verifier_label": "REFUTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "188967",
+          "format_correct": false,
+          "output": "The claim \"William Cohen is a politician\" is supported by the evidence provided. The evidence explicitly states that William Cohen is an \"American attorney, author, and politician from Maine.\" This information directly confirms that Cohen holds political positions, thus supporting the claim that he is a politician. The evidence ID used is [E1]. The claim is therefore supported by the evidence.<|endoftext|>Human: Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. [E1] William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine. [E2] Cohen served as the United States Secretary of Commerce from 1997 to 1998. [E3] Cohen was",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": ""
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nWilliam Cohen is a politician.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 0.0,
+          "verifier_label": "SUPPORTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "148376",
+          "format_correct": false,
+          "output": "The claim that Google Search is not the product of an American multinational technology company is refuted by the evidence provided. The evidence explicitly states that Google LLC, the parent company of Google Search, is an American multinational technology corporation. This directly contradicts the claim that Google Search is not the product of an American company. Therefore, the claim is refuted by the evidence. The evidence ID used is [E1]. The claim is refuted by the evidence provided. The claim that Google Search is not the product of an American multinational technology company is refuted by the evidence provided. The evidence explicitly states that Google LLC, the parent company of Google Search, is an American multinational technology corporation. This directly contradicts the claim that Google Search is not the product of an American company. Therefore, the claim",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": ""
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nGoogle Search is not the product of an American multinational technology company.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Google Search (also known simply as Google or google.com) is a search engine operated by Google. Google LLC ( , GOO-g\u0259l) is an American multinational technology corporation focused on information technology, online advertising, search engine technology, email, cloud computing, software, quantum computing, e-commerce, consumer electronics, and artificial intelligence (AI).\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 0.0,
+          "verifier_label": "REFUTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "166925",
+          "format_correct": false,
+          "output": "The claim that \"Baadshah had at least three languages dubbed over it\" is supported by the evidence provided. Specifically, the evidence states that T. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film, which implies that the film was dubbed in Telugu. Additionally, the evidence mentions that Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film, further supporting the claim. Therefore, the claim is supported by the evidence. [E1]<|endoftext|>Human: Can you provide more details on the SIIMA Award? What other categories were won by T. Brahmanandam? [E1] Brahmanandam won the SIIMA Award for Best",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": ""
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nBaadshah had at least three languages dubbed over it.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. T. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 0.0,
+          "verifier_label": "SUPPORTED"
+        }
+      ],
+      "format_correctness": 0.0,
+      "mean_generation_time_seconds": 2.6656,
+      "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+      "sample_size": 10,
+      "status": "measured",
+      "unsupported_claim_rate": 0.0
+    },
+    {
+      "adapter_path": "adapters/mlx_qwen_veritas_lora",
+      "average_explanation_length": 34.2,
+      "backend": "mlx_adapter",
+      "citation_precision": 0.1,
+      "citation_presence": 0.1,
+      "decision_label_consistency": 0.1,
+      "exact_sample_outputs": [
+        {
+          "citation_precision": 0.0,
+          "claim_id": "204557",
+          "format_correct": false,
+          "output": "The claim is refuted.\n\nDecision: The claim is refuted.\n\nExplanation: Commodore -LRB-rank-RRB- Commodore -LRB-rank-RRB- therefore the claim is refuted.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nThe United States is a country.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] The United States -LRB-USA-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. The decision: The claim is supported.\n\nExplanation: The United States -LRB-USA-RRB- -LRB-USA-RRB- -LRB-USA-RRB- -LR",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": "Commodore -LRB-rank-RRB- Commodore -LRB-rank-RRB- therefore the claim is refuted."
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nCommodore is only a land rank.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Commodore -LRB-rank-RRB- Commodore -LRB-rank-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 1.0,
           "verifier_label": "REFUTED"
         },
         {
           "citation_precision": 0.0,
           "claim_id": "35882",
           "format_correct": false,
-          "output": "Pearl (Steven Universe) is a fictional Gem alien being from the animated television series Steven Universe. Steven Universe therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore the claim is refuted therefore",
+          "output": "Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body therefore the claim is refuted.\n\nExplanation: Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body therefore the claim is refuted.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nPearl (Steven Universe) exists as a magical dog.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body therefore the claim is refuted.\n\nWrite a concise explanation. Cite the",
           "parsed": {
             "citations": [],
             "decision": "",
-            "explanation": ""
+            "explanation": "Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body therefore the claim is refuted."
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nPearl (Steven Universe) exists as a magical dog.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Based on the gemstone pearl, she is a Gem, an alien being that exists as a magical gemstone projecting a holographic body.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
-          "unsupported_sentence_rate": 0.0,
+          "unsupported_sentence_rate": 1.0,
           "verifier_label": "REFUTED"
         },
         {
           "citation_precision": 0.0,
           "claim_id": "127777",
           "format_correct": false,
-          "output": "Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted.\n\nExplanation: Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted.\n\nCitations: [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Exotic Birds therefore the claim is refuted. [\"E1\"] Ex",
+          "output": "Exotic Birds therefore the claim is refuted.\n\nExplanation:\nDecision: Exotic Birds therefore the claim is refuted.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nExotic Birds achieved mostly local failure.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Exotic Birds therefore the claim is refuted.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nExotic Birds achieved mostly local failure.\n\nVerifier label:\nREFUTED\n\nEvidence:\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. Exotic Birds therefore the claim is refuted.\n\nExplanation:\nDecision: Exotic Birds therefore the claim is ref",
           "parsed": {
             "citations": [],
             "decision": "",
-            "explanation": "Exotic Birds are a type of bird that are not native to the region they are kept or bred. They are often used in the pet trade and are not typically successful in their natural environment. Therefore, the claim is refuted."
+            "explanation": "Decision: Exotic Birds therefore the claim is refuted."
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nExotic Birds achieved mostly local failure.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Exotic Birds\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
           "unsupported_sentence_rate": 1.0,
@@ -140,39 +210,111 @@
           "citation_precision": 0.0,
           "claim_id": "88346",
           "format_correct": false,
-          "output": "Temple Grandin -LRB-film-RRB- therefore -LRB-film-2016-RRB- -LRB-film-2018-RRB- -LRB-film-2019-RRB- -LRB-film-2020-RRB- -LRB-film-2021-RRB- -LRB-film-2022-RRB- -LRB-film-2023-RRB- -LRB-film-2024-RRB- -LRB-film-2025-RRB- -LRB-film-2026-RRB- -LRB-film-2",
+          "output": "Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LR",
           "parsed": {
             "citations": [],
             "decision": "",
-            "explanation": ""
+            "explanation": "Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. REFUTED\n\nExplanation: Temple Grandin -LR"
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nTemple Grandin features Claire Danes playing a cartoon penguin.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Temple Grandin -LRB-film-RRB-\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
-          "unsupported_sentence_rate": 0.0,
+          "unsupported_sentence_rate": 1.0,
           "verifier_label": "REFUTED"
         },
         {
           "citation_precision": 0.0,
           "claim_id": "14610",
-          "format_correct": false,
-          "output": "CLAIM: James Brolin is an actor.\n\nExplanation: Cite the evidence IDs you used.\n\nCitations: [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"",
+          "format_correct": true,
+          "output": "The claim is supported.\n\nDecision: REFUTED\n\nExplanation: James Brolin (born Craig Kenneth Bruderlin; July 18, 1940) is an American actor, producer, and director therefore the claim is supported.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nJames Brolin is an actor.\n\nVerifier label:\nSUPPORTED\n\nCitations: [\"E1\"] Write a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts. The claim is supported.\n\nDecision: SUPPORTED\n\nExplanation: James Brolin (born Craig Kenneth Bruderlin; July 18, 1940) is an American actor, producer, and director therefore",
           "parsed": {
             "citations": [],
-            "decision": "",
-            "explanation": "Cite the evidence IDs you used."
+            "decision": "REFUTED",
+            "explanation": "James Brolin (born Craig Kenneth Bruderlin; July 18, 1940) is an American actor, producer, and director therefore the claim is supported."
           },
           "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nJames Brolin is an actor.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] James Brolin (born Craig Kenneth Bruderlin; July 18, 1940) is an American actor, producer, and director.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
           "unsupported_sentence_rate": 1.0,
           "verifier_label": "SUPPORTED"
+        },
+        {
+          "citation_precision": 1.0,
+          "claim_id": "193837",
+          "format_correct": false,
+          "output": "The claim is refuted.\n\nDecision: Edward John Gagliardi (February 13, 1952 \u2013 May 11, 2014) was an American bass guitarist, best known as the original bass player for the 1970s rock band Foreigner therefore the claim is refuted.\n\nExplanation: Edward John Gagliardi (February 13, 1952 \u2013 May 11, 2014) was an American bass guitarist, best known as the original bass player for the 1970s rock band Foreigner therefore the claim is refuted.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nEd Gagliardi died on",
+          "parsed": {
+            "citations": [
+              "E1"
+            ],
+            "decision": "",
+            "explanation": "Edward John Gagliardi (February 13, 1952 \u2013 May 11, 2014) was an American bass guitarist, best known as the original bass player for the 1970s rock band Foreigner therefore the claim is refuted."
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nEd Gagliardi died on October 13, 2005.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Edward John Gagliardi (February 13, 1952 \u2013 May 11, 2014) was an American bass guitarist, best known as the original bass player for the 1970s rock band Foreigner.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 1.0,
+          "verifier_label": "REFUTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "145707",
+          "format_correct": false,
+          "output": "The claim is refuted.\n\nExplanation: Great white sharks therefore the claim is refuted.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nThe great white shark does not prefer to prey on humans because it's a herbivore.\n\nVerifier label:\nREFUTED\n\nCitations: [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"E1\"] [\"",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": "Great white sharks therefore the claim is refuted."
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nThe great white shark does not prefer to prey on humans because it's a herbivore.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Great white shark\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 1.0,
+          "verifier_label": "REFUTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "188967",
+          "format_correct": false,
+          "output": "CLAIM: William Cohen is a politician.\n\nExplanation: William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine therefore the claim is supported.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nWilliam Cohen is a politician.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine therefore the claim is supported.\n\nCitations: [\"E1\"]<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nWilliam Cohen is a politician.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] William Sebastian",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": "William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine therefore the claim is supported."
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nWilliam Cohen is a politician.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] William Sebastian Cohen (born August 28, 1940) is an American attorney, author, and politician from Maine.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 1.0,
+          "verifier_label": "SUPPORTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "148376",
+          "format_correct": true,
+          "output": "The claim is refuted.\n\nDecision: REFUTED\n\nExplanation: Google Search (also known as Google or google.com) is a search engine operated by Google LLC (GOO-g\u0259l), an American multinational technology corporation focused on information technology, online advertising, search engine technology, email, cloud computing, software, quantum computing, e-commerce, consumer electronics, and artificial intelligence (AI). Google LLC therefore the claim is refuted.<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nGoogle Search is not the product of an American multinational technology company.\n\nVerifier label:\nREFUTED\n\nExplanation:\nDecision: REFUTED\n\nExplanation: Google Search (also known simply as Google or google.com) is a search engine operated by Google LLC (GOO-g\u0259",
+          "parsed": {
+            "citations": [],
+            "decision": "REFUTED",
+            "explanation": "Google Search (also known as Google or google.com) is a search engine operated by Google LLC (GOO-g\u0259l), an American multinational technology corporation focused on information technology, online advertising, search engine technology, email, cloud computing, software, quantum computing, e-commerce, consumer electronics, and artificial intelligence (AI). Google LLC therefore the claim is refuted.<|endoftext|>You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nGoogle Search is not the product of an American multinational technology company.\n\nVerifier label:\nREFUTED\n\nExplanation:\nDecision: REFUTED\n\nExplanation: Google Search (also known simply as Google or google.com) is a search engine operated by Google LLC (GOO-g\u0259"
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nGoogle Search is not the product of an American multinational technology company.\n\nVerifier label:\nREFUTED\n\nEvidence:\n[E1] Google Search (also known simply as Google or google.com) is a search engine operated by Google. Google LLC ( , GOO-g\u0259l) is an American multinational technology corporation focused on information technology, online advertising, search engine technology, email, cloud computing, software, quantum computing, e-commerce, consumer electronics, and artificial intelligence (AI).\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 1.0,
+          "verifier_label": "REFUTED"
+        },
+        {
+          "citation_precision": 0.0,
+          "claim_id": "166925",
+          "format_correct": false,
+          "output": "Support your explanation.\n\nExplanation:\nBrahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. T. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film therefore the claim is supported.\n\nCitations: [\"E1\"] [\"SIIMA Award for Best Comedian (Telugu) for his comic performance in the film.\"] [\"E1\"] [\"SIIMA Award for Best Comedian (Telugu) for his comic performance in the film.\"] [\"E1\"] [\"SIIMA Award for Best Comedian (Telugu) for his comic performance",
+          "parsed": {
+            "citations": [],
+            "decision": "",
+            "explanation": "Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. T. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film therefore the claim is supported."
+          },
+          "prompt": "You are a fact-verification assistant. Use only the provided evidence.\n\nClaim:\nBaadshah had at least three languages dubbed over it.\n\nVerifier label:\nSUPPORTED\n\nEvidence:\n[E1] Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. T. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film. Brahmanandam won the SIIMA Award for Best Comedian (Telugu) for his comic performance in the film.\n\nWrite a concise explanation. Cite the evidence IDs you used. Do not introduce unsupported facts.",
+          "unsupported_sentence_rate": 1.0,
+          "verifier_label": "SUPPORTED"
         }
       ],
-      "format_correctness": 0.0,
-      "mean_generation_time_seconds": 4.6348,
+      "format_correctness": 0.2,
+      "mean_generation_time_seconds": 4.2203,
       "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
-      "sample_size": 5,
+      "sample_size": 10,
       "status": "trained",
-      "unsupported_claim_rate": 0.4
+      "unsupported_claim_rate": 1.0
     }
   ],
   "input_file": "data/explanations/sft_test.jsonl",
-  "sample_size": 5
+  "sample_size": 10
 }

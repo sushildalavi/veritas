@@ -2,8 +2,8 @@
 
 - status: trained
 - reason: 
-- timestamp_utc: 2026-06-16T05:43:32.615249+00:00
-- git_commit: ba756914acdeedd7ba7e28ab79e32893e25e0058
+- timestamp_utc: 2026-06-16T06:03:05.620882+00:00
+- git_commit: 844c307c591967c7d2b280bdb1eb176a5f989dfd
 - base_model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
 - dataset_path: /Users/sushildalavi/Desktop/Github/Veritas/data/explanations
 - adapter_path: /Users/sushildalavi/Desktop/Github/Veritas/adapters/mlx_qwen_veritas_lora
@@ -21,7 +21,7 @@
   "batch_size": 1,
   "dataset_dir": "data/explanations",
   "grad_checkpoint": true,
-  "iters": 80,
+  "iters": 300,
   "learning_rate": 1e-05,
   "max_examples": 256,
   "max_seq_length": 768,
