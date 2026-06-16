@@ -1,4 +1,4 @@
-.PHONY: setup test lint data build-sample-data build-large-sample-data eval-retrieval eval-ranking eval-retrieval-large eval-ranking-large eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real serve-vllm-explanations demo ui cli export-demo-corpus audit manifest all-evals verify-local build-mlx-lora-data train-mlx-lora eval-mlx-lora eval-topk-verifier install api frontend-install frontend final-reports all-local
+.PHONY: setup test lint data build-sample-data build-large-sample-data eval-retrieval eval-ranking eval-retrieval-large eval-ranking-large eval-faithfulness error-analysis pareto-analysis train-verifier train-verifier-smoke serve serve-real serve-vllm-explanations cli export-demo-corpus audit manifest all-evals verify-local build-mlx-lora-data train-mlx-lora eval-mlx-lora eval-topk-verifier install api frontend-install frontend final-reports all-local
 
 ## ── Developer workflow ─────────────────────────────────────────────────────
 
@@ -44,7 +44,7 @@ test:
 	python3 -m pytest
 
 lint:
-	python3 -m compileall data retrieval ranking models training rag agent evaluation serving ui tests
+	python3 -m compileall data retrieval ranking models training rag agent evaluation serving tests
 
 data:
 	@echo "Phase 1 will add the data pipeline."
@@ -107,12 +107,6 @@ serve-real:
 
 serve-vllm-explanations:
 	python3 scripts/serve_vllm_explanations.py
-
-demo:
-	python3 app.py
-
-ui:
-	python3 -m ui.app
 
 cli:
 	python3 cli.py "Paris is in France"
