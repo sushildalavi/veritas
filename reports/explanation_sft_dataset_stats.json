@@ -1,0 +1,79 @@
+{
+  "completion_version": "v1",
+  "empty_evidence_count": {
+    "test": 102,
+    "train": 415,
+    "val": 117
+  },
+  "has_fever": true,
+  "has_nei": true,
+  "has_refuted": true,
+  "has_scifact": true,
+  "has_supported": true,
+  "label_distribution": {
+    "test": {
+      "NOT_ENOUGH_INFO": 223,
+      "REFUTED": 195,
+      "SUPPORTED": 224
+    },
+    "train": {
+      "NOT_ENOUGH_INFO": 788,
+      "REFUTED": 604,
+      "SUPPORTED": 1416
+    },
+    "val": {
+      "NOT_ENOUGH_INFO": 236,
+      "REFUTED": 176,
+      "SUPPORTED": 237
+    }
+  },
+  "label_totals": {
+    "NOT_ENOUGH_INFO": 1247,
+    "REFUTED": 975,
+    "SUPPORTED": 1877
+  },
+  "output_dir": "data/explanations",
+  "prompt_version": "v1",
+  "sample_count": 10,
+  "sample_ids": [
+    "43158",
+    "46020",
+    "198393",
+    "139389",
+    "225831",
+    "100184",
+    "37220",
+    "97467",
+    "114682",
+    "188021"
+  ],
+  "source_distribution": {
+    "test": {
+      "fever": 493,
+      "scifact": 149
+    },
+    "train": {
+      "fever": 2000,
+      "scifact": 808
+    },
+    "val": {
+      "fever": 500,
+      "scifact": 149
+    }
+  },
+  "source_files": {
+    "test": "data/processed/verifier_test.jsonl",
+    "train": "data/processed/verifier_train.jsonl",
+    "val": "data/processed/verifier_val.jsonl"
+  },
+  "source_totals": {
+    "fever": 2993,
+    "scifact": 1106
+  },
+  "splits": {
+    "test": 642,
+    "train": 2808,
+    "val": 649
+  },
+  "total_examples": 4099
+}
