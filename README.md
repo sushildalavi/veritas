@@ -11,38 +11,83 @@ license: apache-2.0
 
 # Veritas
 
-**Evidence-Grounded Fact Verification Platform**
+**Claim Investigation Workspace**
 
-Veritas is a local-first research system that runs BM25 retrieval, DistilRoBERTa NLI verification, grounded explanation generation, and full ablation reporting entirely on a Mac — no CUDA required. The design goal was to build an honest, measurable stack rather than a tuned demo: every result shown here was measured, and the two experiments that regressed are documented alongside the ones that worked.
+> Submit a claim. Retrieve evidence. Get a verdict with inline citations.
+
+Veritas is a local-first research system built around a single workflow: enter a factual claim and see exactly what evidence was retrieved, how each passage was classified, and why the system reached its verdict — all with source-level citations. No cloud calls. No CUDA required. Runs entirely on a Mac.
 
 > **Research prototype** — not a production fact checker. Retrieved macro-F1 is 0.3887; retrieval is the primary bottleneck.
 
 ---
 
-## Dashboard
+## Verify a claim
 
-**Overview** — animated metric cards, F1 bar chart, pipeline visualization
-![Veritas Overview](docs/assets/veritas_overview.png)
-
-**Verify Claim** — full pipeline: BM25 retrieval → NLI → explanation
+**Default view** — Raycast-style command bar, state machine progress, verdict + confidence
 ![Veritas Verify Claim](docs/assets/veritas_verify_claim.png)
 
-**Training Artifacts** — production status, adapter metrics, honest negative results
-![Veritas Training Artifacts](docs/assets/veritas_training_artifacts.png)
+**Evidence** — retrieved passages with rank, BM25 score, and NLI relation label
+![Veritas Evidence](docs/assets/veritas_evidence.png)
 
-**Research Results** — oracle vs retrieved tables, retrieval profile bar charts, inference benchmark
-![Veritas Research Results](docs/assets/veritas_research_results.png)
+**Explanation** — how citation-backed explanations are generated (MLX LoRA adapter)
+![Veritas Explanation](docs/assets/veritas_explanation.png)
+
+---
+
+## Demo claim
+
+```
+Claim:   "The Apollo 11 mission landed humans on the Moon in 1969."
+Verdict: SUPPORTED
+Confidence: 84.2%
+Evidence: 3 passages — NASA Technical Reports [1], Encyclopædia Britannica [2], Wikipedia [3]
+
+Explanation:
+The Apollo 11 mission did land humans on the Moon in 1969 [1]. Commander Neil Armstrong
+and lunar module pilot Buzz Aldrin became the first humans on the lunar surface on July 20,
+1969 [2]. The lunar module Eagle landed in the Sea of Tranquility and the crew spent
+approximately 2 hours 31 minutes on the surface [3].
+```
+
+The demo fixture fires automatically when the backend is offline (API port 8001). Run `make api` for live verification.
+
+---
+
+## What Veritas Is Not
+
+This section exists because ML project READMEs routinely over-claim. These are hard constraints.
+
+- **Not a production fact checker.** It is a research prototype evaluated on FEVER. It will fail on out-of-domain claims.
+- **Not deployed.** No cloud service. Runs locally on port 8001 (FastAPI) + 5173 (Vite).
+- **Not SOTA.** Oracle macro-F1 0.6728 is competitive for a compact NLI verifier but is not state-of-the-art on FEVER.
+- **Not using GPT/Claude/Gemini.** The verifier is DistilRoBERTa. The explanation adapter is Qwen2.5-1.5B with LoRA rank 8, running on-device via MLX.
+- **The robust verifier regressed.** Retrieved macro-F1 dropped from 0.3887 → 0.2829. That is documented, not buried.
+- **The relevance gate regressed.** End-to-end F1 dropped from 0.3887 → 0.3557. Gate is disabled by default.
+- **citation_presence 0.72 is not production-grade.** That means 28% of explanations miss inline citations. 500 LoRA iterations is a short run.
+
+---
+
+## Research output
+
+**Failure Analysis** — oracle vs retrieved gap, negative results, system limitations
+![Veritas Failure Analysis](docs/assets/veritas_failure_analysis.png)
+
+**Research Metrics** — measured F1, retrieval profiles, inference benchmark, resume-safe summary
+![Veritas Research Metrics](docs/assets/veritas_research_metrics.png)
+
+**Training Artifacts** — checkpoint status, MLX LoRA metrics, adapter configuration
+![Veritas Training](docs/assets/veritas_training.png)
 
 ---
 
 ## Results
 
-The headline finding is the gap between what the verifier can do with perfect evidence versus what it achieves on BM25-retrieved evidence.
+The headline finding: the verifier is not the bottleneck — retrieval is.
 
 ```
-Oracle macro-F1   ████████████████████████████████████  0.6728
-Retrieved macro-F1  ███████████████████                0.3887
-Gap                                                    −0.2841
+Oracle macro-F1     ████████████████████████████████████  0.6728
+Retrieved macro-F1  ███████████████████                   0.3887
+Gap                                                       −0.2841
 ```
 
 ```mermaid
@@ -86,14 +131,14 @@ Two experiments were run that did not improve the primary metric. Both are fully
 ## Quick Start
 
 ```bash
-# Terminal 1 — backend (http://localhost:8000)
+# Terminal 1 — backend (http://localhost:8001)
 make api
 
 # Terminal 2 — frontend (http://localhost:5173)
 make frontend
 ```
 
-Open `http://localhost:5173`. The dashboard has five tabs: Overview, Verify Claim, Evidence Explorer, Training Artifacts, and Research Results.
+Open `http://localhost:5173`. The default page is **Verify Claim**. The workspace has six pages: Verify Claim, Evidence, Explanation, Failure Analysis, Research Metrics, and Training.
 
 ---
 
