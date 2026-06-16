@@ -1,9 +1,9 @@
 # Phi-3 QLoRA Training Report
 
-- status: dry_run
-- reason: 
-- timestamp_utc: 2026-06-16T01:46:34.512258+00:00
-- git_commit: 3f9bd11514c3b04d132d95db2f7d8a98f05e136e
+- status: skipped
+- reason: CUDA is unavailable on this machine.
+- timestamp_utc: 2026-06-16T05:51:32.211950+00:00
+- git_commit: b82e60418fc0c1928eb4e5646fc59da85c07f9a3
 - base_model: microsoft/Phi-3-mini-4k-instruct
 - train_file: data/explanations/sft_train.jsonl
 - eval_file: data/explanations/sft_val.jsonl
@@ -18,15 +18,13 @@
 | output_parent_exists | adapters | true |
 | base_model | microsoft/Phi-3-mini-4k-instruct | true |
 
+## Environment
+
+- reason: CUDA is unavailable on this machine.
+
 ## Colab / Kaggle Commands
 
 ```bash
 pip install transformers datasets peft trl accelerate bitsandbytes
 python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml
 ```
-
-## Run Notes
-
-- This is a readiness check only.
-- No training was executed.
-- The report confirms local file paths and command syntax.

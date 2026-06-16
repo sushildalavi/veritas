@@ -27,11 +27,11 @@
       "up_proj",
       "down_proj"
     ],
-    "timestamp_utc": "2026-06-16T01:46:34.512249+00:00",
+    "timestamp_utc": "2026-06-16T05:51:31.746931+00:00",
     "train_file": "data/explanations/sft_train.jsonl"
   },
   "eval_file": "data/explanations/sft_val.jsonl",
-  "git_commit": "3f9bd11514c3b04d132d95db2f7d8a98f05e136e",
+  "git_commit": "b82e60418fc0c1928eb4e5646fc59da85c07f9a3",
   "kaggle_commands": [
     "pip install transformers datasets peft trl accelerate bitsandbytes",
     "python3 scripts/train_phi3_qlora.py --config configs/phi3_qlora.yaml"
@@ -58,9 +58,9 @@
       "path": "microsoft/Phi-3-mini-4k-instruct"
     }
   ],
-  "reason": "",
-  "status": "dry_run",
-  "timestamp_utc": "2026-06-16T01:46:34.512258+00:00",
+  "reason": "CUDA is unavailable on this machine.",
+  "status": "skipped",
+  "timestamp_utc": "2026-06-16T05:51:32.211950+00:00",
   "train_file": "data/explanations/sft_train.jsonl",
   "train_metrics": {}
 }
