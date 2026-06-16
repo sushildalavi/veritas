@@ -3,11 +3,11 @@
     "batch_size": 1,
     "clear_cache_threshold": 0,
     "config": null,
-    "data": "/var/folders/dv/4yw53xh14jg0_mcrwc977cgm0000gn/T/mlx_lora_explanations_e7nlgrsl/chat_data",
+    "data": "/var/folders/dv/4yw53xh14jg0_mcrwc977cgm0000gn/T/mlx_lora_explanations_xku32ar1/chat_data",
     "fine_tune_type": "lora",
     "grad_accumulation_steps": 1,
     "grad_checkpoint": true,
-    "iters": 80,
+    "iters": 300,
     "learning_rate": 1e-05,
     "lora_parameters": {
         "rank": 8,

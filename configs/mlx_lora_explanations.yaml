@@ -5,7 +5,7 @@ val_file: sft_val.jsonl
 test_file: sft_test.jsonl
 adapter_path: adapters/mlx_qwen_veritas_lora
 output_dir: adapters/mlx_qwen_veritas_lora
-iters: 80
+iters: 300
 batch_size: 1
 learning_rate: 1.0e-5
 num_layers: 8
