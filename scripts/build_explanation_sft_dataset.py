@@ -1,14 +1,15 @@
-"""Build explanation-only SFT data for the Mac-local MLX LoRA path.
+"""Build grounded explanation SFT data.
 
-The dataset keeps verdict classification anchored to the verifier while
-training the language model to emit faithful, structured explanations.
+Inputs:
+  data/processed/verifier_{train,val,test}.jsonl
 
 Outputs:
-  data/processed/explanation_sft_train.jsonl
-  data/processed/explanation_sft_val.jsonl
-  data/processed/explanation_sft_test.jsonl
-  data/processed/explanation_sft/{train,val,valid,test}.jsonl
-  reports/explanation_sft_data_stats.{json,md}
+  data/explanations/sft_train.jsonl
+  data/explanations/sft_val.jsonl
+  data/explanations/sft_test.jsonl
+  reports/explanation_sft_dataset_stats.json
+  reports/explanation_sft_dataset_stats.md
+  reports/explanation_sft_samples.md
 """
 
 from __future__ import annotations
@@ -17,124 +18,92 @@ import argparse
 import json
 from collections import Counter
 from pathlib import Path
+import sys
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from data.explanation_artifacts import build_explanation_record, validate_explanation_record
 from evaluation.reporting import write_report
 from evaluation.sample_benchmarks import read_jsonl
 
-SYSTEM_PROMPT = (
-    "You are a fact-checking assistant. Given a claim, evidence, and verifier "
-    "verdict, generate a strict JSON object with keys verdict, explanation, "
-    "and citations. The verdict must match the verifier verdict. The citation "
-    "list must contain only E1."
-)
-
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build explanation-only SFT datasets.")
+    parser = argparse.ArgumentParser(description="Build grounded explanation SFT datasets.")
     parser.add_argument("--train-file", default="data/processed/verifier_train.jsonl")
     parser.add_argument("--val-file", default="data/processed/verifier_val.jsonl")
     parser.add_argument("--test-file", default="data/processed/verifier_test.jsonl")
-    parser.add_argument("--output-prefix", default="data/processed/explanation_sft")
-    parser.add_argument("--report-json", default="reports/explanation_sft_data_stats.json")
-    parser.add_argument("--report-md", default="reports/explanation_sft_data_stats.md")
+    parser.add_argument("--output-dir", default="data/explanations")
+    parser.add_argument("--report-json", default="reports/explanation_sft_dataset_stats.json")
+    parser.add_argument("--report-md", default="reports/explanation_sft_dataset_stats.md")
+    parser.add_argument("--samples-md", default="reports/explanation_sft_samples.md")
+    parser.add_argument("--max-samples", type=int, default=10)
     return parser
 
 
 def main() -> None:  # pragma: no cover - script entrypoint
     args = build_parser().parse_args()
-    splits = {
+
+    split_paths = {
         "train": Path(args.train_file),
         "val": Path(args.val_file),
         "test": Path(args.test_file),
     }
-    output_prefix = Path(args.output_prefix)
-    output_prefix.mkdir(parents=True, exist_ok=True)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    split_rows: dict[str, list[dict[str, Any]]] = {name: read_jsonl(path) for name, path in splits.items()}
-    if not any(split_rows.values()):
-        raise SystemExit("No verifier examples were found to build the explanation dataset.")
-
-    stats = {
+    stats: dict[str, Any] = {
+        "output_dir": str(output_dir),
+        "source_files": {split: str(path) for split, path in split_paths.items()},
         "splits": {},
         "label_distribution": {},
         "source_distribution": {},
-        "average_claim_length": {},
-        "average_evidence_length": {},
-        "output_prefix": str(output_prefix),
+        "empty_evidence_count": {},
+        "total_examples": 0,
+        "prompt_version": "v1",
+        "completion_version": "v1",
     }
+    sample_rows: list[dict[str, Any]] = []
 
-    for split_name, rows in split_rows.items():
-        if not rows:
-            continue
-        records = [_build_record(row) for row in rows]
-        _write_jsonl(output_prefix.parent / f"{output_prefix.name}_{split_name}.jsonl", records)
-        _write_jsonl(output_prefix / f"{split_name}.jsonl", records)
-        if split_name == "val":
-            _write_jsonl(output_prefix.parent / f"{output_prefix.name}_valid.jsonl", records)
-            _write_jsonl(output_prefix / "valid.jsonl", records)
-        stats["splits"][split_name] = len(records)
-        label_counter = Counter(json.loads(record["messages"][2]["content"])["verdict"] for record in records)
-        stats["label_distribution"][split_name] = dict(label_counter)
-        source_counter = Counter(str(row.get("metadata", {}).get("source", "unknown")) for row in rows)
-        stats["source_distribution"][split_name] = dict(source_counter)
-        stats["average_claim_length"][split_name] = round(sum(len(str(row.get("claim", "")).split()) for row in rows) / len(rows), 2)
-        stats["average_evidence_length"][split_name] = round(sum(len(str(row.get("evidence", "")).split()) for row in rows) / len(rows), 2)
+    for split, input_path in split_paths.items():
+        rows = read_jsonl(input_path)
+        records = [build_explanation_record(row, split=split) for row in rows]
+        for record in records:
+            validate_explanation_record(record)
 
-    stats["total_examples"] = sum(stats["splits"].values())
-    stats["prompt_template"] = "system/user/assistant JSON messages"
-    stats["strict_json_output"] = True
-    stats["citations"] = ["E1"]
+        _write_jsonl(output_dir / f"sft_{split}.jsonl", records)
+
+        stats["splits"][split] = len(records)
+        stats["total_examples"] += len(records)
+        stats["label_distribution"][split] = dict(Counter(record["verifier_label"] for record in records))
+        stats["source_distribution"][split] = dict(Counter(str(record.get("source", "unknown")) for record in records))
+        stats["empty_evidence_count"][split] = sum(1 for record in records if not record["evidence_passages"])
+
+        if not sample_rows:
+            sample_rows.extend(records[: args.max_samples])
+
+    label_totals = Counter()
+    source_totals = Counter()
+    for split_labels in stats["label_distribution"].values():
+        label_totals.update(split_labels)
+    for split_sources in stats["source_distribution"].values():
+        source_totals.update(split_sources)
+    stats["label_totals"] = dict(label_totals)
+    stats["source_totals"] = dict(source_totals)
+    stats["sample_count"] = len(sample_rows)
+    stats["sample_ids"] = [row["claim_id"] for row in sample_rows]
+    stats["has_supported"] = stats["label_totals"].get("SUPPORTED", 0) > 0
+    stats["has_refuted"] = stats["label_totals"].get("REFUTED", 0) > 0
+    stats["has_nei"] = stats["label_totals"].get("NOT_ENOUGH_INFO", 0) > 0
+    stats["has_fever"] = stats["source_totals"].get("fever", 0) > 0
+    stats["has_scifact"] = stats["source_totals"].get("scifact", 0) > 0
 
     write_report(stats, Path(args.report_json))
     Path(args.report_md).write_text(_to_markdown(stats), encoding="utf-8")
-    print(f"Wrote explanation SFT data under {output_prefix}")
-
-
-def _build_record(row: dict[str, Any]) -> dict[str, Any]:
-    claim = str(row.get("claim", "")).strip()
-    evidence = str(row.get("evidence", "")).strip()
-    label = _normalize_label(row.get("label", "NOT_ENOUGH_INFO"))
-    prompt = (
-        f"Claim: {claim}\n\n"
-        f"Evidence:\n[E1] {evidence}\n\n"
-        f"Verifier verdict: {label}\n\n"
-        "Task:\nGenerate a strict JSON object with keys verdict, explanation, and citations.\n"
-        "Return only valid JSON."
-    )
-    assistant = json.dumps(
-        {
-            "verdict": label,
-            "explanation": _build_explanation(claim, evidence, label),
-            "citations": ["E1"],
-        },
-        ensure_ascii=False,
-    )
-    return {
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-            {"role": "assistant", "content": assistant},
-        ]
-    }
-
-
-def _build_explanation(claim: str, evidence: str, verdict: str) -> str:
-    evidence_text = evidence.rstrip(".!?")
-    if verdict == "NOT ENOUGH INFO":
-        return f"The evidence does not establish the claim about {claim.lower()}."
-    if not evidence_text:
-        return f"The claim is {verdict.lower()} based on the evidence."
-    return f"{evidence_text} therefore the claim is {verdict.lower()}."
-
-
-def _normalize_label(raw: Any) -> str:
-    text = str(raw).strip().upper().replace("-", "_")
-    if text in {"SUPPORTED", "SUPPORTS"}:
-        return "SUPPORTED"
-    if text in {"REFUTED", "REFUTES", "CONTRADICT", "CONTRADICTS"}:
-        return "REFUTED"
-    return "NOT_ENOUGH_INFO"
+    Path(args.samples_md).write_text(_samples_markdown(sample_rows), encoding="utf-8")
+    print(f"Wrote grounded explanation SFT dataset to {output_dir}")
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -146,17 +115,21 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def _to_markdown(stats: dict[str, Any]) -> str:
     lines = [
-        "# Explanation SFT Data Stats",
+        "# Explanation SFT Dataset Stats",
         "",
-        f"- output_prefix: {stats['output_prefix']}",
+        f"- output_dir: {stats['output_dir']}",
         f"- total_examples: {stats['total_examples']}",
-        f"- strict_json_output: {stats['strict_json_output']}",
+        f"- prompt_version: {stats['prompt_version']}",
+        f"- completion_version: {stats['completion_version']}",
         "",
-        "| Split | Examples |",
-        "| --- | ---: |",
+        "## Split sizes",
+        "",
+        "| Split | Examples | Empty evidence |",
+        "| --- | ---: | ---: |",
     ]
-    for split_name, count in stats["splits"].items():
-        lines.append(f"| {split_name} | {count} |")
+    for split, count in stats["splits"].items():
+        lines.append(f"| {split} | {count} | {stats['empty_evidence_count'].get(split, 0)} |")
+
     lines += [
         "",
         "## Label distribution",
@@ -167,17 +140,42 @@ def _to_markdown(stats: dict[str, Any]) -> str:
         "",
         json.dumps(stats["source_distribution"], indent=2),
         "",
-        "## Average lengths",
+        "## Coverage checks",
         "",
-        json.dumps(
-            {
-                "average_claim_length": stats["average_claim_length"],
-                "average_evidence_length": stats["average_evidence_length"],
-            },
-            indent=2,
-        ),
+        f"- supported: {stats['has_supported']}",
+        f"- refuted: {stats['has_refuted']}",
+        f"- not_enough_info: {stats['has_nei']}",
+        f"- fever: {stats['has_fever']}",
+        f"- scifact: {stats['has_scifact']}",
         "",
     ]
+    return "\n".join(lines)
+
+
+def _samples_markdown(samples: list[dict[str, Any]]) -> str:
+    lines = [
+        "# Explanation SFT Samples",
+        "",
+        "The examples below are direct artifacts from the grounded explanation dataset.",
+        "",
+    ]
+    for sample in samples:
+        lines += [
+            f"## {sample['claim_id']} ({sample['source']}, {sample['verifier_label']})",
+            "",
+            "### Prompt",
+            "",
+            "```text",
+            sample["prompt"],
+            "```",
+            "",
+            "### Completion",
+            "",
+            "```text",
+            sample["completion"],
+            "```",
+            "",
+        ]
     return "\n".join(lines)
 
 
