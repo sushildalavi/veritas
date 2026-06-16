@@ -1,6 +1,6 @@
 import type { HealthResponse, MetadataResponse, PipelineResponse } from "./types";
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {

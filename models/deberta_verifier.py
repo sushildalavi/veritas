@@ -257,7 +257,13 @@ def _build_verification_input(claim: str, evidence: list[EvidenceSpan]) -> str:
 
 def _template_explanation(claim: str, evidence: list[EvidenceSpan], verdict: str) -> str:
     evidence_summary = evidence[0].text if evidence else "No evidence retrieved."
-    return f"Verdict: {verdict}. Claim: {claim}. Supporting evidence: {evidence_summary}"
+    if verdict == "SUPPORTED":
+        conclusion = "supports the claim"
+    elif verdict == "REFUTED":
+        conclusion = "contradicts the claim"
+    else:
+        conclusion = "does not establish the claim"
+    return f"Verdict: {verdict}. Claim: {claim}. Evidence: {evidence_summary}. This evidence {conclusion}."
 
 
 def _aggregate_results(

@@ -11,7 +11,7 @@ Built for editorial checks, customer-facing copy review, and internal QA where a
 1. **Paste a claim** into the workspace
 2. **Choose evidence depth** to balance speed and coverage
 3. **Verify** against the live backend
-4. **Review the verdict, confidence, explanation, and evidence**
+4. **Review the verdict, confidence, evidence strength, and explanation**
 5. **Use the result** in editorial or review workflows
 
 ---
@@ -59,6 +59,10 @@ make frontend
 
 Open [http://localhost:5173](http://localhost:5173) and enter a claim to verify.
 
+The frontend talks to the API through the `/api` proxy path by default. If you run
+the backend on a different host or port, set `VITE_API_TARGET` before starting the
+frontend.
+
 ---
 
 ## Tech stack
@@ -68,7 +72,7 @@ Open [http://localhost:5173](http://localhost:5173) and enter a claim to verify.
 | Frontend | React, TypeScript, Vite |
 | Backend | Python, FastAPI |
 | Verification | DeBERTa challenger checkpoint by default, with the DistilRoBERTa baseline preserved in reports |
-| Evidence retrieval | BM25 full-text search by default, with optional neural/hybrid modes in config |
+| Evidence retrieval | BM25 over the bundled demo corpus by default, with optional neural/hybrid modes in config |
 | Explanation | Template fallback or MLX LoRA adapter, depending on backend availability |
 | Infrastructure | Local-first with artifact checks, caching, and explicit runtime metadata |
 
@@ -80,11 +84,11 @@ Open [http://localhost:5173](http://localhost:5173) and enter a claim to verify.
 Claim
   │
   ├─► Retrieval
-  │     └─► BM25 by default, optional dense/hybrid profiles in config
+  │     └─► Curated evidence set by default, optional dense/hybrid profiles in config
   │
   ├─► Verification
   │     └─► DistilRoBERTa / DeBERTa checkpoint with cached responses
-  │     └─► Confidence aggregation → final verdict
+  │     └─► Confidence plus grounding checks before the result is surfaced
   │
   └─► Explanation
         └─► Template fallback or MLX LoRA-backed grounding

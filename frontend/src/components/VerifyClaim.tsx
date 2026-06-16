@@ -37,6 +37,18 @@ function verdictClass(v: string) {
   return "verdict-neutral";
 }
 
+function confidenceLabel(value: number) {
+  if (value >= 0.7) return "High confidence";
+  if (value >= 0.55) return "Borderline";
+  return "Review recommended";
+}
+
+function confidenceTone(value: number) {
+  if (value >= 0.7) return "confidence-high";
+  if (value >= 0.55) return "confidence-mid";
+  return "confidence-low";
+}
+
 function relationLabel(r?: string) {
   if (r === "SUPPORTS") return "Supports";
   if (r === "REFUTES") return "Refutes";
@@ -172,30 +184,31 @@ export default function VerifyClaim({ service }: Props) {
       <section className="hero-card">
         <div className="hero-copy">
           <div className="eyebrow">Claim review workflow</div>
-          <h1>Verify a factual statement before it ships.</h1>
+          <h1>Verify a claim with grounded evidence, not guesswork.</h1>
           <p>
-            Veritas retrieves supporting passages, runs NLI verification, and drafts a
-            citation-grounded explanation so teams can review claims with less guesswork.
+            Veritas retrieves evidence, scores the claim, and drafts a citation-grounded
+            explanation so review teams can separate strong claims from ones that need
+            another look.
           </p>
         </div>
 
         <div className="hero-panel">
-          <div className="panel-title">Validation snapshot</div>
+          <div className="panel-title">System validation</div>
           <div className="metric-grid">
             <div className="metric-card">
               <span className="metric-label">Verifier F1</span>
               <strong>{service.health?.verifier_macro_f1 ? service.health.verifier_macro_f1.toFixed(4) : "n/a"}</strong>
-              <span className="metric-note">Production checkpoint</span>
+              <span className="metric-note">Measured on the bundled checkpoint</span>
             </div>
             <div className="metric-card">
               <span className="metric-label">Retrieval recall@10</span>
               <strong>{service.metadata ? service.metadata.retrieval_recall_at_10.toFixed(4) : "n/a"}</strong>
-              <span className="metric-note">BM25 baseline</span>
+              <span className="metric-note">Validation of the retrieval layer</span>
             </div>
             <div className="metric-card">
               <span className="metric-label">Oracle gap</span>
               <strong>{service.metadata ? service.metadata.oracle_retrieved_gap.toFixed(4) : "n/a"}</strong>
-              <span className="metric-note">Retrieved vs. gold evidence</span>
+              <span className="metric-note">What gets harder once evidence is noisy</span>
             </div>
           </div>
         </div>
@@ -243,7 +256,7 @@ export default function VerifyClaim({ service }: Props) {
           <textarea
             id="claim-input"
             className="claim-input"
-            placeholder="Example: The Pacific Ocean is the largest ocean."
+            placeholder="Example: Paris is the capital city of France."
             value={claim}
             rows={6}
             onChange={(event) => setClaim(event.target.value)}
@@ -279,7 +292,7 @@ export default function VerifyClaim({ service }: Props) {
           </div>
 
           <div className="example-section">
-            <span className="example-label">Quick start</span>
+            <span className="example-label">Good starting points</span>
             <div className="example-grid">
               {EXAMPLES.map((example) => (
                 <button
@@ -308,7 +321,7 @@ export default function VerifyClaim({ service }: Props) {
           <div className="card-header">
             <div>
               <div className="card-kicker">Output</div>
-              <h2>Verification result</h2>
+              <h2>Review result</h2>
             </div>
             <div className="result-status">{verdict}</div>
           </div>
@@ -339,23 +352,25 @@ export default function VerifyClaim({ service }: Props) {
 
                 <div className="confidence-block">
                   <div className="confidence-top">
-                    <span>Confidence</span>
+                    <span>Model confidence</span>
                     <strong>{formatPercent(result.confidence)}</strong>
                   </div>
                   <div className="confidence-bar" aria-hidden="true">
                     <div className="confidence-fill" style={{ width: formatPercent(result.confidence) }} />
                   </div>
+                  <div className={`confidence-note ${confidenceTone(result.confidence)}`}>
+                    {confidenceLabel(result.confidence)}. Evidence quality still matters.
+                  </div>
                 </div>
               </div>
 
               <div className="result-meta">
-                <span className="result-pill">Citation check: {result.citation_valid ? "valid" : "needs review"}</span>
+                <span className="result-pill">Citation check: {result.citation_valid ? "passed" : "needs review"}</span>
                 <span className="result-pill">Verifier: {result.backend_used}</span>
                 <span className="result-pill">Retrieval: {result.retrieval_backend}</span>
                 <span className="result-pill">
                   Top evidence: {topEvidenceScore === null ? "n/a" : topEvidenceScore.toFixed(2)}
                 </span>
-                <span className="result-pill">Request {result.request_id.slice(0, 8)}</span>
               </div>
 
               {groundingState && (
@@ -410,7 +425,7 @@ export default function VerifyClaim({ service }: Props) {
                     <p className="evidence-text">{item.text}</p>
                     {typeof item.score === "number" && (
                       <div className="evidence-score">
-                        <span>Match score</span>
+                        <span>Alignment score</span>
                         <strong>{item.score.toFixed(2)}</strong>
                       </div>
                     )}

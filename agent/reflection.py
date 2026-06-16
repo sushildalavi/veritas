@@ -26,7 +26,7 @@ class ReflectionLoop:
     retriever: object
     verifier: object
     ranker: object | None = None
-    confidence_threshold: float = 0.6
+    confidence_threshold: float = 0.55
     max_retries: int = 2
     explanation_generator: object | None = None
 

@@ -33,9 +33,10 @@ def check_artifacts() -> dict[str, object]:
     checks["mlx_explanation_adapter"] = mlx_explanation_path.exists()
 
     phi3_qlora_path = ROOT / "checkpoints" / "phi3_qlora_adapter"
-    checks["phi3_qlora_adapter"] = phi3_qlora_path.exists()
-    if not phi3_qlora_path.exists():
-        checks["phi3_qlora_note"] = "CUDA required; train on Colab via notebooks/phi3_colab_training.ipynb"
+    if phi3_qlora_path.exists():
+        checks["phi3_qlora_adapter"] = True
+    else:
+        checks["phi3_qlora_adapter"] = "not trained locally; CUDA required for the Phi-3 path"
 
     final_results = ROOT / "reports" / "final_veritas_metrics_summary.json"
     checks["final_results_report"] = final_results.exists()

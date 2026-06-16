@@ -123,9 +123,9 @@ def metadata() -> MetadataResponse:
         project="Veritas",
         version="1.0.0",
         description=(
-            "Failure-aware fact-verification pipeline with BM25 retrieval, "
-            "DistilRoBERTa NLI verification, oracle-vs-retrieved evaluation, "
-            "training artifacts, and inference benchmarks."
+            "Claim review pipeline with retrieval, NLI verification, citation checks, "
+            "and measured validation artifacts. The app surfaces uncertainty instead of "
+            "overstating weak evidence."
         ),
         verifier_checkpoint=str(_pipeline.checkpoint_path or "mock"),
         verifier_model=_pipeline.model_name,

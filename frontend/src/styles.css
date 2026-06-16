@@ -565,6 +565,7 @@ button {
   border: 1px solid var(--line);
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
 }
 
 .empty-state {
@@ -683,6 +684,25 @@ button {
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #2563eb, #0ea5e9, #7c3aed);
+}
+
+.confidence-note {
+  margin-top: 8px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text-subtle);
+}
+
+.confidence-high {
+  color: var(--success);
+}
+
+.confidence-mid {
+  color: var(--warning);
+}
+
+.confidence-low {
+  color: var(--danger);
 }
 
 .result-meta {
