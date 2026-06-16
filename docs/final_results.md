@@ -143,22 +143,23 @@ NEI F1=0.0: the model rarely predicts NEI on oracle-evidence training data.
 
 ### Explanation adapter (`adapters/mlx_qwen_veritas_lora`)
 
-**Source:** `reports/explanation_model_eval.json`, `reports/mlx_lora_generation_fix.md`
-Base model: `mlx-community/Qwen2.5-1.5B-Instruct-4bit`, 300 iters, 256 examples
+**Source:** `reports/mlx_lora_500_eval.json`, `reports/mlx_lora_generation_fix.md`
+Base model: `mlx-community/Qwen2.5-1.5B-Instruct-4bit`, 500 iters, 256 examples
 
 A base-model key mismatch bug (`base_model` config key vs mlx_lm's `model` key) caused
-training to silently use `Qwen/Qwen3-0.6b` — generating a dimension-mismatched adapter
-that crashed on every inference call. Fixed by adding one explicit mapping in the
-training script. Retrained at 300 iters on the correct model.
+training to silently use `Qwen/Qwen3-0.6b` — generating a dimension-mismatched adapter.
+Fixed. Retrained at 300 iters, then extended to 500 iters.
 
-| metric | base model | adapter (300 iters) |
-|---|---|---|
-| format_correctness | 0.0 | 0.2 |
-| citation_presence | 0.0 | 0.1 |
-| decision_label_consistency | 0.0 | 0.1 |
-| avg explanation length (words) | 0.0 | 34.2 |
+| metric | base model | adapter (300 iters) | adapter (500 iters) |
+|---|---|---|---|
+| format_correctness | 0.0 | 0.2 | **0.28** |
+| citation_presence | 0.0 | 0.1 | **0.72** |
+| decision_label_consistency | 0.0 | 0.1 | **0.24** |
+| avg explanation length (words) | 0.0 | 34.2 | 33.2 |
 
-*Eval on 10 examples. Partial format compliance — not production-grade.*
+*25-example eval. Significant improvement in citation_presence (0.1→0.72). Not
+production-grade — partial format compliance. Prompt leakage suppressed by
+stop-token trimming in eval script.*
 
 ---
 

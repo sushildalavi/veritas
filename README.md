@@ -9,7 +9,17 @@ pinned: false
 license: apache-2.0
 ---
 
-# Veritas | Trainable Evidence Retrieval, Cross-Encoder Ranking & Neural Fact Verification
+# Veritas
+
+**Evidence-Grounded Fact Verification & Training Platform**
+
+A failure-aware fact-verification system with BM25 retrieval, DistilRoBERTa NLI verification, oracle-vs-retrieved evaluation, training artifacts, inference benchmarks, and a local research dashboard.
+
+---
+
+> **Research prototype.** Not a production-deployed fact checker. Retrieved macro-F1 is 0.3887; retrieval is the primary bottleneck. See [Limitations](#limitations).
+
+---
 
 Veritas is a Mac-first research system for evidence-grounded fact verification.
 It combines trainable retrieval, cross-encoder reranking, transformer-based verdict prediction,
@@ -64,14 +74,14 @@ All numbers below are measured on checked-in sample-scale evaluation runs.
 | Cross-encoder ranking | 0.540 MAP, 0.562 MRR, 0.565 nDCG@10 |
 | Template faithfulness | 0.560 citation validity, 0.755 verdict consistency |
 | MLX LoRA verdict-prediction adapter (Qwen2.5-1.5B, Apple Silicon) | 0.695 verdict accuracy, 0.4632 macro-F1, 0.600 citation validity (200-example eval, `checkpoints/mlx_lora_verifier`) |
-| MLX LoRA explanation adapter — generation bug fixed | Training script base-model key mismatch resolved; explanation adapter retrained on correct model; see `reports/mlx_lora_generation_fix.md` |
+| MLX LoRA explanation adapter (500 iters) | format_correctness 0.28, citation_presence **0.72**, decision_label_consistency 0.24; generation bug fixed and retrained; see `reports/mlx_lora_500_eval.json` |
 | Robust verifier retrain | negative result: retrieved macro-F1 0.3887 → 0.2829 (oracle also regressed); production checkpoint unchanged |
 | Relevance gate | NEI false-positive rate 0.7098 → 0.2857 (improved); retrieved macro-F1 0.3887 → 0.3557 (regressed); gate disabled by default |
 | ONNX verifier export | Functional; CPU throughput 55 ex/s — slower than native transformers (62 ex/s CPU, 154 ex/s MPS); no ONNX speedup on this Mac |
 | Phi-3 QLoRA + DPO | blocked (CUDA unavailable); datasets and Colab notebook ready; no adapters fabricated |
 | DeBERTa challenger (xsmall) | 0.636 accuracy, 0.537 macro-F1, 0.036 refuted recall (macro-F1 below 0.55 threshold; REFUTED recall still low) |
 | Final audit package | Oracle, retrieved, top-k, retrieval ablation, faithfulness, and Pareto summaries |
-| Tests | 136 passed |
+| Tests | 137 passed, 1 skipped |
 
 The most important signal is the oracle-vs-retrieved gap: retrieval quality still limits end-to-end verifier performance. Each successive enlargement of the evaluation set (20 -> 100 -> 200 -> 650 examples) made the absolute numbers less flattering -- the full 650-example test set is the most representative result and should be treated as the project's primary headline number.
 
@@ -229,6 +239,48 @@ See `docs/inference_performance.md` for full results and
 `docs/inference_runtime_landscape.md` for architecture notes on
 SGLang/MLC-LLM/FlashAttention/TVM-MLIR relative to Veritas's bottlenecks.
 
+## Local Research Dashboard
+
+Veritas includes a full-stack local demo: FastAPI backend + React Vite TypeScript frontend.
+
+### Start backend
+
+```bash
+make api
+# → http://localhost:8000
+# → http://localhost:8000/docs  (Swagger UI)
+```
+
+### Start frontend
+
+```bash
+make frontend
+# → http://localhost:5173
+```
+
+### API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Liveness check, pipeline metadata |
+| GET | `/metadata` | Project info, measured metrics, artifact checks |
+| GET | `/metrics/summary` | Runtime stats snapshot |
+| POST | `/verify` | NLI verifier with cache |
+| POST | `/retrieve` | BM25 evidence retrieval only |
+| POST | `/explain` | Explanation generation |
+| POST | `/pipeline` | Full pipeline with latency breakdown |
+| GET | `/reports/{name}` | Allowlisted research report files |
+
+### Frontend Tabs
+
+1. **Overview** — key metrics cards, architecture diagram, negative results table
+2. **Verify Claim** — full pipeline with verdict, explanation, evidence, latency breakdown
+3. **Evidence Explorer** — retrieval-only with score ranking
+4. **Training Artifacts** — all artifact statuses, what not to claim
+5. **Research Results** — full evaluation tables, inference benchmarks, resume summary
+
+See `docs/local_demo.md` for full setup instructions.
+
 ## Live Demo
 
 Public demo: [https://sushildalavi-veritas.hf.space](https://sushildalavi-veritas.hf.space)
@@ -324,7 +376,7 @@ Research mode:
 | Relevance gate | negative result | `reports/oracle_vs_retrieved_v2_full_gated.json` | Disabled by default |
 | SFT explanation dataset | built | `data/explanations/sft_{train,val,test}.jsonl` | Grounded explanation tuning data |
 | MLX LoRA verdict-prediction adapter | trained | `checkpoints/mlx_lora_verifier` | Qwen2.5-1.5B-Instruct-4bit, 0.695 acc, 0.4632 macro-F1 |
-| MLX LoRA explanation adapter | generation bug fixed | `adapters/mlx_qwen_veritas_lora/` | Retrained on correct base model; see `reports/mlx_lora_generation_fix.md` |
+| MLX LoRA explanation adapter | 500 iters, improved | `adapters/mlx_qwen_veritas_lora/` | citation_presence 0.72 at 500 iters; see `reports/mlx_lora_500_eval.json` |
 | Phi-3 QLoRA | skipped | `reports/phi3_qlora_skipped_or_training_metrics.json` | CUDA-only path |
 | DPO preferences | built | `data/explanations/dpo_{train,val}.jsonl` | Synthetic rejected responses are documented |
 | Phi-3 DPO | skipped | `reports/phi3_dpo_skipped_or_training_metrics.json` | Depends on CUDA and the QLoRA path |
@@ -380,9 +432,10 @@ macro-F1 gap and documented retrieval/noisy-evidence bottlenecks through full-se
 - Documented two negative results rigorously (verifier robustness retrain, relevance gate)
 - ONNX export functional; benchmarked at 55 ex/s CPU
 - MLX LoRA verdict-prediction adapter: 0.695 accuracy, 0.4632 macro-F1 (200-example eval, 53.7 tok/s Apple Silicon)
-- Fixed a base-model key mismatch bug in MLX LoRA explanation training script
+- Fixed a base-model key mismatch bug in MLX LoRA explanation script; retrained at 500 iters; citation_presence improved 0.10→0.72
 - Generated SFT + DPO preference datasets for Phi-3 fine-tuning; Colab notebook included
-- 136 passing tests
+- FastAPI backend (8 endpoints) + React Vite TypeScript research dashboard
+- 137 passing tests
 
 **What must not be claimed:**
 - ONNX is faster than transformers on this Mac (it is not)
