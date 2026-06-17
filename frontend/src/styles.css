@@ -31,6 +31,11 @@
   box-sizing: border-box;
 }
 
+html {
+  color-scheme: light;
+  font-synthesis: none;
+}
+
 html,
 body,
 #root {
@@ -214,6 +219,7 @@ button {
   font-size: clamp(2.7rem, 4.2vw, 5rem);
   line-height: 0.94;
   letter-spacing: -0.05em;
+  text-wrap: balance;
 }
 
 .hero-copy p {
@@ -322,6 +328,7 @@ button {
   border: 1px solid var(--line);
   background: var(--card);
   box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .claim-card,
@@ -917,6 +924,9 @@ button {
 
 @media (max-width: 760px) {
   .topbar {
+    position: static;
+    flex-direction: column;
+    align-items: flex-start;
     padding: 16px 18px;
   }
 
@@ -959,5 +969,16 @@ button {
   .primary-button,
   .ghost-button {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

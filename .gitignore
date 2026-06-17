@@ -40,6 +40,9 @@ artifacts/*
 .env.*
 !.env.example
 
+# Generated runtime cache
+data/raw/wikipedia_extract_cache.jsonl
+
 # OS/editor files
 .DS_Store
 .idea/

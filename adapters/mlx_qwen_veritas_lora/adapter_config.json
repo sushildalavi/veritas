@@ -3,7 +3,7 @@
     "batch_size": 1,
     "clear_cache_threshold": 0,
     "config": null,
-    "data": "/var/folders/dv/4yw53xh14jg0_mcrwc977cgm0000gn/T/mlx_lora_explanations_kr781xff/chat_data",
+    "data": "data/processed/explanation_sft",
     "fine_tune_type": "lora",
     "grad_accumulation_steps": 1,
     "grad_checkpoint": true,

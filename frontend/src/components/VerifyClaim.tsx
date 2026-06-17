@@ -10,6 +10,7 @@ const EXAMPLES = [
 ];
 
 const EVIDENCE_DEPTHS = [3, 5, 8] as const;
+const CLAIM_LENGTH_FORMAT = new Intl.NumberFormat("en-US");
 
 type ServiceState = {
   ready: boolean;
@@ -87,7 +88,7 @@ function formatPercent(value: number) {
 }
 
 function formatCount(value: number) {
-  return new Intl.NumberFormat("en-US").format(value);
+  return CLAIM_LENGTH_FORMAT.format(value);
 }
 
 interface Props {
@@ -106,33 +107,38 @@ export default function VerifyClaim({ service }: Props) {
   const overLimit = remaining < 0;
   const canSubmit = claim.trim().length > 0 && !loading && !overLimit && service.ready;
   const topEvidenceScore = result?.evidence[0]?.score ?? null;
-  const groundingState =
-    topEvidenceScore === null
-      ? null
-      : topEvidenceScore >= 3
-        ? {
-            label: "Strong grounding",
-            tone: "grounding-strong",
-            note: "Top evidence closely matches the claim.",
-          }
-        : topEvidenceScore >= 1.5
-          ? {
-              label: "Moderate grounding",
-              tone: "grounding-moderate",
-              note: "The answer is usable, but still worth skimming.",
-            }
-          : {
-              label: "Weak grounding",
-              tone: "grounding-weak",
-              note: "The retrieved evidence is thin or off-target.",
-            };
+  const groundingState = useMemo(() => {
+    if (topEvidenceScore === null) return null;
+
+    if (topEvidenceScore >= 3) {
+      return {
+        label: "Strong grounding",
+        tone: "grounding-strong",
+        note: "Top evidence closely matches the claim.",
+      };
+    }
+
+    if (topEvidenceScore >= 1.5) {
+      return {
+        label: "Moderate grounding",
+        tone: "grounding-moderate",
+        note: "The answer is usable, but still worth skimming.",
+      };
+    }
+
+    return {
+      label: "Weak grounding",
+      tone: "grounding-weak",
+      note: "The retrieved evidence is thin or off-target.",
+    };
+  }, [topEvidenceScore]);
 
   const serviceBadges = useMemo(() => {
-    const badges = [
-      service.health?.verifier_backend && `Verifier: ${service.health.verifier_backend}`,
-      service.health?.retrieval_backend && `Retrieval: ${service.health.retrieval_backend}`,
-      service.health?.model_name && `Model: ${service.health.model_name}`,
-    ].filter(Boolean) as string[];
+    const badges: string[] = [];
+
+    if (service.health?.verifier_backend) badges.push(`Verifier: ${service.health.verifier_backend}`);
+    if (service.health?.retrieval_backend) badges.push(`Retrieval: ${service.health.retrieval_backend}`);
+    if (service.health?.model_name) badges.push(`Model: ${service.health.model_name}`);
 
     if (service.metadata?.retrieval_profile) {
       badges.push(`Profile: ${service.metadata.retrieval_profile}`);
@@ -140,6 +146,14 @@ export default function VerifyClaim({ service }: Props) {
 
     return badges;
   }, [service.health, service.metadata]);
+
+  const verdict = useMemo(() => (result ? verdictLabel(result.verdict) : "Awaiting claim"), [result]);
+  const isServiceUnavailable = !service.loading && !service.ready && Boolean(service.error);
+  const statusMessage = service.loading
+    ? "Checking service status and metadata…"
+    : isServiceUnavailable
+      ? `Backend check failed. ${service.error}`
+      : null;
 
   async function handleVerify() {
     const text = claim.trim();
@@ -177,8 +191,6 @@ export default function VerifyClaim({ service }: Props) {
     setResult(null);
   }
 
-  const verdict = result ? verdictLabel(result.verdict) : "Awaiting claim";
-
   return (
     <div className="workspace">
       <section className="hero-card">
@@ -215,11 +227,9 @@ export default function VerifyClaim({ service }: Props) {
       </section>
 
       <section className="status-row" aria-label="Service details">
-        {service.loading ? (
-          <div className="status-message">Checking service status and metadata…</div>
-        ) : service.error && !service.ready ? (
-          <div className="status-message status-warning">
-            Backend check failed. {service.error}
+        {statusMessage ? (
+          <div className={`status-message ${isServiceUnavailable ? "status-warning" : ""}`}>
+            {statusMessage}
           </div>
         ) : (
           <>
