@@ -1,9 +1,5 @@
 # Veritas
 
-**Claim verification for publishing and review workflows.** Paste a factual statement, retrieve supporting evidence, and review a citation-grounded verdict in one browser workspace.
-
-Built for editorial checks, customer-facing copy review, and internal QA where a human needs a fast, evidence-backed answer before something ships.
-
 ---
 
 ## Product flow
