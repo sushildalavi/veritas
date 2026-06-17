@@ -44,3 +44,7 @@ artifacts/*
 .DS_Store
 .idea/
 .vscode/
+.claude/
+
+# ML adapter weights
+adapters/**/*.safetensors
